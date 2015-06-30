@@ -18,7 +18,6 @@
 package org.apache.ignite.logger.log4j2;
 
 import org.apache.ignite.*;
-import org.apache.ignite.internal.util.*;
 import org.apache.ignite.internal.util.tostring.*;
 import org.apache.ignite.internal.util.typedef.*;
 import org.apache.ignite.internal.util.typedef.internal.*;
@@ -56,14 +55,8 @@ import java.util.*;
  * task/job code. See {@link org.apache.ignite.resources.LoggerResource} annotation about logger injection.
  */
 public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
-    /** Appenders. */
-    private static final Collection<FileAppender> fileAppenders = new GridConcurrentHashSet<>();
-
     /** */
     private static volatile boolean inited;
-
-    /** */
-    private static volatile boolean quiet0;
 
     /** */
     private static final Object mux = new Object();
@@ -72,12 +65,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
     @GridToStringExclude
     @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
     private Logger impl;
-
-    /** Path to configuration file. */
-    private final String path;
-
-    /** Quiet flag. */
-    private final boolean quiet;
 
     /** Node ID. */
     private UUID nodeId;
@@ -103,15 +90,11 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
     public Log4J2Logger(final Logger impl) {
         assert impl != null;
 
-        path = null;
-
         addConsoleAppenderIfNeeded(null, new C1<Boolean, Logger>() {
             @Override public Logger apply(Boolean init) {
                 return impl;
             }
         });
-
-        quiet = quiet0;
     }
 
     /**
@@ -131,13 +114,7 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
         if (init) {
             // Implementation has already been inited, passing NULL.
             addConsoleAppenderIfNeeded(Level.INFO, null);
-
-            quiet = quiet0;
         }
-        else
-            quiet = true;
-
-        path = null;
     }
 
     /**
@@ -152,8 +129,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
 
         if (!cfgFile.exists() || cfgFile.isDirectory())
             throw new IgniteCheckedException("Log4j configuration path was not found or is a directory: " + cfgFile);
-
-        path = cfgFile.getAbsolutePath();
 
         final String uri;
 
@@ -172,8 +147,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
                 return LogManager.getRootLogger();
             }
         });
-
-        quiet = quiet0;
     }
 
     /**
@@ -185,8 +158,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
     public Log4J2Logger(String path) throws IgniteCheckedException {
         if (path == null)
             throw new IgniteCheckedException("Configuration XML file for Log4j must be specified.");
-
-        this.path = path;
 
         final URL cfgUrl = U.resolveIgniteUrl(path);
 
@@ -201,8 +172,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
                 return LogManager.getRootLogger();
             }
         });
-
-        quiet = quiet0;
     }
 
     /**
@@ -215,8 +184,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
         if (cfgUrl == null)
             throw new IgniteCheckedException("Configuration XML file for Log4j must be specified.");
 
-        path = null;
-
         addConsoleAppenderIfNeeded(null, new C1<Boolean, Logger>() {
             @Override public Logger apply(Boolean init) {
                 if (init)
@@ -225,8 +192,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
                 return LogManager.getRootLogger();
             }
         });
-
-        quiet = quiet0;
     }
 
     /**
@@ -260,9 +225,9 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
 
         // New logic.
         // TODO cast, RollingFileAppender and etc.
-        org.apache.logging.log4j.core.Logger loggerImpl = (org.apache.logging.log4j.core.Logger)impl;
+        org.apache.logging.log4j.core.Logger logImpl = (org.apache.logging.log4j.core.Logger)impl;
 
-        Collection<Appender> appenders = loggerImpl.getAppenders().values();
+        Collection<Appender> appenders = logImpl.getAppenders().values();
 
         for (Appender a : appenders) {
             if (a instanceof FileAppender)
@@ -304,10 +269,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
                 // Init logger impl.
                 impl = implInitC.apply(true);
 
-            // TODO review
-            // use the local quite instead of this
-            boolean quiet = isQuiet();
-
             // here added a console logger if not exists, programmatically
             // the implementations is more easy with new API
             // Log4j2 has always a console logger by default
@@ -318,50 +279,26 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
 
                 final LoggerContext ctx = new LoggerContext("console");
 
-                final Configuration config = ctx.getConfiguration();
+                final Configuration cfg = ctx.getConfiguration();
 
-                config.addAppender(console);
+                cfg.addAppender(console);
 
                 AppenderRef ref = AppenderRef.createAppenderRef("console",logLevel, null);
 
                 AppenderRef[] refs = new AppenderRef[] {ref};
 
                 LoggerConfig logCfg = LoggerConfig.createLogger("false",logLevel, "org.apache.logging.log4j", "true",
-                    refs, null, config, null);
+                    refs, null, cfg, null);
 
                 logCfg.addAppender(console, null, null);
 
-                config.addLogger("org.apache.logging.log4j", logCfg);
+                cfg.addLogger("org.apache.logging.log4j", logCfg);
 
                 ctx.updateLoggers();
             }
 
-            quiet0 = quiet;
             inited = true;
         }
-    }
-
-    /**
-     * Adds file appender.
-     *
-     * @param a Appender.
-     */
-    // TODO we really need these methods.
-    public static void addAppender(FileAppender a) {
-        A.notNull(a, "a");
-
-        fileAppenders.add(a);
-    }
-
-    /**
-     * Removes file appender.
-     *
-     * @param a Appender.
-     */
-    public static void removeAppender(FileAppender a) {
-        A.notNull(a, "a");
-
-        fileAppenders.remove(a);
     }
 
     /** {@inheritDoc} */
@@ -372,14 +309,7 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
     /** {@inheritDoc} */
     @Override public void setNodeId(UUID nodeId) {
         A.notNull(nodeId, "nodeId");
-        // TODO
-        // Old impl
-//
-//        this.nodeId = nodeId;
-//
-//        updateFilePath(new Log4j2NodeIdFilePath(nodeId));
 
-        // New impl.
         String uid = U.id8(nodeId);
 
         // set up the new thread context
@@ -458,20 +388,6 @@ public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware {
     /** {@inheritDoc} */
     @Override public String toString() {
         return S.toString(Log4J2Logger.class, this);
-    }
-
-    /**
-     * Gets files for all registered file appenders.
-     *
-     * @return List of files.
-     */
-    public static Collection<String> logFiles() {
-        Collection<String> res = new ArrayList<>(fileAppenders.size());
-
-        for (FileAppender a : fileAppenders)
-            res.add(a.getFileName());
-
-        return res;
     }
 
     /**
