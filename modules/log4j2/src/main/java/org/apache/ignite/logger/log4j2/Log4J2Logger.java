@@ -24,9 +24,11 @@ import org.apache.ignite.internal.util.typedef.*;
 import org.apache.ignite.internal.util.typedef.internal.*;
 import org.apache.ignite.lang.*;
 import org.apache.ignite.logger.*;
-import org.apache.log4j.*;
-import org.apache.log4j.varia.*;
-import org.apache.log4j.xml.*;
+import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.*;
+import org.apache.logging.log4j.core.appender.*;
+import org.apache.logging.log4j.core.layout.*;
 import org.jetbrains.annotations.*;
 
 import java.io.*;
@@ -36,33 +38,27 @@ import java.util.*;
 import static org.apache.ignite.IgniteSystemProperties.*;
 
 /**
- * Log4j-based implementation for logging. This logger should be used
- * by loaders that have prefer <a target=_new href="http://logging.apache.org/log4j/docs/">log4j</a>-based logging.
- * <p>
- * Here is a typical example of configuring log4j logger in Ignite configuration file:
- * <pre name="code" class="xml">
- *      &lt;property name="gridLogger"&gt;
- *          &lt;bean class="org.apache.ignite.grid.logger.log4j.GridLog4jLogger"&gt;
- *              &lt;constructor-arg type="java.lang.String" value="config/ignite-log4j.xml"/&gt;
- *          &lt;/bean>
- *      &lt;/property&gt;
- * </pre>
- * and from your code:
- * <pre name="code" class="java">
- *      IgniteConfiguration cfg = new IgniteConfiguration();
- *      ...
- *      URL xml = U.resolveIgniteUrl("config/custom-log4j.xml");
- *      IgniteLogger log = new Log4JLogger(xml);
- *      ...
- *      cfg.setGridLogger(log);
+ * Log4j2-based implementation for logging. This logger should be used by loaders that have prefer <a target=_new
+ * href="http://logging.apache.org/log4j/2.x/">log4j2</a>-based logging. <p> Here is a typical example of configuring
+ * log4j logger in Ignite configuration file:
+ *
+ * <pre name="code" class="xml"> &lt;property name="gridLogger"&gt; &lt;bean class="org.apache.ignite.grid.logger.log4j.GridLog4J2Logger"&gt;
+ * &lt;constructor-arg type="java.lang.String" value="config/ignite-log4j2.xml"/&gt; &lt;/bean> &lt;/property&gt;
  * </pre>
  *
- * Please take a look at <a target=_new href="http://logging.apache.org/log4j/1.2/index.html">Apache Log4j 1.2</a>
- * for additional information.
- * <p>
- * It's recommended to use Ignite logger injection instead of using/instantiating
- * logger in your task/job code. See {@link org.apache.ignite.resources.LoggerResource} annotation about logger
- * injection.
+ * and from your code:
+ *
+ * <pre name="code" class="java"> IgniteConfiguration cfg = new IgniteConfiguration(); ... URL xml =
+ * U.resolveIgniteUrl("config/custom-log4j.xml"); IgniteLogger log = new Log4J2Logger(xml); ... cfg.setGridLogger(log);
+ * </pre>
+ *
+ * Please take a look at <a target=_new href="http://logging.apache.org/log4j/2.x/">Apache Log4j 2.7</a> for additional
+ * information. <p> It's recommended to use Ignite logger injection instead of using/instantiating logger apacin your
+ * task/job code. See {@link org.apache.ignite.resources.LoggerResource} annotation about logger injection.
+ *
+ * Porting for the Log4j2
+ *
+ * @author Gianfranco Murador
  */
 public class Log4J2Logger implements IgniteLogger, LoggerNodeIdAware, Log4j2FileAware {
     /** Appenders. */

@@ -34,7 +34,8 @@ public class IgniteLog4j2TestSuite extends TestSuite {
         suite.addTest(new TestSuite(GridLog4j2InitializedTest.class));
         suite.addTest(new TestSuite(GridLog4j2NotInitializedTest.class));
         suite.addTest(new TestSuite(GridLog4j2CorrectFileNameTest.class));
-
+        suite.addTest(new TestSuite(GridLog4j2LoggingFileTest.class));
+        
         return suite;
     }
 }
