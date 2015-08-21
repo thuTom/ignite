@@ -19,6 +19,7 @@ package org.apache.ignite.schema.parser;
 
 import javafx.collections.*;
 import org.apache.ignite.schema.model.*;
+import org.apache.ignite.schema.parser.dialect.*;
 
 import java.sql.*;
 import java.util.*;

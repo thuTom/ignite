@@ -341,7 +341,7 @@ public class SchemaImportApp extends Application {
         if (!pwd.isEmpty())
             jdbcInfo.put("password", pwd);
 
-        return connect(jdbcDrvJarPath, jdbcDrvCls, jdbcUrl, jdbcInfo);
+        return DbMetadataReader.getInstance().connect(jdbcDrvJarPath, jdbcDrvCls, jdbcUrl, jdbcInfo);
     }
 
     /**
@@ -360,7 +360,23 @@ public class SchemaImportApp extends Application {
 
         lockUI(connLayerPnl, connPnl, nextBtn);
 
+        final String jdbcDrvJarPath = jdbcDrvJarTf.getText().trim();
+
+        final String jdbcDrvCls = jdbcDrvClsTf.getText();
+
         final String jdbcUrl = jdbcUrlTf.getText();
+
+        final Properties jdbcInfo = new Properties();
+
+        String user = userTf.getText().trim();
+
+        String pwd = pwdTf.getText().trim();
+
+        if (!user.isEmpty())
+            jdbcInfo.put("user", user);
+
+        if (!pwd.isEmpty())
+            jdbcInfo.put("password", pwd);
 
         final boolean tblsOnly = parseCb.getSelectionModel().getSelectedIndex() == 0;
 

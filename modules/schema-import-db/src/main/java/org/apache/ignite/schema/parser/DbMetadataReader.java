@@ -70,7 +70,9 @@ public class DbMetadataReader {
             dialect = new JdbcMetadataDialect();
         }
 
-        return dialect.tables(conn, tblsOnly);
+        List<String> schemas = new ArrayList<>();
+
+        return dialect.tables(conn, schemas, tblsOnly);
     }
 
     /**
