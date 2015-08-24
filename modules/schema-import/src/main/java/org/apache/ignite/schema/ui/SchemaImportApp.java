@@ -360,23 +360,7 @@ public class SchemaImportApp extends Application {
 
         lockUI(connLayerPnl, connPnl, nextBtn);
 
-        final String jdbcDrvJarPath = jdbcDrvJarTf.getText().trim();
-
-        final String jdbcDrvCls = jdbcDrvClsTf.getText();
-
         final String jdbcUrl = jdbcUrlTf.getText();
-
-        final Properties jdbcInfo = new Properties();
-
-        String user = userTf.getText().trim();
-
-        String pwd = pwdTf.getText().trim();
-
-        if (!user.isEmpty())
-            jdbcInfo.put("user", user);
-
-        if (!pwd.isEmpty())
-            jdbcInfo.put("password", pwd);
 
         final boolean tblsOnly = parseCb.getSelectionModel().getSelectedIndex() == 0;
 
@@ -385,7 +369,7 @@ public class SchemaImportApp extends Application {
             @Override protected Void call() throws Exception {
                 long started = System.currentTimeMillis();
 
-                try (Connection conn = DbMetadataReader.getInstance().connect(jdbcDrvJarPath, jdbcDrvCls, jdbcUrl, jdbcInfo)) {
+                try (Connection conn = connect()) {
                     pojos = DatabaseMetadataParser.parse(conn, selSchemas, tblsOnly);
                 }
 

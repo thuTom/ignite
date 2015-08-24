@@ -15,28 +15,43 @@
  * limitations under the License.
  */
 
-package org.apache.ignite.internal.processors.cache.distributed.replicated;
+package org.apache.ignite.schema.parser.dialect;
 
-import org.apache.ignite.configuration.*;
-import org.apache.ignite.internal.processors.cache.distributed.*;
-
-import static org.apache.ignite.cache.CacheMode.*;
+import java.sql.*;
+import java.util.*;
 
 /**
- * Test cases for multi-threaded tests.
+ * MySQL specific metadata dialect.
  */
-public class GridCacheReplicatedMultiNodeLockSelfTest extends GridCacheMultiNodeLockAbstractTest {
+public class MySQLMetadataDialect extends JdbcMetadataDialect {
     /** {@inheritDoc} */
-    @Override protected void beforeTest() throws Exception {
-        fail("https://issues.apache.org/jira/browse/IGNITE-601");
+    @Override public Collection<String> schemas(Connection conn) throws SQLException {
+        List<String> schemas = new ArrayList<>();
+
+        ResultSet rs = conn.getMetaData().getCatalogs();
+
+        Set<String> sys = systemSchemas();
+
+        while(rs.next()) {
+            String schema = rs.getString(1);
+
+            // Skip system schemas.
+            if (sys.contains(schema))
+                continue;
+
+            schemas.add(schema);
+        }
+
+        return schemas;
     }
 
     /** {@inheritDoc} */
-    @Override protected CacheConfiguration cacheConfiguration() {
-        CacheConfiguration cacheCfg = defaultCacheConfiguration();
+    @Override protected boolean useCatalog() {
+        return true;
+    }
 
-        cacheCfg.setCacheMode(REPLICATED);
-
-        return cacheCfg;
+    /** {@inheritDoc} */
+    @Override protected boolean useSchema() {
+        return false;
     }
 }
