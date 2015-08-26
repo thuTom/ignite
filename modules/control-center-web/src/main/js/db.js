@@ -38,7 +38,7 @@ var AccountSchema = new Schema({
 });
 
 // Install passport plugin.
-AccountSchema.plugin(passportLocalMongoose, {usernameField: 'email', limitAttempts: true, lastLoginField: 'lastLogin',
+AccountSchema.plugin(passportLocalMongoose, {usernameField: 'email', limitAttempts: false, lastLoginField: 'lastLogin',
     usernameLowerCase: true});
 
 // Configure transformation to JSON.
@@ -93,7 +93,7 @@ var CacheSchema = new Schema({
     space: {type: ObjectId, ref: 'Space'},
     name: String,
     clusters: [{type: ObjectId, ref: 'Cluster'}],
-    mode: {type: String, enum: ['PARTITIONED', 'REPLICATED', 'LOCAL']},
+    cacheMode: {type: String, enum: ['PARTITIONED', 'REPLICATED', 'LOCAL']},
     atomicityMode: {type: String, enum: ['ATOMIC', 'TRANSACTIONAL']},
 
     backups: Number,
@@ -171,7 +171,6 @@ var CacheSchema = new Schema({
 
     invalidate: Boolean,
     defaultLockTimeout: Number,
-    transactionManagerLookupClassName: String,
 
     sqlEscapeAll: Boolean,
     sqlOnheapRowCacheSize: Number,
@@ -208,6 +207,14 @@ var CacheSchema = new Schema({
             }
         }
     }
+});
+
+// Install deep populate plugin.
+CacheSchema.plugin(deepPopulate, {
+    whitelist: [
+        'queryMetadata',
+        'storeMetadata'
+    ]
 });
 
 // Define Cache model.
@@ -260,7 +267,6 @@ var ClusterSchema = new Schema({
         atomicSequenceReserveSize: Number
     },
     caches: [{type: ObjectId, ref: 'Cache'}],
-    cacheSanityCheckEnabled: Boolean,
     clockSyncSamples: Number,
     clockSyncFrequency: Number,
     deploymentMode: {type: String, enum: ['PRIVATE', 'ISOLATED', 'SHARED', 'CONTINUOUS']},
@@ -338,8 +344,10 @@ exports.Cluster = mongoose.model('Cluster', ClusterSchema);
 var NotebookSchema = new Schema({
     space: {type: ObjectId, ref: 'Space'},
     name: String,
-    paragraph: [{
-        query: String
+    paragraphs: [{
+        name: String,
+        query: String,
+        result: {type: String, enum: ['table', 'bar']}
     }]
 });
 

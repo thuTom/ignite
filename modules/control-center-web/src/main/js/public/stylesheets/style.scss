@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-@import "../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
+@import "bootstrap-custom";
 
 $logo-path: "https://www.filepicker.io/api/file/QagunjDGRFul2JgNCAli";
 $input-height: 28px;
@@ -1434,10 +1434,13 @@ a {
     }
 }
 
+.ace_hidden-cursors { opacity:0 }
+
+.ace_cursor { opacity:0 }
+
 .ace_editor, #ace_document {
     margin: 0.65em 0 0 0;
 
-    width: 100%;
     height: 400px;
 
     .ace_gutter {
@@ -1452,8 +1455,30 @@ a {
     }
 }
 
-.ace-preview {
+.sql-editor {
+    .ace_cursor { opacity:1 }
+}
 
+.preview-panel {
+    margin-top: 10px;
+    margin-left: 20px;
+
+    border-radius: 5px;
+    border: thin dotted lightgrey;
+
+    padding: 0 3px;
+}
+
+.preview-legend {
+    top: 0;
+    right: 0;
+    margin-right: 3px;
+    overflow: visible;
+    position: absolute;
+
+    i {
+        cursor: pointer;
+    }
 }
 
 .loading-indicator {

@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-controlCenterModule.controller('clustersController', ['$scope', '$http', '$common', '$focus', '$confirm', '$copy', '$table',
-    function ($scope, $http, $common, $focus, $confirm, $copy, $table) {
+controlCenterModule.controller('clustersController', ['$scope', '$http', '$timeout', '$common', '$focus', '$confirm', '$copy', '$table', '$preview',
+    function ($scope, $http, $timeout, $common, $focus, $confirm, $copy, $table, $preview) {
         $scope.joinTip = $common.joinTip;
         $scope.getModel = $common.getModel;
 
@@ -32,6 +32,8 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
         $scope.tableSimpleUp = $table.tableSimpleUp;
         $scope.tableSimpleDown = $table.tableSimpleDown;
         $scope.tableSimpleDownVisible = $table.tableSimpleDownVisible;
+
+        $scope.previewInit = $preview.previewInit;
 
         $scope.hidePopover = $common.hidePopover;
         var showPopoverMessage = $common.showPopoverMessage;
@@ -60,26 +62,13 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
 
         $scope.events = [];
 
-        for (var eventGroupName in eventGroups) {
-            if (eventGroups.hasOwnProperty(eventGroupName)) {
+        for (var eventGroupName in $dataStructures.EVENT_GROUPS) {
+            if ($dataStructures.EVENT_GROUPS.hasOwnProperty(eventGroupName)) {
                 $scope.events.push({value: eventGroupName, label: eventGroupName});
             }
         }
 
-        $scope.aceInit = function (editor) {
-            editor.setReadOnly(true);
-            editor.setOption("highlightActiveLine", false);
-
-            var renderer = editor.renderer;
-
-            renderer.setHighlightGutterLine(false);
-            renderer.setShowPrintMargin(false);
-            renderer.setOption('fontSize', '14px');
-
-            editor.setTheme('ace/theme/chrome');
-        };
-
-        $scope.preview = '<bean class="org.apache.ignite.configuration.IgniteConfiguration"></bean>';
+        $scope.preview = {};
 
         $scope.cacheModes = $common.mkOptions(['LOCAL', 'REPLICATED', 'PARTITIONED']);
 
@@ -102,6 +91,12 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
         };
 
         $scope.panels = {activePanels: [0]};
+
+        $scope.$watchCollection('panels.activePanels', function () {
+            $timeout(function() {
+                $common.previewHeightUpdate();
+            })
+        });
 
         var simpleTables = {
             addresses: {msg: 'Such IP address already exists!', id: 'IpAddress'},
@@ -147,9 +142,11 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
         // When landing on the page, get clusters and show them.
         $http.post('clusters/list')
             .success(function (data) {
-                $scope.caches = data.caches;
                 $scope.spaces = data.spaces;
                 $scope.clusters = data.clusters;
+                $scope.caches = _.map(data.caches, function (cache) {
+                    return {value: cache._id, label: cache.name, cache: cache};
+                });
 
                 var restoredItem = angular.fromJson(sessionStorage.clusterBackupItem);
 
@@ -193,9 +190,48 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
                     $scope.selectItem($scope.clusters[0]);
 
                 $scope.$watch('backupItem', function (val) {
-                    if (val)
+                    if (val) {
                         sessionStorage.clusterBackupItem = angular.toJson(val);
+
+                        var clusterCaches = _.reduce($scope.caches, function(memo, cache){
+                            if (_.contains(val.caches, cache.value)) {
+                                memo.push(cache.cache);
+                            }
+
+                            return memo;
+                        }, []);
+
+                        $scope.preview.generalXml = $generatorXml.clusterCaches(clusterCaches, $generatorXml.clusterGeneral(val)).join('');
+                        $scope.preview.atomicsXml = $generatorXml.clusterAtomics(val).join('');
+                        $scope.preview.communicationXml = $generatorXml.clusterCommunication(val).join('');
+                        $scope.preview.deploymentXml = $generatorXml.clusterDeployment(val).join('');
+                        $scope.preview.eventsXml = $generatorXml.clusterEvents(val).join('');
+                        $scope.preview.marshallerXml = $generatorXml.clusterMarshaller(val).join('');
+                        $scope.preview.metricsXml = $generatorXml.clusterMetrics(val).join('');
+                        $scope.preview.p2pXml = $generatorXml.clusterP2p(val).join('');
+                        $scope.preview.swapXml = $generatorXml.clusterSwap(val).join('');
+                        $scope.preview.timeXml = $generatorXml.clusterTime(val).join('');
+                        $scope.preview.poolsXml = $generatorXml.clusterPools(val).join('');
+                        $scope.preview.transactionsXml = $generatorXml.clusterTransactions(val).join('');
+
+                        $scope.preview.generalJava = $generatorJava.clusterCaches(clusterCaches, $generatorJava.clusterGeneral(val)).join('');
+                        $scope.preview.atomicsJava = $generatorJava.clusterAtomics(val).join('');
+                        $scope.preview.communicationJava = $generatorJava.clusterCommunication(val).join('');
+                        $scope.preview.deploymentJava = $generatorJava.clusterDeployment(val).join('');
+                        $scope.preview.eventsJava = $generatorJava.clusterEvents(val).join('');
+                        $scope.preview.marshallerJava = $generatorJava.clusterMarshaller(val).join('');
+                        $scope.preview.metricsJava = $generatorJava.clusterMetrics(val).join('');
+                        $scope.preview.p2pJava = $generatorJava.clusterP2p(val).join('');
+                        $scope.preview.swapJava = $generatorJava.clusterSwap(val).join('');
+                        $scope.preview.timeJava = $generatorJava.clusterTime(val).join('');
+                        $scope.preview.poolsJava = $generatorJava.clusterPools(val).join('');
+                        $scope.preview.transactionsJava = $generatorJava.clusterTransactions(val).join('');
+                    }
                 }, true);
+
+                $timeout(function () {
+                    $common.initPreview();
+                })
             })
             .error(function (errMsg) {
                 $common.showError(errMsg);
@@ -213,17 +249,23 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
             else
                 $scope.backupItem = undefined;
 
-
             if (item)
                 sessionStorage.clusterSelectedItem = angular.toJson(item);
             else
                 sessionStorage.removeItem('clusterSelectedItem');
+
+            $timeout(function () {
+                $common.previewHeightUpdate();
+            });
         };
 
         // Add new cluster.
         $scope.createItem = function () {
             $table.tableReset();
-            $common.ensureActivePanel($scope.panels, "general-data");
+
+            $timeout(function () {
+                $common.ensureActivePanel($scope.panels, "general-data", 'clusterName');
+            });
 
             var newItem = angular.copy($scope.template);
             newItem.caches = [];
@@ -242,6 +284,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
         function validate(item) {
             if ($common.isEmptyString(item.name))
                 return showPopoverMessage($scope.panels, 'general-data', 'clusterName', 'Name should not be empty');
+                    sessionStorage.removeItem('clusterSelectedItem');
 
             if (item.discovery.kind == 'Vm' && item.discovery.Vm.addresses.length == 0)
                 return showPopoverMessage($scope.panels, 'general-data', 'addresses', 'Addresses are not specified');
@@ -278,7 +321,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$http', '$commo
                     if (idx >= 0) {
                         var cache = $scope.caches[idx];
 
-                        if (cache.swapEnabled) {
+                        if (cache.cache.swapEnabled) {
                             $scope.ui.expanded = true;
 
                             return showPopoverMessage($scope.panels, 'swap-data', 'swapSpaceSpi',

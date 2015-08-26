@@ -432,7 +432,7 @@ controlCenterModule.service('$common', [
 
         var popover = null;
 
-        function ensureActivePanel(panels, id) {
+        function ensureActivePanel(panels, id, focusId) {
             if (panels) {
                 var idx = _.findIndex($('div.panel-collapse'), function(pnl) {
                     return pnl.id == id;
@@ -451,11 +451,14 @@ controlCenterModule.service('$common', [
                         panels.activePanels = newActivePanels;
                     }
                 }
+
+                if (isDefined(focusId))
+                    $focus(focusId)
             }
         }
 
         function showPopoverMessage(panels, panelId, id, message) {
-            ensureActivePanel(panels, panelId);
+            ensureActivePanel(panels, panelId, id);
 
             var el = $('body').find('#' + id);
 
@@ -465,10 +468,9 @@ controlCenterModule.service('$common', [
             var newPopover = $popover(el, {content: message});
 
             $timeout(function () {
-                $focus(id);
-            }, 50);
+                // Workaround for FireFox browser.
+                newPopover.$options.container;
 
-            $timeout(function () {
                 newPopover.show();
 
                 popover = newPopover;
@@ -477,6 +479,26 @@ controlCenterModule.service('$common', [
             $timeout(function () { newPopover.hide() }, 3000);
 
             return false;
+        }
+
+        function resizePreview (el) {
+            var left = $('#' + el.id + '-left');
+
+            if (left.height() > 0) {
+                var right = $('#' + el.id + '-right');
+
+                var scrollHeight = right.find('.ace_scrollbar-h').height();
+
+                var parent = right.parent();
+
+                var parentHeight = Math.max(75, left.height() - 2 * parent.css('marginTop').replace("px", ""));
+
+                parent.outerHeight(parentHeight);
+
+                right.height(parentHeight - scrollHeight / 2);
+
+                right.resize();
+            }
         }
 
         return {
@@ -526,6 +548,16 @@ controlCenterModule.service('$common', [
                 });
             },
             isDefined: isDefined,
+            hasProperty: function (obj, props) {
+                for (var propName in props) {
+                    if (props.hasOwnProperty(propName)) {
+                        if (obj[propName])
+                            return true;
+                    }
+                }
+
+                return false;
+            },
             isEmptyArray: isEmptyArray,
             isEmptyString: isEmptyString,
             errorMessage: errorMessage,
@@ -608,8 +640,8 @@ controlCenterModule.service('$common', [
 
                 return result;
             },
-            ensureActivePanel: function (panels, id) {
-                ensureActivePanel(panels, id);
+            ensureActivePanel: function (panels, id, focusId) {
+                ensureActivePanel(panels, id, focusId);
             },
             showPopoverMessage: function (panels, panelId, id, message) {
                 return showPopoverMessage(panels, panelId, id, message)
@@ -617,6 +649,25 @@ controlCenterModule.service('$common', [
             hidePopover: function () {
                 if (popover)
                     popover.hide();
+            },
+            previewHeightUpdate: function () {
+                $('.panel-collapse').each(function (ix, el) {
+                    resizePreview(el);
+                })
+            },
+            initPreview: function () {
+                MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+
+                $('.panel-collapse').each(function (ix, el) {
+                    var observer = new MutationObserver(function(mutations, observer) {
+                        resizePreview(el);
+                    });
+
+                    observer.observe(el, {
+                        childList: true,
+                        subtree: true
+                    });
+                });
             }
         }
     }]);
@@ -680,228 +731,248 @@ controlCenterModule.service('$copy', function ($modal, $rootScope, $q) {
 });
 
 // Tables support service.
-controlCenterModule.service('$table', [
-    '$common', '$focus', function ($common, $focus) {
-        function _swapSimpleItems(a, ix1, ix2) {
-            var tmp = a[ix1];
+controlCenterModule.service('$table', ['$common', '$focus', function ($common, $focus) {
+    function _swapSimpleItems(a, ix1, ix2) {
+        var tmp = a[ix1];
 
-            a[ix1] = a[ix2];
-            a[ix2] = tmp;
+        a[ix1] = a[ix2];
+        a[ix2] = tmp;
+    }
+
+    function _model(item, field) {
+        return $common.getModel(item, field);
+    }
+
+    var table = {name: 'none', editIndex: -1};
+
+    function _tableReset() {
+        table.name = 'none';
+        table.editIndex = -1;
+
+        $common.hidePopover();
+    }
+
+    function _tableState(name, editIndex) {
+        table.name = name;
+        table.editIndex = editIndex;
+    }
+
+    function _tableUI(field) {
+        var ui = field.ui;
+
+        return ui ? ui : field.type;
+    }
+
+    function _tableFocus(focusId, index) {
+        $focus((index < 0 ? 'new' : 'cur') + focusId);
+    }
+
+    function _tableSimpleValue(filed, index) {
+        return index < 0 ? filed.newValue : filed.curValue;
+    }
+
+    function _tablePairValue(filed, index) {
+        return index < 0 ? {key: filed.newKey, value: filed.newValue} : {key: filed.curKey, value: filed.curValue};
+    }
+
+    function _tableStartEdit(item, field, index) {
+        _tableState(field.model, index);
+
+        var val = _model(item, field)[field.model][index];
+
+        var ui = _tableUI(field);
+
+        if (ui == 'table-simple') {
+            field.curValue = val;
+
+            _tableFocus(field.focusId, index);
         }
+        else if (ui == 'table-pair') {
+            field.curKey = val[field.keyName];
+            field.curValue = val[field.valueName];
 
-        function _model(item, field) {
-            return $common.getModel(item, field);
+            _tableFocus('Key' + field.focusId, index);
         }
+        else if (ui == 'table-db-fields') {
+            field.curDatabaseName = val.databaseName;
+            field.curDatabaseType = val.databaseType;
+            field.curJavaName = val.javaName;
+            field.curJavaType = val.javaType;
 
-        var table = {name: 'none', editIndex: -1};
-
-        function _tableReset() {
-            table.name = 'none';
-            table.editIndex = -1;
-
-            $common.hidePopover();
+            _tableFocus('DatabaseName' + field.focusId, index);
         }
+        else if (ui == 'table-query-groups') {
+            field.curGroupName = val.name;
+            field.curFields = val.fields;
 
-        function _tableState(name, editIndex) {
-            table.name = name;
-            table.editIndex = editIndex;
+            _tableFocus('GroupName', index);
         }
+    }
 
-        function _tableUI(field) {
-            var ui = field.ui;
+    function _tableNewItem(field) {
+        _tableState(field.model, -1);
 
-            return ui ? ui : field.type;
+        var ui = _tableUI(field);
+
+        if (ui == 'table-simple') {
+            field.newValue = null;
+
+            _tableFocus(field.focusId, -1);
         }
+        else if (ui == 'table-pair') {
+            field.newKey = null;
+            field.newValue = null;
 
-        function _tableFocus(focusId, index) {
-            $focus((index < 0 ? 'new' : 'cur') + focusId);
+            _tableFocus('Key' + field.focusId, -1);
         }
+        else if (ui == 'table-db-fields') {
+            field.newDatabaseName = null;
+            field.newDatabaseType = 'INTEGER';
+            field.newJavaName = null;
+            field.newJavaType = 'Integer';
 
-        function _tableSimpleValue(filed, index) {
-            return index < 0 ? filed.newValue : filed.curValue;
+            _tableFocus('DatabaseName' + field.focusId, -1);
         }
+        else if (ui == 'table-query-groups') {
+            field.newGroupName = null;
+            field.newFields = null;
 
-        function _tablePairValue(filed, index) {
-            return index < 0 ? {key: filed.newKey, value: filed.newValue} : {key: filed.curKey, value: filed.curValue};
+            _tableFocus('GroupName', -1);
         }
-
-        function _tableStartEdit(item, field, index) {
-            _tableState(field.model, index);
-
-            var val = _model(item, field)[field.model][index];
-
-            var ui = _tableUI(field);
-
-            if (ui == 'table-simple') {
-                field.curValue = val;
-
-                _tableFocus(field.focusId, index);
-            }
-            else if (ui == 'table-pair') {
-                field.curKey = val[field.keyName];
-                field.curValue = val[field.valueName];
-
-                _tableFocus('Key' + field.focusId, index);
-            }
-            else if (ui == 'table-db-fields') {
-                field.curDatabaseName = val.databaseName;
-                field.curDatabaseType = val.databaseType;
-                field.curJavaName = val.javaName;
-                field.curJavaType = val.javaType;
-
-                _tableFocus('DatabaseName' + field.focusId, index);
-            }
-            else if (ui == 'table-query-groups') {
-                field.curGroupName = val.name;
-                field.curFields = val.fields;
-
-                _tableFocus('GroupName', index);
-            }
+        else if (ui == 'table-query-group-fields') {
+            _tableFocus('FieldName', -1);
         }
+    }
 
-        function _tableNewItem(field) {
-            _tableState(field.model, -1);
+    return {
+        tableState: function (name, editIndex) {
+            _tableState(name, editIndex);
+        },
+        tableReset: function () {
+            _tableReset();
+        },
+        tableNewItem: _tableNewItem,
+        tableNewItemActive: function (field) {
+            return table.name == field.model && table.editIndex < 0;
+        },
+        tableEditing: function (field, index) {
+            return table.name == field.model && table.editIndex == index;
+        },
+        tableStartEdit: _tableStartEdit,
+        tableRemove: function (item, field, index) {
+            _tableReset();
 
-            var ui = _tableUI(field);
+            _model(item, field)[field.model].splice(index, 1);
+        },
+        tableSimpleSave: function (valueValid, item, field, index) {
+            var simpleValue = _tableSimpleValue(field, index);
 
-            if (ui == 'table-simple') {
-                field.newValue = null;
-
-                _tableFocus(field.focusId, -1);
-            }
-            else if (ui == 'table-pair') {
-                field.newKey = null;
-                field.newValue = null;
-
-                _tableFocus('Key' + field.focusId, -1);
-            }
-            else if (ui == 'table-db-fields') {
-                field.newDatabaseName = null;
-                field.newDatabaseType = 'INTEGER';
-                field.newJavaName = null;
-                field.newJavaType = 'Integer';
-
-                _tableFocus('DatabaseName' + field.focusId, -1);
-            }
-            else if (ui == 'table-query-groups') {
-                field.newGroupName = null;
-                field.newFields = null;
-
-                _tableFocus('GroupName', -1);
-            }
-            else if (ui == 'table-query-group-fields') {
-                _tableFocus('FieldName', -1);
-            }
-        }
-
-        return {
-            tableState: function (name, editIndex) {
-                _tableState(name, editIndex);
-            },
-            tableReset: function () {
+            if (valueValid(item, field, simpleValue, index)) {
                 _tableReset();
-            },
-            tableNewItem: _tableNewItem,
-            tableNewItemActive: function (field) {
-                return table.name == field.model && table.editIndex < 0;
-            },
-            tableEditing: function (field, index) {
-                return table.name == field.model && table.editIndex == index;
-            },
-            tableStartEdit: _tableStartEdit,
-            tableRemove: function (item, field, index) {
-                _tableReset();
 
-                _model(item, field)[field.model].splice(index, 1);
-            },
-            tableSimpleSave: function (valueValid, item, field, index) {
-                var simpleValue = _tableSimpleValue(field, index);
+                if (index < 0) {
+                    if (_model(item, field)[field.model])
+                        _model(item, field)[field.model].push(simpleValue);
+                    else
+                        _model(item, field)[field.model] = [simpleValue];
 
-                if (valueValid(item, field, simpleValue, index)) {
-                    _tableReset();
-
-                    if (index < 0) {
-                        if (_model(item, field)[field.model])
-                            _model(item, field)[field.model].push(simpleValue);
-                        else
-                            _model(item, field)[field.model] = [simpleValue];
-
-                        _tableNewItem(field);
-                    }
-                    else {
-                        var arr = _model(item, field)[field.model];
-
-                        arr[index] = simpleValue;
-
-                        if (index < arr.length - 1)
-                            _tableStartEdit(item, field, index + 1);
-                        else
-                            _tableNewItem(field);
-                    }
+                    _tableNewItem(field);
                 }
-            },
-            tableSimpleSaveVisible: function (field, index) {
-                return !$common.isEmptyString(_tableSimpleValue(field, index));
-            },
-            tableSimpleUp: function (item, field, index) {
-                _tableReset();
+                else {
+                    var arr = _model(item, field)[field.model];
 
-                _swapSimpleItems(_model(item, field)[field.model], index, index - 1);
-            },
-            tableSimpleDown: function (item, field, index) {
-                _tableReset();
+                    arr[index] = simpleValue;
 
-                _swapSimpleItems(_model(item, field)[field.model], index, index + 1);
-            },
-            tableSimpleDownVisible: function (item, field, index) {
-                return index < _model(item, field)[field.model].length - 1;
-            },
-            tablePairValue: _tablePairValue,
-            tablePairSave: function (pairValid, item, field, index) {
-                if (pairValid(item, field, index)) {
-                    var pairValue = _tablePairValue(field, index);
-
-                    var pairModel = {};
-
-                    if (index < 0) {
-                        pairModel[field.keyName] = pairValue.key;
-                        pairModel[field.valueName] = pairValue.value;
-
-                        if (item[field.model])
-                            item[field.model].push(pairModel);
-                        else
-                            item[field.model] = [pairModel];
-
+                    if (index < arr.length - 1)
+                        _tableStartEdit(item, field, index + 1);
+                    else
                         _tableNewItem(field);
-                    }
-                    else {
-                        pairModel = item[field.model][index];
-
-                        pairModel[field.keyName] = pairValue.key;
-                        pairModel[field.valueName] = pairValue.value;
-
-                        if (index < item[field.model].length - 1)
-                            _tableStartEdit(item, field, index + 1);
-                        else
-                            _tableNewItem(field);
-                    }
                 }
-            },
-            tablePairSaveVisible: function (field, index) {
+            }
+        },
+        tableSimpleSaveVisible: function (field, index) {
+            return !$common.isEmptyString(_tableSimpleValue(field, index));
+        },
+        tableSimpleUp: function (item, field, index) {
+            _tableReset();
+
+            _swapSimpleItems(_model(item, field)[field.model], index, index - 1);
+        },
+        tableSimpleDown: function (item, field, index) {
+            _tableReset();
+
+            _swapSimpleItems(_model(item, field)[field.model], index, index + 1);
+        },
+        tableSimpleDownVisible: function (item, field, index) {
+            return index < _model(item, field)[field.model].length - 1;
+        },
+        tablePairValue: _tablePairValue,
+        tablePairSave: function (pairValid, item, field, index) {
+            if (pairValid(item, field, index)) {
                 var pairValue = _tablePairValue(field, index);
 
-                return !$common.isEmptyString(pairValue.key) && !$common.isEmptyString(pairValue.value);
-            },
-            tableFocusInvalidField: function (index, id) {
-                _tableFocus(id, index);
+                var pairModel = {};
 
-                return false;
-            },
-            tableFieldId: function(index, id) {
-                return (index < 0 ? 'new' : 'cur') + id;
+                if (index < 0) {
+                    pairModel[field.keyName] = pairValue.key;
+                    pairModel[field.valueName] = pairValue.value;
+
+                    if (item[field.model])
+                        item[field.model].push(pairModel);
+                    else
+                        item[field.model] = [pairModel];
+
+                    _tableNewItem(field);
+                }
+                else {
+                    pairModel = item[field.model][index];
+
+                    pairModel[field.keyName] = pairValue.key;
+                    pairModel[field.valueName] = pairValue.value;
+
+                    if (index < item[field.model].length - 1)
+                        _tableStartEdit(item, field, index + 1);
+                    else
+                        _tableNewItem(field);
+                }
             }
+        },
+        tablePairSaveVisible: function (field, index) {
+            var pairValue = _tablePairValue(field, index);
+
+            return !$common.isEmptyString(pairValue.key) && !$common.isEmptyString(pairValue.value);
+        },
+        tableFocusInvalidField: function (index, id) {
+            _tableFocus(id, index);
+
+            return false;
+        },
+        tableFieldId: function (index, id) {
+            return (index < 0 ? 'new' : 'cur') + id;
         }
-    }]);
+    }
+}]);
+
+
+// Preview support service.
+controlCenterModule.service('$preview', [function () {
+    return {
+        previewInit: function (editor) {
+            editor.setReadOnly(true);
+            editor.setOption('highlightActiveLine', false);
+            editor.$blockScrolling = Infinity;
+
+            var renderer = editor.renderer;
+
+            renderer.setShowGutter(false);
+            renderer.setHighlightGutterLine(false);
+            renderer.setShowPrintMargin(false);
+            renderer.setOption('fontSize', '10px');
+
+            editor.setTheme('ace/theme/chrome');
+        }
+    }
+}]);
 
 // Filter to decode name using map(value, label).
 controlCenterModule.filter('displayValue', function () {

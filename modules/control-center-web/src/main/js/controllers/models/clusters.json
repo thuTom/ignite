@@ -26,6 +26,7 @@
     {
       "label": "General",
       "id": "general-data",
+      "preview": "general",
       "fields": [
         {
           "label": "Name",
@@ -329,21 +330,13 @@
   "advanced": [
     {
       "label": "Atomics configuration",
+      "id": "atomics-data",
+      "preview": "atomics",
       "tip": [
         "Configuration for atomic data structures.",
         "Atomics are distributed across the cluster, essentially enabling performing atomic operations (such as increment-and-get or compare-and-set) with the same globally-visible value."
       ],
       "fields": [
-        {
-          "label": "Backups",
-          "type": "number",
-          "path": "atomicConfiguration",
-          "model": "backups",
-          "placeholder": 0,
-          "tip": [
-            "Number of backup nodes."
-          ]
-        },
         {
           "label": "Cache mode",
           "type": "dropdown",
@@ -370,11 +363,24 @@
             "Default number of sequence values reserved for IgniteAtomicSequence instances.",
             "After a certain number has been reserved, consequent increments of sequence will happen locally, without communication with other nodes, until the next reservation has to be made."
           ]
+        },
+        {
+          "label": "Backups",
+          "type": "number",
+          "path": "atomicConfiguration",
+          "model": "backups",
+          "hide": "backupItem.atomicConfiguration &&  backupItem.atomicConfiguration.cacheMode && backupItem.atomicConfiguration.cacheMode != 'PARTITIONED'",
+          "placeholder": 0,
+          "tip": [
+            "Number of backup nodes."
+          ]
         }
       ]
     },
     {
       "label": "Communication",
+      "id": "communication-data",
+      "preview": "communication",
       "tip": [
         "Cluster communication network properties."
       ],
@@ -442,6 +448,8 @@
     },
     {
       "label": "Deployment",
+      "id": "deployment-data",
+      "preview": "deployment",
       "tip": [
         "Task and resources deployment in cluster."
       ],
@@ -467,6 +475,8 @@
     },
     {
       "label": "Events",
+      "id": "events-data",
+      "preview": "events",
       "tip": [
         " Grid events are used for notification about what happens within the grid."
       ],
@@ -486,6 +496,8 @@
     },
     {
       "label": "Marshaller",
+      "id": "marshaller-data",
+      "preview": "marshaller",
       "tip": [
         "Marshaller allows to marshal or unmarshal objects in grid.",
         "It provides serialization/deserialization mechanism for all instances that are sent across networks or are otherwise serialized."
@@ -565,6 +577,8 @@
     },
     {
       "label": "Metrics",
+      "id": "metrics-data",
+      "preview": "metrics",
       "tip": [
         "Cluster runtime metrics settings."
       ],
@@ -616,6 +630,8 @@
     },
     {
       "label": "Peer Class Loading",
+      "id": "p2p-data",
+      "preview": "p2p",
       "tip": [
         "Cluster peer class loading settings."
       ],
@@ -661,6 +677,8 @@
     },
     {
       "label": "Swap",
+      "id": "swap-data",
+      "preview": "swap",
       "id": "swap-data",
       "tip": [
         "Settings for overflow data to disk if it cannot fit in memory."
@@ -743,6 +761,8 @@
     },
     {
       "label": "Time configuration",
+      "id": "time-data",
+      "preview": "time",
       "tip": [
         "Time settings for CLOCK write ordering mode."
       ],
@@ -791,6 +811,8 @@
     },
     {
       "label": "Thread pools size",
+      "id": "pools-data",
+      "preview": "pools",
       "tip": [
         "Settings for node thread pools."
       ],
@@ -835,6 +857,8 @@
     },
     {
       "label": "Transactions",
+      "id": "transactions-data",
+      "preview": "transactions",
       "tip": [
         "Settings for transactions."
       ],

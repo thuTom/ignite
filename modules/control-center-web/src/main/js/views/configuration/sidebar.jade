@@ -16,6 +16,13 @@
 
 extends ../templates/layout
 
+append scripts
+    script(src='/common-utils.js')
+    script(src='/data-structures.js')
+    script(src='/generator-common.js')
+    script(src='/generator-xml.js')
+    script(src='/generator-java.js')
+
 mixin sidebar-item(ref, num, txt)
     li
         a(ng-class='{active: isActive("#{ref}")}' href='#{ref}')

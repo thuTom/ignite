@@ -16,11 +16,12 @@
  */
 
 controlCenterModule.controller('cachesController', [
-        '$scope', '$http', '$common', '$focus', '$confirm', '$copy', '$table',
-        function ($scope, $http, $common, $focus, $confirm, $copy, $table) {
+        '$scope', '$http', '$timeout', '$common', '$focus', '$confirm', '$copy', '$table', '$preview',
+        function ($scope, $http, $timeout, $common, $focus, $confirm, $copy, $table, $preview) {
             $scope.joinTip = $common.joinTip;
             $scope.getModel = $common.getModel;
             $scope.javaBuildInClasses = $common.javaBuildInClasses;
+            $scope.compactJavaName = $common.compactJavaName;
 
             $scope.tableReset = $table.tableReset;
             $scope.tableNewItem = $table.tableNewItem;
@@ -38,14 +39,15 @@ controlCenterModule.controller('cachesController', [
             $scope.tablePairSave = $table.tablePairSave;
             $scope.tablePairSaveVisible = $table.tablePairSaveVisible;
 
-            $scope.compactJavaName = $common.compactJavaName;
+            $scope.previewInit = $preview.previewInit;
 
             $scope.hidePopover = $common.hidePopover;
+
             var showPopoverMessage = $common.showPopoverMessage;
 
             $scope.atomicities = $common.mkOptions(['ATOMIC', 'TRANSACTIONAL']);
 
-            $scope.modes = $common.mkOptions(['PARTITIONED', 'REPLICATED', 'LOCAL']);
+            $scope.cacheModes = $common.mkOptions(['PARTITIONED', 'REPLICATED', 'LOCAL']);
 
             $scope.atomicWriteOrderModes = $common.mkOptions(['CLOCK', 'PRIMARY']);
 
@@ -87,6 +89,12 @@ controlCenterModule.controller('cachesController', [
 
             $scope.panels = {activePanels: [0]};
 
+            $scope.$watchCollection('panels.activePanels', function () {
+                $timeout(function() {
+                    $common.previewHeightUpdate();
+                })
+            });
+
             $scope.general = [];
             $scope.advanced = [];
 
@@ -103,6 +111,8 @@ controlCenterModule.controller('cachesController', [
             $scope.caches = [];
             $scope.queryMetadata = [];
             $scope.storeMetadata = [];
+
+            $scope.preview = {};
 
             $scope.required = function (field) {
                 var model = $common.isDefined(field.path) ? field.path + '.' + field.model : field.model;
@@ -173,7 +183,11 @@ controlCenterModule.controller('cachesController', [
                     $scope.caches = data.caches;
                     $scope.clusters = data.clusters;
 
-                    _.forEach(data.metadatas, function (meta) {
+                    var metadatas = _.map(data.metadatas, function (meta) {
+                        return {value: meta._id, label: meta.name, kind: meta.kind, meta: meta}
+                    });
+
+                    _.forEach(metadatas, function (meta) {
                         var kind = meta.kind;
 
                         if (kind == 'query' || kind == 'both')
@@ -237,10 +251,51 @@ controlCenterModule.controller('cachesController', [
                         $scope.selectItem($scope.caches[0]);
 
                     $scope.$watch('backupItem', function (val) {
-                        if (val)
+                        if (val) {
                             sessionStorage.cacheBackupItem = angular.toJson(val);
+
+                            var qryMeta = _.reduce($scope.queryMetadata, function(memo, meta){
+                                if (_.contains(val.queryMetadata, meta.value)) {
+                                    memo.push(meta.meta);
+                                }
+
+                                return memo;
+                            }, []);
+
+                            var storeMeta = _.reduce($scope.storeMetadata, function(memo, meta){
+                                if (_.contains(val.storeMetadata, meta.value)) {
+                                    memo.push(meta.meta);
+                                }
+
+                                return memo;
+                            }, []);
+
+                            $scope.preview.generalXml = $generatorXml.cacheGeneral(val).join('');
+                            $scope.preview.memoryXml = $generatorXml.cacheMemory(val).join('');
+                            $scope.preview.queryXml = $generatorXml.cacheMetadatas(qryMeta, null, $generatorXml.cacheQuery(val)).join('');
+                            $scope.preview.storeXml = $generatorXml.cacheMetadatas(null, storeMeta, $generatorXml.cacheStore(val)).join('');
+                            $scope.preview.concurrencyXml = $generatorXml.cacheConcurrency(val).join('');
+                            $scope.preview.rebalanceXml = $generatorXml.cacheRebalance(val).join('');
+                            $scope.preview.serverNearCacheXml = $generatorXml.cacheServerNearCache(val).join('');
+                            $scope.preview.statisticsXml = $generatorXml.cacheStatistics(val).join('');
+
+                            var varName = 'cache';
+
+                            $scope.preview.generalJava = $generatorJava.cacheGeneral(val, varName).join('');
+                            $scope.preview.memoryJava = $generatorJava.cacheMemory(val, varName).join('');
+                            $scope.preview.queryJava = $generatorJava.cacheMetadatas(qryMeta, null, varName, $generatorJava.cacheQuery(val, varName)).join('');
+                            $scope.preview.storeJava = $generatorJava.cacheMetadatas(null, storeMeta, varName, $generatorJava.cacheStore(val, varName)).join('');
+                            $scope.preview.concurrencyJava = $generatorJava.cacheConcurrency(val, varName).join('');
+                            $scope.preview.rebalanceJava = $generatorJava.cacheRebalance(val, varName).join('');
+                            $scope.preview.serverNearCacheJava = $generatorJava.cacheServerNearCache(val, varName).join('');
+                            $scope.preview.statisticsJava = $generatorJava.cacheStatistics(val, varName).join('');
+                        }
                     }, true);
-                })
+
+                    $timeout(function () {
+                        $common.initPreview();
+                    })
+               })
                 .error(function (errMsg) {
                     $common.showError(errMsg);
                 });
@@ -261,16 +316,23 @@ controlCenterModule.controller('cachesController', [
                     sessionStorage.cacheSelectedItem = angular.toJson(item);
                 else
                     sessionStorage.removeItem('cacheSelectedItem');
+
+                $timeout(function () {
+                    $common.previewHeightUpdate();
+                })
             };
 
             // Add new cache.
             $scope.createItem = function () {
                 $table.tableReset();
-                $common.ensureActivePanel($scope.panels, 'general-data');
+
+                $timeout(function () {
+                    $common.ensureActivePanel($scope.panels, 'general-data', 'cacheName');
+                });
 
                 var newItem = {
                     space: $scope.spaces[0]._id,
-                    mode: 'PARTITIONED',
+                    cacheModes: 'PARTITIONED',
                     atomicityMode: 'ATOMIC',
                     readFromBackup: true,
                     copyOnRead: true,
@@ -286,6 +348,7 @@ controlCenterModule.controller('cachesController', [
             function validate(item) {
                 if ($common.isEmptyString(item.name))
                     return showPopoverMessage($scope.panels, 'general-data', 'cacheName', 'Name should not be empty');
+                        sessionStorage.removeItem('cacheSelectedItem');
 
                 if (item.memoryMode == 'OFFHEAP_TIERED' && item.offHeapMaxMemory == null)
                     return showPopoverMessage($scope.panels, 'memory-data', 'offHeapMaxMemory',

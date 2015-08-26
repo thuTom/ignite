@@ -16,8 +16,8 @@
  */
 
 controlCenterModule.controller('metadataController', [
-        '$scope', '$controller', '$http', '$modal', '$common', '$timeout', '$focus', '$confirm', '$copy', '$table',
-        function ($scope, $controller, $http, $modal, $common, $timeout, $focus, $confirm, $copy, $table) {
+        '$scope', '$controller', '$http', '$modal', '$common', '$timeout', '$focus', '$confirm', '$copy', '$table', '$preview',
+        function ($scope, $controller, $http, $modal, $common, $timeout, $focus, $confirm, $copy, $table, $preview) {
             // Initialize the super class and extend it.
             angular.extend(this, $controller('agent-download', {$scope: $scope}));
             $scope.agentGoal = 'load metadata from database schema';
@@ -26,6 +26,7 @@ controlCenterModule.controller('metadataController', [
             $scope.joinTip = $common.joinTip;
             $scope.getModel = $common.getModel;
             $scope.javaBuildInClasses = $common.javaBuildInClasses;
+            $scope.compactJavaName = $common.compactJavaName;
 
             $scope.tableReset = $table.tableReset;
             $scope.tableNewItem = $table.tableNewItem;
@@ -44,10 +45,13 @@ controlCenterModule.controller('metadataController', [
             $scope.tablePairSave = $table.tablePairSave;
             $scope.tablePairSaveVisible = $table.tablePairSaveVisible;
 
-            $scope.compactJavaName = $common.compactJavaName;
+            $scope.previewInit = $preview.previewInit;
 
             $scope.hidePopover = $common.hidePopover;
+
             var showPopoverMessage = $common.showPopoverMessage;
+
+            $scope.preview = {};
 
             var presets = [
                 {
@@ -146,6 +150,11 @@ controlCenterModule.controller('metadataController', [
 
             $scope.panels = {activePanels: [0, 1]};
 
+            $scope.$watchCollection('panels.activePanels', function () {
+                $timeout(function() {
+                    $common.previewHeightUpdate();
+                })
+            });
             $scope.metadatas = [];
 
             $scope.isJavaBuildInClass = function () {
@@ -179,6 +188,10 @@ controlCenterModule.controller('metadataController', [
 
                 $scope.selectedItem = sel;
                 $scope.backupItem = bak;
+
+                $timeout(function () {
+                    $common.previewHeightUpdate();
+                })
             }
 
             $scope.selectAllSchemas = function () {
@@ -493,9 +506,22 @@ controlCenterModule.controller('metadataController', [
                     });
 
                     $scope.$watch('backupItem', function (val) {
-                        if (val)
+                        if (val) {
                             sessionStorage.metadataBackupItem = angular.toJson(val);
+
+                            $scope.preview.generalXml = $generatorXml.metadataGeneral(val).join('');
+                            $scope.preview.queryXml = $generatorXml.metadataQuery(val).join('');
+                            $scope.preview.storeXml = $generatorXml.metadataStore(val).join('');
+
+                            $scope.preview.generalJava = $generatorJava.metadataGeneral(val).join('');
+                            $scope.preview.queryJava = $generatorJava.metadataQuery(val).join('');
+                            $scope.preview.storeJava = $generatorJava.metadataStore(val).join('');
+                        }
                     }, true);
+
+                    $timeout(function () {
+                        $common.initPreview();
+                    });
                 })
                 .error(function (errMsg) {
                     $common.showError(errMsg);
@@ -525,7 +551,10 @@ controlCenterModule.controller('metadataController', [
             // Add new metadata.
             $scope.createItem = function () {
                 $table.tableReset();
-                $common.ensureActivePanel($scope.panels, 'metadata-data');
+
+                $timeout(function () {
+                    $common.ensureActivePanel($scope.panels, 'metadata-data', 'metadataName');
+                });
 
                 $scope.selectedItem = undefined;
 
