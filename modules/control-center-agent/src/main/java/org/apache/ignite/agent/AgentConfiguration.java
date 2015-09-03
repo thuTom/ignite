@@ -222,6 +222,16 @@ public class AgentConfiguration {
 
         if (val != null)
             driversFolder(val);
+
+        val = (String)props.remove("test-drive-metadata");
+
+        if (val != null)
+            testDriveMetadata(Boolean.valueOf(val));
+
+        val = (String)props.remove("test-drive-sql");
+
+        if (val != null)
+            testDriveSql(Boolean.valueOf(val));
     }
 
     /**
