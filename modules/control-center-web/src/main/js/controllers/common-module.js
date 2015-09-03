@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-var controlCenterModule = angular.module('ignite-web-control-center', ['smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize']);
+var controlCenterModule = angular.module('ignite-web-control-center', ['ngAnimate', 'smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize']);
 
 // Modal popup configuration.
 controlCenterModule.config(function ($modalProvider) {
@@ -63,6 +63,13 @@ controlCenterModule.config(function ($alertProvider) {
         placement: 'top-right',
         duration: '5',
         type: 'danger'
+    });
+});
+
+// Alerts configuration.
+controlCenterModule.config(function($modalProvider) {
+    angular.extend($modalProvider.defaults, {
+        animation: 'am-fade-and-scale'
     });
 });
 
