@@ -1124,10 +1124,8 @@ a {
     opacity: 0;
 }
 
-.ace_editor, #ace_document {
+.ace_editor {
     margin: 0.85em 0 0 0;
-
-    height: 400px;
 
     .ace_gutter {
         background: transparent !important;
@@ -1142,11 +1140,69 @@ a {
 }
 
 .sql-editor {
-    height: 200px;
-
     .ace_cursor {
         opacity: 1;
     }
+}
+
+.preview-highlight-1 {
+    position: absolute;
+    background-color: #f7faff;
+    z-index: 20;
+}
+
+.preview-highlight-2 {
+  position: absolute;
+  background-color: #f0f6ff;
+  z-index: 21;
+}
+
+.preview-highlight-3 {
+  position: absolute;
+  background-color: #e8f2ff;
+  z-index: 22;
+}
+
+.preview-highlight-4 {
+  position: absolute;
+  background-color: #e1eeff;
+  z-index: 23;
+}
+
+.preview-highlight-5 {
+  position: absolute;
+  background-color: #DAEAFF;
+  z-index: 24;
+}
+
+.preview-highlight-6 {
+    position: absolute;
+    background-color: #D2E5FF;
+    z-index: 25;
+}
+
+.preview-highlight-7 {
+  position: absolute;
+  background-color: #CBE1FF;
+  z-index: 26;
+}
+
+.preview-highlight-8 {
+  position: absolute;
+  background-color: #C3DDFF;
+  z-index: 27;
+}
+
+.preview-highlight-9 {
+  position: absolute;
+  background-color: #BCD9FF;
+  z-index: 28;
+}
+
+.preview-highlight-10 {
+  position: absolute;
+  background-color: #B5D5FF;
+  z-index: 29;
 }
 
 .preview-panel {

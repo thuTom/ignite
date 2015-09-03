@@ -53,6 +53,7 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
     $scope.aceInit = function (editor) {
         editor.setReadOnly(true);
         editor.setOption('highlightActiveLine', false);
+        editor.setAutoScrollEditorIntoView(true);
         editor.$blockScrolling = Infinity;
 
         var renderer = editor.renderer;
@@ -60,6 +61,8 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
         renderer.setHighlightGutterLine(false);
         renderer.setShowPrintMargin(false);
         renderer.setOption('fontSize', '14px');
+        renderer.setOption('minLines', '3');
+        renderer.setOption('maxLines', '50');
 
         editor.setTheme('ace/theme/chrome');
     };
