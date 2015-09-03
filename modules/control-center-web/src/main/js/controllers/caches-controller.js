@@ -101,12 +101,6 @@ controlCenterModule.controller('cachesController', [
 
             $scope.panels = {activePanels: [0]};
 
-            $scope.$watchCollection('panels.activePanels', function () {
-                $timeout(function() {
-                    $common.previewHeightUpdate();
-                })
-            });
-
             $scope.general = [];
             $scope.advanced = [];
 
@@ -224,6 +218,86 @@ controlCenterModule.controller('cachesController', [
                 return true;
             };
 
+            // Fill cache previews.
+            function generatePreview(val) {
+                if ($common.isDefined(val)) {
+                    var qryMeta = _.reduce($scope.queryMetadata, function(memo, meta){
+                        if (_.contains(val.queryMetadata, meta.value)) {
+                            memo.push(meta.meta);
+                        }
+
+                        return memo;
+                    }, []);
+
+                    var storeMeta = _.reduce($scope.storeMetadata, function(memo, meta){
+                        if (_.contains(val.storeMetadata, meta.value)) {
+                            memo.push(meta.meta);
+                        }
+
+                        return memo;
+                    }, []);
+
+                    var varName = 'cache';
+
+                    $scope.preview.general.xml = $generatorXml.cacheGeneral(val).join('');
+                    $scope.preview.general.java = $generatorJava.cacheGeneral(val, varName).join('');
+                    $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
+
+                    $scope.preview.memory.xml = $generatorXml.cacheMemory(val).join('');
+                    $scope.preview.memory.java = $generatorJava.cacheMemory(val, varName).join('');
+                    $scope.preview.memory.allDefaults = $common.isEmptyString($scope.preview.memory.xml);
+
+                    $scope.preview.query.xml = $generatorXml.cacheMetadatas(qryMeta, null, $generatorXml.cacheQuery(val)).join('');
+                    $scope.preview.query.java = $generatorJava.cacheMetadatas(qryMeta, null, varName, $generatorJava.cacheQuery(val, varName)).join('');
+                    $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
+
+                    $scope.preview.store.xml = $generatorXml.cacheMetadatas(null, storeMeta, $generatorXml.cacheStore(val)).join('');
+                    $scope.preview.store.java = $generatorJava.cacheMetadatas(null, storeMeta, varName, $generatorJava.cacheStore(val, varName)).join('');
+                    $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
+
+                    $scope.preview.concurrency.xml = $generatorXml.cacheConcurrency(val).join('');
+                    $scope.preview.concurrency.java = $generatorJava.cacheConcurrency(val, varName).join('');
+                    $scope.preview.concurrency.allDefaults = $common.isEmptyString($scope.preview.concurrency.xml);
+
+                    $scope.preview.rebalance.xml = $generatorXml.cacheRebalance(val).join('');
+                    $scope.preview.rebalance.java = $generatorJava.cacheRebalance(val, varName).join('');
+                    $scope.preview.rebalance.allDefaults = $common.isEmptyString($scope.preview.rebalance.xml);
+
+                    $scope.preview.serverNearCache.xml = $generatorXml.cacheServerNearCache(val).join('');
+                    $scope.preview.serverNearCache.java = $generatorJava.cacheServerNearCache(val, varName).join('');
+                    $scope.preview.serverNearCache.allDefaults = $common.isEmptyString($scope.preview.serverNearCache.xml);
+
+                    $scope.preview.statistics.xml = $generatorXml.cacheStatistics(val).join('');
+                    $scope.preview.statistics.java = $generatorJava.cacheStatistics(val, varName).join('');
+                    $scope.preview.statistics.allDefaults = $common.isEmptyString($scope.preview.statistics.xml);
+                }
+                else {
+                    $scope.preview.general.xml = ' ';
+                    $scope.preview.general.java = ' ';
+
+                    $scope.preview.memory.xml = ' ';
+                    $scope.preview.memory.java = ' ';
+
+                    $scope.preview.query.xml = ' ';
+                    $scope.preview.query.java = ' ';
+
+                    $scope.preview.store.xml = ' ';
+                    $scope.preview.store.java = ' ';
+
+                    $scope.preview.concurrency.xml = ' ';
+                    $scope.preview.concurrency.java = ' ';
+
+                    $scope.preview.rebalance.xml = ' ';
+                    $scope.preview.rebalance.java = ' ';
+
+                    $scope.preview.serverNearCache.xml = ' ';
+                    $scope.preview.serverNearCache.java = ' ';
+
+                    $scope.preview.statistics.xml = ' ';
+                    $scope.preview.statistics.java = ' ';
+                }
+            }
+
             // When landing on the page, get caches and show them.
             $http.post('caches/list')
                 .success(function (data) {
@@ -302,63 +376,11 @@ controlCenterModule.controller('cachesController', [
                         if (val) {
                             sessionStorage.cacheBackupItem = angular.toJson(val);
 
-                            var qryMeta = _.reduce($scope.queryMetadata, function(memo, meta){
-                                if (_.contains(val.queryMetadata, meta.value)) {
-                                    memo.push(meta.meta);
-                                }
-
-                                return memo;
-                            }, []);
-
-                            var storeMeta = _.reduce($scope.storeMetadata, function(memo, meta){
-                                if (_.contains(val.storeMetadata, meta.value)) {
-                                    memo.push(meta.meta);
-                                }
-
-                                return memo;
-                            }, []);
-
-                            var varName = 'cache';
-
-                            $scope.preview.general.xml = $generatorXml.cacheGeneral(val).join('');
-                            $scope.preview.general.java = $generatorJava.cacheGeneral(val, varName).join('');
-                            $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
-
-                            $scope.preview.memory.xml = $generatorXml.cacheMemory(val).join('');
-                            $scope.preview.memory.java = $generatorJava.cacheMemory(val, varName).join('');
-                            $scope.preview.memory.allDefaults = $common.isEmptyString($scope.preview.memory.xml);
-
-                            $scope.preview.query.xml = $generatorXml.cacheMetadatas(qryMeta, null, $generatorXml.cacheQuery(val)).join('');
-                            $scope.preview.query.java = $generatorJava.cacheMetadatas(qryMeta, null, varName, $generatorJava.cacheQuery(val, varName)).join('');
-                            $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
-
-                            $scope.preview.store.xml = $generatorXml.cacheMetadatas(null, storeMeta, $generatorXml.cacheStore(val)).join('');
-                            $scope.preview.store.java = $generatorJava.cacheMetadatas(null, storeMeta, varName, $generatorJava.cacheStore(val, varName)).join('');
-                            $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
-
-                            $scope.preview.concurrency.xml = $generatorXml.cacheConcurrency(val).join('');
-                            $scope.preview.concurrency.java = $generatorJava.cacheConcurrency(val, varName).join('');
-                            $scope.preview.concurrency.allDefaults = $common.isEmptyString($scope.preview.concurrency.xml);
-
-                            $scope.preview.rebalance.xml = $generatorXml.cacheRebalance(val).join('');
-                            $scope.preview.rebalance.java = $generatorJava.cacheRebalance(val, varName).join('');
-                            $scope.preview.rebalance.allDefaults = $common.isEmptyString($scope.preview.rebalance.xml);
-
-                            $scope.preview.serverNearCache.xml = $generatorXml.cacheServerNearCache(val).join('');
-                            $scope.preview.serverNearCache.java = $generatorJava.cacheServerNearCache(val, varName).join('');
-                            $scope.preview.serverNearCache.allDefaults = $common.isEmptyString($scope.preview.serverNearCache.xml);
-
-                            $scope.preview.statistics.xml = $generatorXml.cacheStatistics(val).join('');
-                            $scope.preview.statistics.java = $generatorJava.cacheStatistics(val, varName).join('');
-                            $scope.preview.statistics.allDefaults = $common.isEmptyString($scope.preview.statistics.xml);
+                            generatePreview(val);
 
                             $common.markChanged($scope.ui.inputForm, 'cacheBackupItemChanged');
                         }
                     }, true);
-
-                    $timeout(function () {
-                        $common.initPreview();
-                    })
                })
                 .error(function (errMsg) {
                     $common.showError(errMsg);
@@ -368,13 +390,6 @@ controlCenterModule.controller('cachesController', [
                 function selectItem() {
                     $table.tableReset();
 
-                    if (backup)
-                        $scope.backupItem = backup;
-                    else if (item)
-                        $scope.backupItem = angular.copy(item);
-                    else
-                        $scope.backupItem = undefined;
-
                     $scope.selectedItem = item;
 
                     if (item)
@@ -382,8 +397,15 @@ controlCenterModule.controller('cachesController', [
                     else
                         sessionStorage.removeItem('cacheSelectedItem');
 
+                    generatePreview();
+
                     $timeout(function () {
-                        $common.previewHeightUpdate();
+                        if (backup)
+                            $scope.backupItem = backup;
+                        else if (item)
+                            $scope.backupItem = angular.copy(item);
+                        else
+                            $scope.backupItem = undefined;
                     });
 
                     $timeout(function () {

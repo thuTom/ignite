@@ -74,13 +74,14 @@ $generatorCommon.builder = function () {
     };
 
     res.line = function (s) {
-        if (this.needEmptyLine) {
-            this.push('\n');
-            this.needEmptyLine = false;
+        if (s) {
+            if (this.needEmptyLine)
+                this.push('\n');
+
+            this.append(s);
         }
 
-        if (s)
-            this.append(s);
+        this.needEmptyLine = false;
 
         this.push('\n');
         this.lineStart = true;

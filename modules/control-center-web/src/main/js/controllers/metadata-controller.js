@@ -168,11 +168,6 @@ controlCenterModule.controller('metadataController', [
 
             $scope.panels = {activePanels: [0, 1]};
 
-            $scope.$watchCollection('panels.activePanels', function () {
-                $timeout(function() {
-                    $common.previewHeightUpdate();
-                })
-            });
             $scope.metadatas = [];
 
             $scope.isJavaBuildInClass = function () {
@@ -204,11 +199,12 @@ controlCenterModule.controller('metadataController', [
                 function setSelectedAndBackupItem() {
                     $table.tableReset();
 
-                    $scope.backupItem = bak;
                     $scope.selectedItem = sel;
 
+                    generatePreview();
+
                     $timeout(function () {
-                        $common.previewHeightUpdate();
+                        $scope.backupItem = bak;
                     });
 
                     $timeout(function () {
@@ -489,6 +485,35 @@ controlCenterModule.controller('metadataController', [
                     $scope.loadMeta.action = 'connect';
             };
 
+            function generatePreview(val) {
+                if ($common.isDefined(val)) {
+                    $scope.preview.general.xml = $generatorXml.metadataGeneral(val).join('');
+                    $scope.preview.general.java = $generatorJava.metadataGeneral(val).join('');
+                    $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
+
+                    $scope.preview.query.xml = $generatorXml.metadataQuery(val).join('');
+                    $scope.preview.query.java = $generatorJava.metadataQuery(val).join('');
+                    $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
+
+                    $scope.preview.store.xml = $generatorXml.metadataStore(val).join('');
+                    $scope.preview.store.java = $generatorJava.metadataStore(val).join('');
+                    $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
+                }
+                else {
+                    $scope.preview.general.xml = ' ';
+                    $scope.preview.general.java = ' ';
+                    $scope.preview.general.allDefaults = ' ';
+
+                    $scope.preview.query.xml = ' ';
+                    $scope.preview.query.java = ' ';
+                    $scope.preview.query.allDefaults = ' ';
+
+                    $scope.preview.store.xml = ' ';
+                    $scope.preview.store.java = ' ';
+                    $scope.preview.store.allDefaults = ' ';
+                }
+            }
+
             // When landing on the page, get metadatas and show them.
             $http.post('metadata/list')
                 .success(function (data) {
@@ -540,25 +565,11 @@ controlCenterModule.controller('metadataController', [
                         if (val) {
                             sessionStorage.metadataBackupItem = angular.toJson(val);
 
-                            $scope.preview.general.xml = $generatorXml.metadataGeneral(val).join('');
-                            $scope.preview.general.java = $generatorJava.metadataGeneral(val).join('');
-                            $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
-
-                            $scope.preview.query.xml = $generatorXml.metadataQuery(val).join('');
-                            $scope.preview.query.java = $generatorJava.metadataQuery(val).join('');
-                            $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
-
-                            $scope.preview.store.xml = $generatorXml.metadataStore(val).join('');
-                            $scope.preview.store.java = $generatorJava.metadataStore(val).join('');
-                            $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
+                            generatePreview(val);
 
                             $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
                         }
                     }, true);
-
-                    $timeout(function () {
-                        $common.initPreview();
-                    });
                 })
                 .error(function (errMsg) {
                     $common.showError(errMsg);

@@ -481,37 +481,6 @@ controlCenterModule.service('$common', [
             return false;
         }
 
-        function resizePreview (el) {
-            var left = $('#' + el.id + '-left');
-
-            if (left.height() > 0) {
-                var right = $('#' + el.id + '-right');
-
-                var parent = right.parent();
-
-                var hScroll = right.find('.ace_scrollbar-h');
-
-                var scrollHeight = hScroll.length > 0 ? hScroll.height() : 0;
-
-                var marginTop = parent.css('marginTop');
-
-                var minHeight = right.attr('min-height');
-
-                if (isDefined(minHeight) && minHeight.length > 0)
-                    minHeight = minHeight.replace('px', '');
-                else
-                    minHeight = 0;
-
-                var parentHeight = Math.max(minHeight, 75, left.height() - 2 * (isDefined(marginTop) ? marginTop.replace('px', '') : 0));
-
-                parent.outerHeight(parentHeight);
-
-                right.height(parentHeight - scrollHeight * 3 / 4);
-
-                right.resize();
-            }
-        }
-
         function formChanged (form) {
             return isDefined(form) && form.$dirty;
         }
@@ -664,26 +633,6 @@ controlCenterModule.service('$common', [
             hidePopover: function () {
                 if (popover)
                     popover.hide();
-            },
-            previewHeightUpdate: function () {
-                $('.panel-collapse').each(function (ix, el) {
-                    resizePreview(el);
-                })
-            },
-            initPreview: function () {
-                MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
-
-                $('.panel-collapse').each(function (ix, el) {
-                    var observer = new MutationObserver(function(mutations, observer) {
-                        resizePreview(el);
-                    });
-
-                    observer.observe(el, {
-                        childList: true,
-                        subtree: true,
-                        attributeFilter: ['class']
-                    });
-                });
             },
             markChanged: function (form, item) {
                 sessionStorage.setItem(item, 'true');
@@ -1006,24 +955,29 @@ controlCenterModule.service('$preview', ['$timeout', function ($timeout) {
 
     var previewPrevContent = [];
 
-    var clearPromise = null;
-
     function previewChanged (ace) {
         var content = ace[0];
 
+        var editor = ace[1];
+
+        var clearPromise = editor.clearPromise;
+
+        var previewNewContent = content.lines;
+
         if (content.action == 'remove')
             previewPrevContent = content.lines;
-        else {
+        // Do not mark the text changes for special marker value: ' '.
+        else if (previewPrevContent.length > 0 && previewNewContent.length > 0 && previewNewContent[0] != ' '
+            && previewPrevContent[0] != ' ') {
             if (clearPromise)
                 $timeout.cancel(clearPromise);
-
-            var previewNewContent = content.lines;
 
             var start = -1;
             var end = -1;
             var prevLen = previewPrevContent.length;
             var newLen = previewNewContent.length;
 
+            // Find an index of a first line with different text.
             for (var i = 0; (i < newLen || i < prevLen) && start < 0; i++) {
                 if (previewNewContent[i] != previewPrevContent[i]) {
                     start = i;
@@ -1033,8 +987,10 @@ controlCenterModule.service('$preview', ['$timeout', function ($timeout) {
             }
 
             if (start >= 0) {
+                // Find an index of a last line with different text by checking last string of old and new content in reverse order.
                 for (i = 1; (i <= newLen || i <= prevLen) && end < 0; i++) {
-                    if (previewNewContent[newLen - i] != previewPrevContent[prevLen - i]) {
+                    // Also check when difference added in end of content.
+                    if (previewNewContent[newLen - i] != previewPrevContent[prevLen - i] || prevLen - i < start) {
                         end = newLen - i + 1;
 
                         break;
@@ -1044,15 +1000,15 @@ controlCenterModule.service('$preview', ['$timeout', function ($timeout) {
                 if (end < 0)
                     end = start + 1;
 
-                var editor = ace[1];
+                if (start <= end) {
+                    editor.selection.setSelectionRange(new Range(start, 0, end, 0), false);
 
-                editor.selection.setSelectionRange(new Range(start, 0, end, 0), false);
+                    editor.clearPromise = $timeout(function () {
+                        editor.clearSelection();
 
-                clearPromise = $timeout(function () {
-                    editor.clearSelection();
-
-                    clearPromise = null;
-                }, 3000);
+                        editor.clearPromise = null;
+                    }, 3000);
+                }
             }
 
             previewPrevContent = [];
