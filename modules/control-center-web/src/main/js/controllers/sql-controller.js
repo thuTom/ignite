@@ -337,16 +337,20 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
         nv.addGraph(function() {
             var chart = nv.models.discreteBarChart()
-                    .x(function (row) {
-                        return (row.length > 1) ? row[1] : index++;
+                    .x(function (d) {
+                        return d.label;
                     })
-                    .y(function (row) {
-                        return (row.length > 0) ? row[0] : 0;
+                    .y(function (d) {
+                        return d.value;
                     });
+
+            var values = _.map(paragraph.rows, function (row) {
+                return {label: (row.length > 1) ? row[1] : index++, value: (row.length > 0) ? row[0] : 0}
+            });
 
             d3.selectAll("#chart svg > *").remove();
             d3.select('#chart svg')
-                .datum({key: 'bar', values: paragraph.rows})
+                .datum({key: 'bar', values: values})
                 .call(chart);
 
             nv.utils.windowResize(chart.update);
