@@ -43,7 +43,6 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
         $scope.tableSimpleDown = $table.tableSimpleDown;
         $scope.tableSimpleDownVisible = $table.tableSimpleDownVisible;
 
-        $scope.previewInit = $preview.previewInit;
         $scope.previewChanged = $preview.previewChanged;
 
         $scope.formChanged = $common.formChanged;
