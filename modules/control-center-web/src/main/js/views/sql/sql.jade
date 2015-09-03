@@ -36,15 +36,13 @@ block container
                         label {{notebook.name}}
                         .btn-group
                             i.btn.btn-default.fa.fa-pencil(ng-click='notebook.edit = true;notebook.edit_name = notebook.name' bs-tooltip data-title='Rename notebook' data-trigger='hover')
-                            i.btn.btn-default.fa.fa-floppy-o(ng-click='saveNotebook()' bs-tooltip data-title='Save notebook' data-trigger='hover')
-                            i.btn.btn-default.fa.fa-remove(ng-click='removeNotebook()' bs-tooltip data-title='Remove notebook' data-trigger='hover')
+                            i.btn.btn-default.fa.fa-paragraph(ng-click='addParagraph()' bs-tooltip data-title='Add new paragraph' data-trigger='hover')
+                            i.btn.btn-default.fa.fa-trash(ng-click='removeNotebook()' bs-tooltip data-title='Remove notebook' data-trigger='hover')
                     h1.col-sm-6(ng-show='notebook.edit')
                         input.sql-name-input(ng-model='notebook.edit_name' required on-enter='renameNotebook(notebook.edit_name)' on-escape='notebook.edit = false;')
                         i.tipLabel.fa.fa-floppy-o(ng-show='notebook.edit_name' ng-click='renameNotebook(notebook.edit_name)' bs-tooltip data-title='Save notebook name' data-trigger='hover')
-                    .pull-right
-                        i.tipField.fa.fa-plus(ng-click='addParagraph()' bs-tooltip data-title='Add new paragraph' data-trigger='hover')
-                .docs-body(style='margin-top: 20px;')
-                    hr
+                hr
+                .docs-body.paragraphs
                     .panel-group(bs-collapse ng-model='notebook.expandedParagraphs' data-allow-multiple='true' data-start-collapsed='false')
                         .panel.panel-default(ng-repeat='paragraph in notebook.paragraphs')
                             .panel-heading(bs-collapse-toggle)
@@ -70,9 +68,8 @@ block container
                                 .panel-body(ng-show='paragraph.editor')
                                     .row
                                         .col-xs-8.col-sm-9(style='border-right: 1px solid #eee')
-                                            .sql-editor(ui-ace='{ theme: "chrome", mode: "sql",' +
+                                            .sql-editor(ui-ace='{ onLoad: aceInit, theme: "chrome", mode: "sql",' +
                                                 'require: ["ace/ext/language_tools"],' +
-                                                'rendererOptions: {showPrintMargin: false, highlightGutterLine: false, fontSize: 14},' +
                                                 'advanced: {enableSnippets: false, enableBasicAutocompletion: true, enableLiveAutocompletion: true, autoScrollEditorIntoView: true, minLines: 3, maxLines: 15}}'
                                             ng-model='paragraph.query'
                                             ng-class='{"disable": paragraph.status == "RUNNING" || paragraph.status == "PENDING" }')
@@ -90,9 +87,10 @@ block container
                                         button.btn.btn-primary(ng-click='execute(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Execute
                                         button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
                                         .pull-right
-                                            button.btn.btn-default.fa.fa-clock-o(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' title='Refresh rate' bs-popover data-template-url="rate" data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
-                                            label Page Size:&nbsp;
-                                            button.btn.btn-default.base-control(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
+                                            label Refresh rate:
+                                            button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url="rate" data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
+                                            label.tipLabel Page size:
+                                            button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
                                 .panel-body(ng-show='paragraph.result === "table" && paragraph.rows')
                                     .row
                                         .col-sm-8

@@ -16,8 +16,8 @@
  */
 
 // Controller for SQL notebook screen.
-controlCenterModule.controller('sqlController', ['$scope', '$window','$controller', '$http', '$common',
-    function ($scope, $window, $controller, $http, $common) {
+controlCenterModule.controller('sqlController', ['$scope', '$window','$controller', '$http', '$common', '$confirm',
+    function ($scope, $window, $controller, $http, $common, $confirm) {
     // Initialize the super class and extend it.
     angular.extend(this, $controller('agent-download', {$scope: $scope}));
     $scope.agentGoal = 'execute sql statements';
@@ -38,6 +38,18 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         {value: 'm', label: 'minutes'},
         {value: 'h', label: 'hours'}
     ];
+
+    $scope.aceInit = function (editor) {
+        editor.$blockScrolling = Infinity;
+
+        var renderer = editor.renderer;
+
+        renderer.setHighlightGutterLine(false);
+        renderer.setShowPrintMargin(false);
+        renderer.setOption('fontSize', '14px');
+
+        editor.setTheme('ace/theme/chrome');
+    };
 
     var loadNotebook = function () {
         $http.post('/notebooks/get', {noteId: $scope.noteId})
@@ -98,25 +110,29 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.removeNotebook = function () {
-        $http.post('/notebooks/remove', {_id: $scope.notebook._id})
-            .success(function () {
-                var idx = _.findIndex($scope.$root.notebooks, function (item) {
-                    return item._id == $scope.notebook._id;
-                });
+        $confirm.show('Are you sure you want to remove notebook: "' + $scope.notebook.name + '"?').then(
+            function () {
+                $http.post('/notebooks/remove', {_id: $scope.notebook._id})
+                    .success(function () {
+                        var idx = _.findIndex($scope.$root.notebooks, function (item) {
+                            return item._id == $scope.notebook._id;
+                        });
 
-                if (idx >= 0) {
-                    $scope.$root.notebooks.splice(idx, 1);
+                        if (idx >= 0) {
+                            $scope.$root.notebooks.splice(idx, 1);
 
-                    if ($scope.$root.notebooks.length > 0)
-                        $window.location = "/sql/" +
-                            $scope.$root.notebooks[Math.min(idx,  $scope.$root.notebooks.length - 1)]._id;
-                    else
-                        $scope.inputNotebookName();
-                }
-            })
-            .error(function (errMsg) {
-                $common.showError(errMsg);
-            });
+                            if ($scope.$root.notebooks.length > 0)
+                                $window.location = "/sql/" +
+                                    $scope.$root.notebooks[Math.min(idx,  $scope.$root.notebooks.length - 1)]._id;
+                            else
+                                $scope.inputNotebookName();
+                        }
+                    })
+                    .error(function (errMsg) {
+                        $common.showError(errMsg);
+                    });
+            }
+        );
     };
 
     $scope.renameParagraph = function (paragraph, newName) {
@@ -189,18 +205,22 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.removeParagraph = function(paragraph) {
-        var paragraph_idx = _.findIndex($scope.notebook.paragraphs, function (item) {
-            return paragraph == item;
-        });
+        $confirm.show('Are you sure you want to remove paragraph: "' + paragraph.name + '"?').then(
+            function () {
+                var paragraph_idx = _.findIndex($scope.notebook.paragraphs, function (item) {
+                    return paragraph == item;
+                });
 
-        var panel_idx = _.findIndex($scope.notebook.expandedParagraphs, function (item) {
-            return paragraph_idx == item;
-        });
+                var panel_idx = _.findIndex($scope.notebook.expandedParagraphs, function (item) {
+                    return paragraph_idx == item;
+                });
 
-        if (panel_idx >= 0)
-            $scope.notebook.expandedParagraphs.splice(panel_idx, 1);
+                if (panel_idx >= 0)
+                    $scope.notebook.expandedParagraphs.splice(panel_idx, 1);
 
-        $scope.notebook.paragraphs.splice(paragraph_idx, 1);
+                $scope.notebook.paragraphs.splice(paragraph_idx, 1);
+            }
+        );
     };
 
     $http.get('/models/sql.json')

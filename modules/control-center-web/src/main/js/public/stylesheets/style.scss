@@ -420,6 +420,12 @@ table tr:hover {
     }
 }
 
+.theme-line .paragraphs {
+    .panel-group .panel + .panel {
+        margin-top: 30px;
+    }
+}
+
 .theme-line .panel-heading {
     padding: 5px 10px;
     margin: 0;
