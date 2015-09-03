@@ -477,7 +477,6 @@
     {
       "label": "Events",
       "group": "events",
-      "minHeight": "150px",
       "tip": [
         " Grid events are used for notification about what happens within the grid."
       ],

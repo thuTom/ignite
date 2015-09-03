@@ -459,6 +459,14 @@ mixin advanced-options-bottom
         i.fa.fa-chevron-circle-up(ng-click='toggleExpanded()')
         a(ng-click='toggleExpanded()') {{ui.expanded ? 'Hide advanced settings...' : 'Show advanced settings...'}}
 
+mixin preview-content(preview, state, mode)
+    -var previewState = preview + 'State'
+
+    if state
+        .preview-content(ng-if='!preview[#{preview}].allDefaults && #{previewState}' id='#{id}' ui-ace='{onChange: previewChanged, mode: "#{mode}", advanced: {autoScrollEditorIntoView: true, minLines: 3, maxLines: 50}}' ng-model='preview[#{preview}].#{mode}')
+    else
+        .preview-content(ng-if='!preview[#{preview}].allDefaults && !#{previewState}' id='#{id}' ui-ace='{onChange: previewChanged, mode: "#{mode}", advanced: {autoScrollEditorIntoView: true, minLines: 3, maxLines: 50}}' ng-model='preview[#{preview}].#{mode}')
+
 mixin preview(preview, id)
     -var previewState = preview + 'State'
 
@@ -466,8 +474,8 @@ mixin preview(preview, id)
         .preview-legend(ng-show='!preview[#{preview}].allDefaults')
             a(ng-class='{active: !#{previewState}, inactive: #{previewState}}' ng-click='#{previewState} = false') XML&nbsp;
             a(ng-class='{active: #{previewState}, inactive: !#{previewState}}' ng-click='#{previewState} = true') Java
-        .preview-content(ng-if='!preview[#{preview}].allDefaults && !#{previewState}' id='#{id}' ui-ace='{onLoad: previewInit, onChange: previewChanged, mode: "xml", advanced: {autoScrollEditorIntoView: true, minLines: 3, maxLines: 50}}' ng-model='preview[#{preview}].xml' min-height='{{::group.minHeight}}')
-        .preview-content(ng-if='!preview[#{preview}].allDefaults && #{previewState}' id='#{id}' ui-ace='{onLoad: previewInit, onChange: previewChanged, mode: "java", advanced: {autoScrollEditorIntoView: true, minLines: 3, maxLines: 50}}' ng-model='preview[#{preview}].java' min-height='{{::group.minHeight}}')
+        +preview-content(preview, false, 'xml')
+        +preview-content(preview, true, 'java')
         .preview-content-empty(ng-if='preview[#{preview}].allDefaults' id='#{id}')
             label All Defaults
 
