@@ -17,6 +17,11 @@
 
 var router = require('express').Router();
 var db = require('../db');
+
+router.get('/rate', function (req, res) {
+    res.render('templates/paragraph-rate', {});
+});
+
 router.get('/:noteId', function (req, res) {
     res.render('sql/sql', {noteId: req.params.noteId});
 });

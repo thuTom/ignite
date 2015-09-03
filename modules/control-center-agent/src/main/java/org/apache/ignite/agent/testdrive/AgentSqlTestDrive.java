@@ -1,6 +1,7 @@
 package org.apache.ignite.agent.testdrive;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,6 +30,8 @@ import org.apache.ignite.internal.IgniteEx;
 import org.apache.ignite.internal.IgniteNodeAttributes;
 import org.apache.ignite.internal.util.typedef.F;
 import org.apache.ignite.lang.IgniteBiTuple;
+import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
+import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 
 /**
  * Test drive for SQL.
@@ -326,7 +329,20 @@ public class AgentSqlTestDrive {
             try {
                 IgniteConfiguration cfg = new IgniteConfiguration();
 
+                cfg.setLocalHost("127.0.0.1");
+
                 cfg.setMetricsLogFrequency(0);
+
+                // Configure discovery SPI.
+                TcpDiscoverySpi discoSpi = new TcpDiscoverySpi();
+
+                TcpDiscoveryVmIpFinder ipFinder = new TcpDiscoveryVmIpFinder();
+
+                ipFinder.setAddresses(Arrays.asList("127.0.0.1:47500..47509"));
+
+                discoSpi.setIpFinder(ipFinder);
+
+                cfg.setDiscoverySpi(discoSpi);
 
                 cfg.setCacheConfiguration(cacheEmployee(EMPLOYEE_CACHE_NAME), cacheCar(CAR_CACHE_NAME));
 

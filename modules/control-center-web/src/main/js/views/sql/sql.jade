@@ -82,15 +82,15 @@ block container
                                                 table.links(st-table='caches')
                                                     tbody
                                                         tr(ng-repeat='cache in caches track by cache.name')
-                                                            td.col-sm-6(ng-class='{active: cache.name == paragraph.cache.name}')
-                                                                a(ng-click='paragraph.cache = cache') {{$index + 1}}) {{::cache.name}}, {{::cache.mode}}
+                                                            td.col-sm-6
+                                                                a(ng-class='{active: cache.name == paragraph.cache.name}' ng-click='paragraph.cache = cache') {{$index + 1}}) {{::cache.name}}, {{::cache.mode}}
                                     hr(style='margin: 0')
                                     .settings-row
                                         button.btn.btn-primary(ng-click='explain(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Explain
                                         button.btn.btn-primary(ng-click='execute(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Execute
                                         button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
                                         .pull-right
-                                            i.btn.btn-default.fa.fa-clock-o(style='margin-right: 20px' bs-tooltip data-title='Refresh rate' data-trigger='hover')
+                                            button.btn.btn-default.fa.fa-clock-o(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' title='Refresh rate' bs-popover data-template-url="rate" data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label Page Size:&nbsp;
                                             button.btn.btn-default.base-control(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
                                 .panel-body(ng-show='paragraph.result === "table" && paragraph.rows')
@@ -106,7 +106,7 @@ block container
                                         table.table.table-condensed(st-table='displayedCollection' st-safe-src='paragraph.rows')
                                             thead
                                                 tr
-                                                    th(ng-repeat='col in paragraph.meta track by $index' st-sort='getter' data-ng-bind='::col.fieldName' bs-tooltip='columnToolTip(col)')
+                                                    th(ng-repeat='col in paragraph.meta track by $index' st-sort='getter' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)')
                                             tbody
                                                 tr(ng-repeat='row in displayedCollection track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}

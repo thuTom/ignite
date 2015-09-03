@@ -33,6 +33,12 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         {value: 'LOCAL', label: 'LOCAL'}
     ];
 
+    $scope.timeUnit = [
+        {value: 's', label: 'seconds'},
+        {value: 'm', label: 'minutes'},
+        {value: 'h', label: 'hours'}
+    ];
+
     var loadNotebook = function () {
         $http.post('/notebooks/get', {noteId: $scope.noteId})
             .success(function (notebook) {
@@ -143,6 +149,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         if ($scope.caches && $scope.caches.length > 0)
             paragraph.cache = $scope.caches[0];
 
+        paragraph.rate = {ruined: false, value: 0, unit: $scope.timeUnit[0].value};
+
         $scope.notebook.expandedParagraphs.push($scope.notebook.paragraphs.length);
 
         $scope.notebook.paragraphs.push(paragraph);
@@ -186,8 +194,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         });
 
         var panel_idx = _.findIndex($scope.notebook.expandedParagraphs, function (item) {
-            console.log(item);
-
             return paragraph_idx == item;
         });
 
@@ -313,6 +319,13 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.resultMode = function (paragraph, type) {
         return (paragraph.result === type);
+    };
+
+    $scope.rateAsString = function (paragraph) {
+        if (paragraph.rate && paragraph.rate.ruined)
+            return  " " + paragraph.rate.value + paragraph.rate.unit;
+
+        return "";
     };
 
     $scope.getter = function (value) {
