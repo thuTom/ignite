@@ -461,16 +461,16 @@ mixin advanced-options-bottom
 
 mixin preview-content(preview, state, mode)
     -var previewState = preview + 'State'
+    -var rendererOptions = 'rendererOptions: {showPrintMargin: false, highlightGutterLine: false, fontSize: 10}'
+    -var advancedOptions = 'advanced: {readOnly: true, highlightActiveLine: false, autoScrollEditorIntoView: true, minLines: 3, maxLines: 50}'
 
-    if state
-        .preview-content(ng-if='!preview[#{preview}].allDefaults && #{previewState}' id='#{id}' ui-ace='{onChange: previewChanged, mode: "#{mode}", advanced: {autoScrollEditorIntoView: true, minLines: 3, maxLines: 50}}' ng-model='preview[#{preview}].#{mode}')
-    else
-        .preview-content(ng-if='!preview[#{preview}].allDefaults && !#{previewState}' id='#{id}' ui-ace='{onChange: previewChanged, mode: "#{mode}", advanced: {autoScrollEditorIntoView: true, minLines: 3, maxLines: 50}}' ng-model='preview[#{preview}].#{mode}')
+    .preview-content(ng-if='!preview[#{preview}].allDefaults && #{previewState} == #{state}' id='#{id}'
+        ui-ace='{onChange: previewChanged, mode: "#{mode}", #{rendererOptions}, #{advancedOptions}}' ng-model='preview[#{preview}].#{mode}')
 
 mixin preview(preview, id)
     -var previewState = preview + 'State'
 
-    .preview-panel
+    .preview-panel(ng-init='#{previewState} = false')
         .preview-legend(ng-show='!preview[#{preview}].allDefaults')
             a(ng-class='{active: !#{previewState}, inactive: #{previewState}}' ng-click='#{previewState} = false') XML&nbsp;
             a(ng-class='{active: #{previewState}, inactive: !#{previewState}}' ng-click='#{previewState} = true') Java

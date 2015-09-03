@@ -1021,24 +1021,6 @@ controlCenterModule.service('$preview', ['$timeout', function ($timeout) {
             previewPrevContent = [];
         }
     }
-
-    return {
-        previewInit: function (editor) {
-            editor.setReadOnly(true);
-            editor.setOption('highlightActiveLine', false);
-            editor.$blockScrolling = Infinity;
-
-            var renderer = editor.renderer;
-
-            renderer.setShowGutter(false);
-            renderer.setHighlightGutterLine(false);
-            renderer.setShowPrintMargin(false);
-            renderer.setOption('fontSize', '10px');
-
-            editor.setTheme('ace/theme/chrome');
-        },
-        previewChanged: previewChanged
-    }
 }]);
 
 // Filter to decode name using map(value, label).
