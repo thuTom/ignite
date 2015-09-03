@@ -1,8 +1,8 @@
 package org.apache.ignite.agent.testdrive;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
@@ -45,9 +45,13 @@ public class AgentSqlTestDrive {
     /** */
     private static final AtomicBoolean initLatch = new AtomicBoolean();
 
+    /** */
     private static final String EMPLOYEE_CACHE_NAME = "test-drive-employee";
+
+    /** */
     private static final String CAR_CACHE_NAME = "test-drive-car";
 
+    /** */
     private static final Random rnd = new Random();
 
     /** Countries count. */
@@ -242,15 +246,20 @@ public class AgentSqlTestDrive {
         return ccfg;
     }
 
-    public static double round(double value, int places) {
+    /**
+     * @param val Value to round.
+     * @param places Numbers after point.
+     * @return Rounded value;
+     */
+    private static double round(double val, int places) {
         if (places < 0)
             throw new IllegalArgumentException();
 
         long factor = (long) Math.pow(10, places);
 
-        value *= factor;
+        val *= factor;
 
-        long tmp = Math.round(value);
+        long tmp = Math.round(val);
 
         return (double) tmp / factor;
     }
@@ -270,29 +279,29 @@ public class AgentSqlTestDrive {
         IgniteCache<DepartmentKey, Department> cacheDepartment = ignite.cache(name);
 
         for (int i = 0; i < DEP_CNT; i++) {
-            Integer managerId = (i == 0 || rnd.nextBoolean()) ? null : rnd.nextInt(i);
+            Integer mgrId = (i == 0 || rnd.nextBoolean()) ? null : rnd.nextInt(i);
 
             cacheDepartment.put(new DepartmentKey(i),
-                new Department(i, "Department " + (i + 1), rnd.nextInt(CNTR_CNT), managerId));
+                new Department(i, "Department " + (i + 1), rnd.nextInt(CNTR_CNT), mgrId));
         }
 
         IgniteCache<EmployeeKey, Employee> cacheEmployee = ignite.cache(name);
 
-        long offset = java.sql.Date.valueOf("2007-01-01").getTime();
+        long off = java.sql.Date.valueOf("2007-01-01").getTime();
 
         long end = java.sql.Date.valueOf("2016-01-01").getTime();
 
-        long diff = end - offset + 1;
+        long diff = end - off + 1;
 
         for (int i = 0; i < EMPL_CNT; i++) {
-            Integer managerId = (i == 0 || rnd.nextBoolean()) ? null : rnd.nextInt(i);
+            Integer mgrId = (i == 0 || rnd.nextBoolean()) ? null : rnd.nextInt(i);
 
             double r = rnd.nextDouble();
 
             cacheEmployee.put(new EmployeeKey(i),
                 new Employee(i, "first name " + (i + 1), "last name " + (i + 1), "email " + (i + 1),
-                    "phone number " + (i + 1), new java.sql.Date(offset + (long)(r * diff)), "job " + (i + 1),
-                    round(r * 5000, 2) , managerId, rnd.nextInt(DEP_CNT)));
+                    "phone number " + (i + 1), new java.sql.Date(off + (long)(r * diff)), "job " + (i + 1),
+                    round(r * 5000, 2) , mgrId, rnd.nextInt(DEP_CNT)));
         }
 
         log.log(Level.INFO, "TEST-DRIVE: Finished population cache: '" + name + "' with data.");
@@ -338,7 +347,7 @@ public class AgentSqlTestDrive {
 
                 TcpDiscoveryVmIpFinder ipFinder = new TcpDiscoveryVmIpFinder();
 
-                ipFinder.setAddresses(Arrays.asList("127.0.0.1:47500..47509"));
+                ipFinder.setAddresses(Collections.singleton("127.0.0.1:47500..47501"));
 
                 discoSpi.setIpFinder(ipFinder);
 
