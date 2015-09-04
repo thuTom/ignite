@@ -54,12 +54,18 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         editor.setTheme('ace/theme/chrome');
     };
 
+    var paragraphId = 0;
+
     var loadNotebook = function () {
         $http.post('/notebooks/get', {noteId: $scope.noteId})
             .success(function (notebook) {
                 $scope.notebook = notebook;
 
                 $scope.notebook_name = notebook.name;
+
+                _.forEach(notebook.paragraphs, function (paragraph) {
+                    paragraph.id = paragraphId++;
+                });
 
                 if (!notebook.paragraphs || notebook.paragraphs.length == 0)
                     $scope.addParagraph();
@@ -91,8 +97,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                     }
 
                     $scope.notebook.edit = false;
-
-                    $common.showInfo("Notebook successfully renamed.");
                 })
                 .error(function (errMsg) {
                     $common.showError(errMsg);
@@ -104,9 +108,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.saveNotebook = function () {
         $http.post('/notebooks/save', $scope.notebook)
-            .success(function () {
-                $common.showInfo("Notebook successfully saved.");
-            })
             .error(function (errMsg) {
                 $common.showError(errMsg);
             });
@@ -157,15 +158,13 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             paragraph.edit = false
     };
 
-    var id = 0;
-
     $scope.addParagraph = function () {
         if (!$scope.notebook.paragraphs)
             $scope.notebook.paragraphs = [];
 
         var sz = $scope.notebook.paragraphs.length;
 
-        var paragraph = {id: id++, name: 'Query' + (sz ==0 ? '' : sz), editor: true, query: '', pageSize: $scope.pageSizes[0], result: 'none'};
+        var paragraph = {id: paragraphId++, name: 'Query' + (sz ==0 ? '' : sz), editor: true, query: '', pageSize: $scope.pageSizes[0], result: 'none'};
 
         if ($scope.caches && $scope.caches.length > 0)
             paragraph.cache = $scope.caches[0];
@@ -180,28 +179,31 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     $scope.setResult = function (paragraph, new_result) {
         paragraph.result = paragraph.result === new_result ? 'none' : new_result;
 
-        switch (new_result) {
-            case 'table':
-                break;
+        if (paragraph.rows && paragraph.rows.length > 0) {
+            switch (new_result) {
+                case 'table':
+                case 'none':
+                    break;
 
-            case 'bar':
-                _barChart(paragraph);
-                break;
+                case 'bar':
+                    _barChart(paragraph);
+                    break;
 
-            case 'pie':
-                _pieChart(paragraph);
-                break;
+                case 'pie':
+                    _pieChart(paragraph);
+                    break;
 
-            case 'line':
-                _lineChart(paragraph);
-                break;
+                case 'line':
+                    _lineChart(paragraph);
+                    break;
 
-            case 'area':
-                _areaChart(paragraph);
-                break;
+                case 'area':
+                    _areaChart(paragraph);
+                    break;
 
-            default:
-                $common.showError('Unknown chart: ' + kind);
+                default:
+                    $common.showError('Unknown result: ' + new_result);
+            }
         }
     };
 
@@ -264,6 +266,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     var _processQueryResult = function (item) {
+        $scope.saveNotebook();
+
         return function (res) {
             item.meta = [];
 

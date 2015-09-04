@@ -94,7 +94,7 @@ block container
                                             button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url="rate" data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
-                                .panel-body(ng-show='paragraph.result === "table" && paragraph.rows')
+                                .panel-body(ng-show='paragraph.rows && paragraph.result === "table" && paragraph.rows')
                                     .row
                                         .col-sm-8
                                             lable Page #:&nbsp;
@@ -111,9 +111,9 @@ block container
                                             tbody
                                                 tr(ng-repeat='row in displayedCollection track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
-                                .panel-body(ng-show='paragraph.result != "table" && paragraph.result != "none"')
+                                .panel-body(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
                                     div(id='chart-{{paragraph.id}}')
                                         svg
-                                .panel-body(ng-show='paragraph.result === "table" && !paragraph.rows')
+                                .panel-body(ng-show='!paragraph.rows')
                                     div(style='text-align: center;')
-                                        label ResultSet is empty.
+                                        label Result set is empty.
