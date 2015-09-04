@@ -1271,6 +1271,18 @@ controlCenterModule.factory('$focus', function ($timeout) {
     };
 });
 
+// Directive to auto-focus element.
+controlCenterModule.directive('autoFocus', function($timeout) {
+    return {
+        restrict: 'AC',
+        link: function(scope, element) {
+            $timeout(function(){
+                element[0].focus();
+            });
+        }
+    };
+});
+
 // Directive to focus next element on ENTER key.
 controlCenterModule.directive('enterFocusNext', function ($focus) {
     return function (scope, elem, attrs) {
