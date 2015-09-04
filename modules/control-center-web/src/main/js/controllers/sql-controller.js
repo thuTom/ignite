@@ -386,6 +386,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         var chartId = 'chart-' + paragraph.id;
 
         $timeout(function() {
+            chart.height(400);
+
             // Remove previous chart.
             d3.selectAll('#' + chartId + ' svg > *').remove();
 
@@ -409,8 +411,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 })
                 .y(function (d) {
                     return d.value;
-                })
-                .height(400);
+                });
 
             var values = _.map(paragraph.rows, function (row) {
                 return {label: (row.length > 1) ? row[1] : index++, value: _isNumber(row, 0, 0)}
@@ -435,8 +436,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 .labelThreshold(.05)
                 .labelType("percent")
                 .donut(true)
-                .donutRatio(0.35)
-                .height(400);
+                .donutRatio(0.35);
 
             _insertChart(paragraph, paragraph.rows, chart);
         });
@@ -454,8 +454,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.lineChart()
                 .x(_x)
-                .y(_y)
-                .height(400);
+                .y(_y);
 
             _insertChart(paragraph, _datum('Line chart', paragraph.rows), chart);
         });
@@ -465,8 +464,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.stackedAreaChart()
                 .x(_x)
-                .y(_y)
-                .height(400);
+                .y(_y);
 
             _insertChart(paragraph, _datum('Area chart', paragraph.rows), chart);
         });
