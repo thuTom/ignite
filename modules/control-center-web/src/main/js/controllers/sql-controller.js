@@ -157,13 +157,15 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             paragraph.edit = false
     };
 
+    var id = 0;
+
     $scope.addParagraph = function () {
         if (!$scope.notebook.paragraphs)
             $scope.notebook.paragraphs = [];
 
         var sz = $scope.notebook.paragraphs.length;
 
-        var paragraph = {name: 'Query' + (sz ==0 ? '' : sz), editor: true, query: '', pageSize: $scope.pageSizes[0], result: 'none'};
+        var paragraph = {id: id++, name: 'Query' + (sz ==0 ? '' : sz), editor: true, query: '', pageSize: $scope.pageSizes[0], result: 'none'};
 
         if ($scope.caches && $scope.caches.length > 0)
             paragraph.cache = $scope.caches[0];
@@ -376,6 +378,22 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         return [{key: key, values: values}];
     }
 
+    function _insertChart(paragraph, datum, chart) {
+        var chartId = 'chart-' + paragraph.id;
+
+        // Remove previous chart.
+        d3.selectAll('#' + chartId + ' svg > *').remove();
+
+        // Insert new chart.
+        d3.select('#' + chartId + ' svg')
+            .datum(datum)
+            .call(chart);
+
+        nv.utils.windowResize(chart.update);
+
+        return chart;
+    }
+
     function _barChart(paragraph) {
         var index = 0;
 
@@ -392,14 +410,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 return {label: (row.length > 1) ? row[1] : index++, value: _isNumber(row, 0, 0)}
             });
 
-            d3.selectAll("#chart svg > *").remove();
-            d3.select('#chart svg')
-                .datum([{key: 'bar', values: values}])
-                .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
+            return _insertChart(paragraph, [{key: 'bar', values: values}], chart);
         });
     }
 
@@ -412,7 +423,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                         return (row.length > 1) ? row[1] : index++;
                     })
                     .y(function (row) {
-                        return (row.length > 0) ? row[0] : 0;
+                        return _isNumber(row, 0, 0);
                     })
                 .showLabels(true)
                 .labelThreshold(.05)
@@ -420,56 +431,35 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 .donut(true)
                 .donutRatio(0.35);
 
-            d3.selectAll("#chart svg > *").remove();
-            d3.select('#chart svg')
-                .datum(paragraph.rows)
-                .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
+            return _insertChart(paragraph, paragraph.rows, chart);
         });
+    }
+
+    function _x(d) {
+        return d.x;
+    }
+
+    function _y(d) {
+        return d.y;
     }
 
     function _lineChart(paragraph) {
         nv.addGraph(function() {
             var chart = nv.models.lineChart()
-                .x(function (d) {
-                    return d.x;
-                })
-                .y(function (d) {
-                    return d.y;
-                });
+                .x(_x)
+                .y(_y);
 
-            d3.selectAll("#chart svg > *").remove();
-            d3.select('#chart svg')
-                .datum(_datum('Line chart', paragraph.rows))
-                .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
+            return _insertChart(paragraph, _datum('Line chart', paragraph.rows), chart);
         });
     }
 
     function _areaChart(paragraph) {
         nv.addGraph(function() {
             var chart = nv.models.stackedAreaChart()
-                .x(function (d) {
-                    return d.x;
-                })
-                .y(function (d) {
-                    return d.y;
-                });
+                .x(_x)
+                .y(_y);
 
-            d3.selectAll("#chart svg > *").remove();
-            d3.select('#chart svg')
-                .datum(_datum('Area chart', paragraph.rows))
-                .call(chart);
-
-            nv.utils.windowResize(chart.update);
-
-            return chart;
+            return _insertChart(paragraph, _datum('Area chart', paragraph.rows), chart);
         });
     }
 }]);

@@ -24,8 +24,11 @@ append scripts
     script(src='//cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.js')
     link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.css')
 
-mixin btn-toolbar(btn, kind, tip)
-    i.btn.btn-default.fa(class=btn ng-click='setResult(paragraph, "#{kind}")' ng-class='{active: resultEq(paragraph, "#{kind}")}' bs-tooltip data-title=tip data-trigger='hover')
+mixin btn-toolbar(btn, click, tip)
+    i.btn.btn-default.fa(class=btn ng-click=click bs-tooltip='' data-title=tip data-trigger='hover' data-placement='bottom')
+
+mixin btn-toolbar-data(btn, kind, tip)
+    i.btn.btn-default.fa(class=btn ng-click='setResult(paragraph, "#{kind}")' ng-class='{active: resultEq(paragraph, "#{kind}")}' bs-tooltip='' data-title=tip data-trigger='hover' data-placement='bottom')
 
 block container
     .row
@@ -35,9 +38,9 @@ block container
                     h1.col-sm-6(ng-hide='notebook.edit')
                         label {{notebook.name}}
                         .btn-group
-                            i.btn.btn-default.fa.fa-pencil(ng-click='notebook.edit = true;notebook.edit_name = notebook.name' bs-tooltip data-title='Rename notebook' data-trigger='hover')
-                            i.btn.btn-default.fa.fa-paragraph(ng-click='addParagraph()' bs-tooltip data-title='Add new paragraph' data-trigger='hover')
-                            i.btn.btn-default.fa.fa-trash(ng-click='removeNotebook()' bs-tooltip data-title='Remove notebook' data-trigger='hover')
+                            +btn-toolbar('fa-pencil', 'notebook.edit = true;notebook.edit_name = notebook.name', 'Rename notebook')
+                            +btn-toolbar('fa-paragraph', 'addParagraph()', 'Add new paragraph')
+                            +btn-toolbar('fa-trash', 'removeNotebook()', 'Remove notebook')
                     h1.col-sm-6(ng-show='notebook.edit')
                         input.sql-name-input(ng-model='notebook.edit_name' required on-enter='renameNotebook(notebook.edit_name)' on-escape='notebook.edit = false;')
                         i.tipLabel.fa.fa-floppy-o(ng-show='notebook.edit_name' ng-click='renameNotebook(notebook.edit_name)' bs-tooltip data-title='Save notebook name' data-trigger='hover')
@@ -49,18 +52,19 @@ block container
                                 div(ng-hide='paragraph.edit')
                                     a {{paragraph.name}}
 
+                                    .btn-group(ng-hide='notebook.paragraphs.length > 1')
+                                        +btn-toolbar('fa-pencil', 'paragraph.edit = true; paragraph.edit_name = paragraph.name; $event.stopPropagation();', 'Rename paragraph')
+
                                     .btn-group(ng-show='notebook.paragraphs.length > 1' ng-click='$event.stopPropagation();')
-                                        i.btn.btn-default.fa.fa-pencil(ng-click='paragraph.edit = true; paragraph.edit_name = paragraph.name;' bs-tooltip data-title='Rename paragraph' data-trigger='hover')
-                                        i.btn.btn-default.fa.fa-remove( ng-click='removeParagraph(paragraph)' bs-tooltip data-title='Remove paragraph' data-trigger='hover')
+                                        +btn-toolbar('fa-pencil', 'paragraph.edit = true; paragraph.edit_name = paragraph.name;', 'Rename paragraph')
+                                        +btn-toolbar('fa-remove', 'removeParagraph(paragraph)', 'Remove paragraph')
 
-                                    i.btn.btn-default.fa.fa-pencil.margin-left-dflt(ng-hide='notebook.paragraphs.length > 1' ng-click='paragraph.edit = true; paragraph.edit_name = paragraph.name;$event.stopPropagation();' bs-tooltip data-title='Rename paragraph' data-trigger='hover')
-
-                                    .btn-group(ng-model='paragraph.result' ng-click='$event.stopPropagation();' style='float: right' )
-                                        +btn-toolbar('fa-table', 'table', 'Show table')
-                                        +btn-toolbar('fa-bar-chart', 'bar', 'Show bar chart')
-                                        +btn-toolbar('fa-pie-chart', 'pie', 'Show pie chart')
-                                        +btn-toolbar('fa-line-chart', 'line', 'Show line chart')
-                                        +btn-toolbar('fa-area-chart', 'area', 'Show area chart')
+                                    .btn-group(ng-model='paragraph.result' ng-click='$event.stopPropagation()' style='float: right')
+                                        +btn-toolbar-data('fa-table', 'table', 'Show data in tabular form.')
+                                        +btn-toolbar-data('fa-bar-chart', 'bar', 'Show bar chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
+                                        +btn-toolbar-data('fa-pie-chart', 'pie', 'Show pie chart.<br/>By default first column - pie values, second column - pie labels.<br/>In case of one column it will be treated as pies values.')
+                                        +btn-toolbar-data('fa-line-chart', 'line', 'Show line chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
+                                        +btn-toolbar-data('fa-area-chart', 'area', 'Show area chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
                                 div(ng-show='paragraph.edit')
                                     input.sql-name-input(ng-model='paragraph.edit_name' required ng-click='$event.stopPropagation();' on-enter='renameParagraph(paragraph, paragraph.edit_name)' on-escape='paragraph.edit = false')
                                     i.tipLabel.fa.fa-floppy-o(ng-show='paragraph.edit_name' ng-click='renameParagraph(paragraph, paragraph.edit_name); $event.stopPropagation();' bs-tooltip data-title='Save paragraph name' data-trigger='hover')
@@ -108,7 +112,7 @@ block container
                                                 tr(ng-repeat='row in displayedCollection track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
                                 .panel-body(ng-show='paragraph.result != "table" && paragraph.result != "none"')
-                                    #chart
+                                    div(id='chart-{{paragraph.id}}')
                                         svg
                                 .panel-body(ng-show='paragraph.result === "table" && !paragraph.rows')
                                     div(style='text-align: center;')
