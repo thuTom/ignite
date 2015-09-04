@@ -927,6 +927,7 @@ public final class GridDhtTxPrepareFuture extends GridCompoundFuture<IgniteInter
             // We are holding transaction-level locks for entries here, so we can get next write version.
             onEntriesLocked();
 
+            // We are holding transaction-level locks for entries here, so we can get next write version.
             tx.writeVersion(cctx.versions().next(tx.topologyVersion()));
 
             {
@@ -948,12 +949,6 @@ public final class GridDhtTxPrepareFuture extends GridCompoundFuture<IgniteInter
 
                 tx.needsCompletedVersions(hasRemoteNodes);
             }
-
-            // We are holding transaction-level locks for entries here, so we can get next write version.
-            if (tx.onePhaseCommit())
-                tx.writeVersion(tx.nearXidVersion());
-            else
-                tx.writeVersion(cctx.versions().next(tx.topologyVersion()));
 
             if (isDone())
                 return;
