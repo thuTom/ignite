@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+// Controller for Summary screen.
 controlCenterModule.controller('summaryController', ['$scope', '$http', '$common', function ($scope, $http, $common) {
     $scope.joinTip = $common.joinTip;
     $scope.getModel = $common.getModel;
@@ -35,6 +36,7 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
     $scope.oss = ['debian:8', 'ubuntu:14.10'];
 
     $scope.configServer = {javaClassServer: 1, os: undefined};
+
     $scope.backupItem = {javaClassClient: 1};
 
     $http.get('/models/summary.json')
@@ -51,6 +53,7 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
     $scope.aceInit = function (editor) {
         editor.setReadOnly(true);
         editor.setOption('highlightActiveLine', false);
+        editor.setAutoScrollEditorIntoView(true);
         editor.$blockScrolling = Infinity;
 
         var renderer = editor.renderer;
@@ -58,20 +61,33 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
         renderer.setHighlightGutterLine(false);
         renderer.setShowPrintMargin(false);
         renderer.setOption('fontSize', '14px');
+        renderer.setOption('minLines', '3');
+        renderer.setOption('maxLines', '50');
 
         editor.setTheme('ace/theme/chrome');
     };
 
-    $scope.reloadServer = function () {
-        $scope.javaServer = $scope.configServer.javaClassServer === 2 ?
-            $scope.configServer.javaClass : $scope.configServer.javaSnippet;
-
-        if ($scope.configServer.docker) {
-            var os = $scope.configServer.os ? $scope.configServer.os : $scope.oss[0];
-
-            $scope.dockerServer = $scope.configServer.docker.replace(new RegExp('\%OS\%', 'g'), os);
-        }
+    $scope.generateJavaServer = function () {
+        $scope.javaServer = $generatorJava.cluster($scope.selectedItem, $scope.configServer.javaClassServer === 2);
     };
+
+    $scope.$watch('configServer.javaClassServer', $scope.generateJavaServer, true);
+
+    $scope.generateDockerServer = function() {
+        var os = $scope.configServer.os ? $scope.configServer.os : $scope.oss[0];
+
+        $scope.dockerServer = $generatorDocker.clusterDocker($scope.selectedItem, os);
+    };
+
+    $scope.$watch('configServer.os', $scope.generateDockerServer, true);
+
+    $scope.generateClient = function () {
+        $scope.xmlClient = $generatorXml.cluster($scope.selectedItem, $scope.backupItem.nearConfiguration);
+        $scope.javaClient = $generatorJava.cluster($scope.selectedItem, $scope.backupItem.javaClassClient === 2,
+            $scope.backupItem.nearConfiguration);
+    };
+
+    $scope.$watch('backupItem', $scope.generateClient, true);
 
     $scope.selectItem = function (cluster) {
         if (!cluster)
@@ -79,63 +95,19 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
 
         $scope.selectedItem = cluster;
 
-        $scope.$watch('javaClassServer', $scope.reloadServer);
-        $scope.$watch('os', $scope.reloadServer);
+        $scope.xmlServer = $generatorXml.cluster(cluster);
 
-        $scope.generateServer(cluster);
+        $scope.generateJavaServer();
 
-        $scope.reloadServer();
+        $scope.generateDockerServer();
 
-        $scope.$watch('configServer', function () {
-            $scope.reloadServer();
-        }, true);
-
-        $scope.$watch('backupItem', function () {
-            $scope.generateClient();
-        }, true);
-    };
-
-    $scope.generateServer = function (cluster) {
-        $http.post('summary/generator', {_id: cluster._id})
-            .success(function (data) {
-                $scope.xmlServer = data.xmlServer;
-
-                $scope.configServer.javaClass = data.javaClassServer;
-                $scope.configServer.javaSnippet = data.javaSnippetServer;
-                $scope.configServer.docker = data.docker;
-            }).error(function (errMsg) {
-                $common.showError('Failed to generate config: ' + errMsg);
-            });
-    };
-
-    $scope.generateClient = function () {
-        $http.post('summary/generator', {
-            _id: $scope.selectedItem._id, javaClass: $scope.backupItem.javaClassClient === 2,
-            clientNearConfiguration: $scope.backupItem.nearConfiguration
-        })
-            .success(function (data) {
-                $scope.xmlClient = data.xmlClient;
-                $scope.javaClient = data.javaClient;
-            }).error(function (errMsg) {
-                $common.showError('Failed to generate config: ' + errMsg);
-            });
+        $scope.generateClient();
     };
 
     $scope.download = function () {
         $http.post('summary/download', {_id: $scope.selectedItem._id, os: $scope.os})
             .success(function (data) {
-                var file = document.createElement('a');
-
-                file.setAttribute('href', 'data:application/octet-stream;charset=utf-8,' + data);
-                file.setAttribute('download', $scope.selectedItem.name + '-configuration.zip');
-
-                file.style.display = 'none';
-
-                document.body.appendChild(file);
-
-                file.click();
-
-                document.body.removeChild(file);
+                $common.download('application/octet-stream', $scope.selectedItem.name + '-configuration.zip', data);
             })
             .error(function (errMsg) {
                 $common.showError('Failed to generate zip: ' + errMsg);
@@ -146,6 +118,13 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
         $scope.clusters = data.clusters;
 
         if ($scope.clusters.length > 0) {
+            // Populate clusters with caches.
+            _.forEach($scope.clusters, function (cluster) {
+                cluster.caches = _.filter(data.caches, function (cache) {
+                    return _.contains(cluster.caches, cache._id);
+                });
+            });
+
             var restoredId = sessionStorage.summarySelectedId;
 
             var selectIdx = 0;

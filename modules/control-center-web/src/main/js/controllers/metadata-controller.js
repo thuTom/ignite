@@ -15,11 +15,17 @@
  * limitations under the License.
  */
 
+// Controller for Metadata screen.
 controlCenterModule.controller('metadataController', [
         '$scope', '$controller', '$http', '$modal', '$common', '$timeout', '$focus', '$confirm', '$copy', '$table', '$preview',
         function ($scope, $controller, $http, $modal, $common, $timeout, $focus, $confirm, $copy, $table, $preview) {
             // Initialize the super class and extend it.
+            angular.extend(this, $controller('save-remove', {$scope: $scope}));
+
+            // Initialize the super class and extend it.
             angular.extend(this, $controller('agent-download', {$scope: $scope}));
+            $scope.ui = {};
+
             $scope.agentGoal = 'load metadata from database schema';
             $scope.agentTestDriveOption = '--test-metadata';
 
@@ -27,13 +33,18 @@ controlCenterModule.controller('metadataController', [
             $scope.getModel = $common.getModel;
             $scope.javaBuildInClasses = $common.javaBuildInClasses;
             $scope.compactJavaName = $common.compactJavaName;
+            $scope.saveBtnTipText = $common.saveBtnTipText;
 
             $scope.tableReset = $table.tableReset;
             $scope.tableNewItem = $table.tableNewItem;
             $scope.tableNewItemActive = $table.tableNewItemActive;
             $scope.tableEditing = $table.tableEditing;
             $scope.tableStartEdit = $table.tableStartEdit;
-            $scope.tableRemove = $table.tableRemove;
+            $scope.tableRemove = function (item, field, index) {
+                $table.tableRemove(item, field, index);
+
+                $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
+            };
 
             $scope.tableSimpleSave = $table.tableSimpleSave;
             $scope.tableSimpleSaveVisible = $table.tableSimpleSaveVisible;
@@ -46,12 +57,19 @@ controlCenterModule.controller('metadataController', [
             $scope.tablePairSaveVisible = $table.tablePairSaveVisible;
 
             $scope.previewInit = $preview.previewInit;
+            $scope.previewChanged = $preview.previewChanged;
+
+            $scope.formChanged = $common.formChanged;
 
             $scope.hidePopover = $common.hidePopover;
 
             var showPopoverMessage = $common.showPopoverMessage;
 
-            $scope.preview = {};
+            $scope.preview = {
+                general: {xml: '', java: '', allDefaults: true},
+                query: {xml: '', java: '', allDefaults: true},
+                store: {xml: '', java: '', allDefaults: true}
+            };
 
             var presets = [
                 {
@@ -150,11 +168,6 @@ controlCenterModule.controller('metadataController', [
 
             $scope.panels = {activePanels: [0, 1]};
 
-            $scope.$watchCollection('panels.activePanels', function () {
-                $timeout(function() {
-                    $common.previewHeightUpdate();
-                })
-            });
             $scope.metadatas = [];
 
             $scope.isJavaBuildInClass = function () {
@@ -170,7 +183,6 @@ controlCenterModule.controller('metadataController', [
             $http.get('/models/metadata.json')
                 .success(function (data) {
                     $scope.screenTip = data.screenTip;
-                    $scope.templateTip = data.templateTip;
                     $scope.metadata = data.metadata;
                     $scope.metadataDb = data.metadataDb;
                 })
@@ -183,15 +195,30 @@ controlCenterModule.controller('metadataController', [
                     $scope.selectItem($scope.metadatas[0]);
             }
 
-            function setSelectedAndBackupItem(sel, bak) {
-                $table.tableReset();
+            function setSelectedAndBackupItem(sel, bak, changed) {
+                function setSelectedAndBackupItem() {
+                    $table.tableReset();
 
-                $scope.selectedItem = sel;
-                $scope.backupItem = bak;
+                    $scope.selectedItem = sel;
 
-                $timeout(function () {
-                    $common.previewHeightUpdate();
-                })
+                    generatePreview();
+
+                    $timeout(function () {
+                        $scope.backupItem = bak;
+                    });
+
+                    $timeout(function () {
+                        if (changed)
+                            $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
+                        else
+                            $common.markPristine($scope.ui.inputForm, 'metadataBackupItemChanged');
+                    }, 50);
+                }
+
+                $common.confirmUnsavedChanges($confirm, $scope.ui.inputForm, setSelectedAndBackupItem);
+
+                $scope.ui.formTitle = $common.isDefined($scope.backupItem) && $scope.backupItem._id ?
+                    'Selected metadata: ' + $scope.backupItem.name : 'New metadata';
             }
 
             $scope.selectAllSchemas = function () {
@@ -458,6 +485,35 @@ controlCenterModule.controller('metadataController', [
                     $scope.loadMeta.action = 'connect';
             };
 
+            function generatePreview(val) {
+                if ($common.isDefined(val)) {
+                    $scope.preview.general.xml = $generatorXml.metadataGeneral(val).join('');
+                    $scope.preview.general.java = $generatorJava.metadataGeneral(val).join('');
+                    $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
+
+                    $scope.preview.query.xml = $generatorXml.metadataQuery(val).join('');
+                    $scope.preview.query.java = $generatorJava.metadataQuery(val).join('');
+                    $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
+
+                    $scope.preview.store.xml = $generatorXml.metadataStore(val).join('');
+                    $scope.preview.store.java = $generatorJava.metadataStore(val).join('');
+                    $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
+                }
+                else {
+                    $scope.preview.general.xml = ' ';
+                    $scope.preview.general.java = ' ';
+                    $scope.preview.general.allDefaults = ' ';
+
+                    $scope.preview.query.xml = ' ';
+                    $scope.preview.query.java = ' ';
+                    $scope.preview.query.allDefaults = ' ';
+
+                    $scope.preview.store.xml = ' ';
+                    $scope.preview.store.java = ' ';
+                    $scope.preview.store.allDefaults = ' ';
+                }
+            }
+
             // When landing on the page, get metadatas and show them.
             $http.post('metadata/list')
                 .success(function (data) {
@@ -487,7 +543,7 @@ controlCenterModule.controller('metadataController', [
                                         }) >= 0;
                                 });
 
-                                setSelectedAndBackupItem($scope.metadatas[idx], restoredItem);
+                                setSelectedAndBackupItem($scope.metadatas[idx], restoredItem, sessionStorage.metadataBackupItemChanged);
                             }
                             else {
                                 sessionStorage.removeItem('metadataBackupItem');
@@ -496,7 +552,7 @@ controlCenterModule.controller('metadataController', [
                             }
                         }
                         else
-                            setSelectedAndBackupItem(undefined, restoredItem);
+                            setSelectedAndBackupItem(undefined, restoredItem, sessionStorage.metadataBackupItemChanged);
                     }
                     else
                         selectFirstItem();
@@ -509,19 +565,11 @@ controlCenterModule.controller('metadataController', [
                         if (val) {
                             sessionStorage.metadataBackupItem = angular.toJson(val);
 
-                            $scope.preview.generalXml = $generatorXml.metadataGeneral(val).join('');
-                            $scope.preview.queryXml = $generatorXml.metadataQuery(val).join('');
-                            $scope.preview.storeXml = $generatorXml.metadataStore(val).join('');
+                            generatePreview(val);
 
-                            $scope.preview.generalJava = $generatorJava.metadataGeneral(val).join('');
-                            $scope.preview.queryJava = $generatorJava.metadataQuery(val).join('');
-                            $scope.preview.storeJava = $generatorJava.metadataStore(val).join('');
+                            $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
                         }
                     }, true);
-
-                    $timeout(function () {
-                        $common.initPreview();
-                    });
                 })
                 .error(function (errMsg) {
                     $common.showError(errMsg);
@@ -553,12 +601,10 @@ controlCenterModule.controller('metadataController', [
                 $table.tableReset();
 
                 $timeout(function () {
-                    $common.ensureActivePanel($scope.panels, 'metadata-data', 'metadataName');
+                    $common.ensureActivePanel($scope.panels, 'metadata', 'metadataName');
                 });
 
-                $scope.selectedItem = undefined;
-
-                $scope.backupItem = {space: $scope.spaces[0]._id};
+                setSelectedAndBackupItem(undefined, {space: $scope.spaces[0]._id});
             };
 
             function queryConfigured(item) {
@@ -579,17 +625,17 @@ controlCenterModule.controller('metadataController', [
             // Check metadata logical consistency.
             function validate(item) {
                 if ($common.isEmptyString(item.name))
-                    return showPopoverMessage($scope.panels, 'metadata-data', 'metadataName', 'Name should not be empty');
+                    return showPopoverMessage($scope.panels, 'metadata', 'metadataName', 'Name should not be empty');
 
                 if ($common.isEmptyString(item.keyType))
-                    return showPopoverMessage($scope.panels, 'metadata-data', 'keyType', 'Key type should not be empty');
+                    return showPopoverMessage($scope.panels, 'metadata', 'keyType', 'Key type should not be empty');
                 else if (!$common.isValidJavaClass('Key type', item.keyType, true, 'keyType'))
-                    return showPopoverMessage($scope.panels, 'metadata-data', 'keyType', 'Key type should be valid Java class');
+                    return showPopoverMessage($scope.panels, 'metadata', 'keyType', 'Key type should be valid Java class');
 
                 if ($common.isEmptyString(item.valueType))
-                    return showPopoverMessage($scope.panels, 'metadata-data', 'valueType', 'Value type should not be empty');
+                    return showPopoverMessage($scope.panels, 'metadata', 'valueType', 'Value type should not be empty');
                 else if (!$common.isValidJavaClass('Value type', item.valueType, false, 'valueType'))
-                    return showPopoverMessage($scope.panels, 'metadata-data', 'valueType', 'Value type should valid Java class');
+                    return showPopoverMessage($scope.panels, 'metadata', 'valueType', 'Value type should valid Java class');
 
                 var qry = queryConfigured(item);
 
@@ -602,10 +648,10 @@ controlCenterModule.controller('metadataController', [
                             var fields = group.fields;
 
                             if ($common.isEmptyArray(fields))
-                                return showPopoverMessage($scope.panels, 'metadataQuery-data', 'groups' + i, 'Group fields are not specified');
+                                return showPopoverMessage($scope.panels, 'metadataQuery', 'groups' + i, 'Group fields are not specified');
 
                             if (fields.length == 1) {
-                                return showPopoverMessage($scope.panels, 'metadataQuery-data', 'groups' + i, 'Group has only one field. Consider to use ascending or descending fields.');
+                                return showPopoverMessage($scope.panels, 'metadataQuery', 'groups' + i, 'Group has only one field. Consider to use ascending or descending fields.');
                             }
                         }
                     }
@@ -615,19 +661,19 @@ controlCenterModule.controller('metadataController', [
 
                 if (str) {
                     if ($common.isEmptyString(item.databaseSchema))
-                        return showPopoverMessage($scope.panels, 'metadataCache-data', 'databaseSchema', 'Database schema should not be empty');
+                        return showPopoverMessage($scope.panels, 'metadataCache', 'databaseSchema', 'Database schema should not be empty');
 
                     if ($common.isEmptyString(item.databaseTable))
-                        return showPopoverMessage($scope.panels, 'metadataCache-data', 'databaseTable', 'Database table should not be empty');
+                        return showPopoverMessage($scope.panels, 'metadataCache', 'databaseTable', 'Database table should not be empty');
 
                     if ($common.isEmptyArray(item.keyFields) && !$common.isJavaBuildInClass(item.keyType))
-                        return showPopoverMessage($scope.panels, 'metadataCache-data', 'keyFields-add', 'Key fields are not specified');
+                        return showPopoverMessage($scope.panels, 'metadataCache', 'keyFields-add', 'Key fields are not specified');
 
                     if ($common.isEmptyArray(item.valueFields))
-                        return showPopoverMessage($scope.panels, 'metadataCache-data', 'valueFields-add', 'Value fields are not specified');
+                        return showPopoverMessage($scope.panels, 'metadataCache', 'valueFields-add', 'Value fields are not specified');
                 }
                 else if (!qry) {
-                    return showPopoverMessage($scope.panels, 'metadataQuery-data', 'metadataQuery-data-title', 'SQL query metadata should be configured');
+                    return showPopoverMessage($scope.panels, 'metadataQuery', 'query-title', 'SQL query metadata should be configured');
                 }
 
                 return true;
@@ -647,6 +693,8 @@ controlCenterModule.controller('metadataController', [
 
                 $http.post('metadata/save', item)
                     .success(function (_id) {
+                        $common.markPristine($scope.ui.inputForm, 'metadataBackupItemChanged');
+
                         $common.showInfo('Metadata "' + item.name + '" saved.');
 
                         var idx = _.findIndex($scope.metadatas, function (metadata) {
@@ -681,7 +729,7 @@ controlCenterModule.controller('metadataController', [
             };
 
             // Save cache type metadata with new name.
-            $scope.saveItemAs = function () {
+            $scope.copyItem = function () {
                 $table.tableReset();
 
                 if (validate($scope.backupItem))
@@ -695,6 +743,7 @@ controlCenterModule.controller('metadataController', [
                     });
             };
 
+            // Remove metadata from db.
             $scope.removeItem = function () {
                 $table.tableReset();
 
@@ -706,6 +755,8 @@ controlCenterModule.controller('metadataController', [
 
                         $http.post('metadata/remove', {_id: _id})
                             .success(function () {
+                                $common.markPristine($scope.ui.inputForm, 'metadataBackupItemChanged');
+
                                 $common.showInfo('Cache type metadata has been removed: ' + selectedItem.name);
 
                                 var metadatas = $scope.metadatas;
@@ -729,6 +780,29 @@ controlCenterModule.controller('metadataController', [
                                 $common.showError(errMsg);
                             });
                     });
+            };
+
+            // Remove all metadata from db.
+            $scope.removeAllItems = function () {
+                $table.tableReset();
+
+                $confirm.show('Are you sure you want to remove all metadata?').then(
+                    function () {
+                        $common.markPristine($scope.ui.inputForm, 'metadataBackupItemChanged');
+
+                        $http.post('metadata/remove/all')
+                            .success(function () {
+                                $common.showInfo('All metadata have been removed');
+
+                                $scope.metadatas = [];
+
+                                $scope.selectItem(undefined, undefined);
+                            })
+                            .error(function (errMsg) {
+                                $common.showError(errMsg);
+                            });
+                    }
+                );
             };
 
             $scope.tableSimpleValid = function (item, field, name, index) {
@@ -804,8 +878,8 @@ controlCenterModule.controller('metadataController', [
 
                     var model = item[field.model];
 
-                    if (!$common.isValidJavaIdentifier(dbFieldTable.msg + ' java name', dbFieldValue.javaName))
-                        return $table.tableFocusInvalidField(index, 'JavaName' + dbFieldTable.id);
+                    if (!$common.isValidJavaIdentifier(dbFieldTable.msg + ' java name', dbFieldValue.javaName, $table.tableFieldId(index, 'JavaName' + dbFieldTable.id)))
+                        return false;
 
                     if ($common.isDefined(model)) {
                         var idx = _.findIndex(model, function (dbMeta) {
@@ -1012,6 +1086,11 @@ controlCenterModule.controller('metadataController', [
                 $table.tableReset();
 
                 group.fields.splice(index, 1);
+
+                $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
+
+                // Dirty state do not change automatically.
+                $scope.ui.inputForm.$dirty = true;
             };
         }]
 );

@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
+// For server side we should load required libraries.
 if (typeof window === 'undefined') {
     _ = require('lodash');
 
     $generatorCommon = require('./generator-common');
 }
 
+// Properties generation entry point.
 $generatorProperties = {};
 
 /**
@@ -30,7 +32,7 @@ $generatorProperties = {};
  * @returns {string} Generated content.
  */
 $generatorProperties.dataSourcesProperties = function (cluster) {
-    var res = exports.builder();
+    var res = $generatorCommon.builder();
 
     var datasources = [];
 
@@ -61,6 +63,7 @@ $generatorProperties.dataSourcesProperties = function (cluster) {
     return undefined;
 };
 
+// For server side we should export properties generation entry point.
 if (typeof window === 'undefined') {
     module.exports = $generatorProperties;
 }

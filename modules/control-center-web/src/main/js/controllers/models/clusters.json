@@ -15,18 +15,10 @@
       "</ul>"
     ]
   },
-  "templateTip": [
-    "Use following template to add a new cluster:",
-    "<ul>",
-    "  <li>multicast - cluster with multicast discovery.</li>",
-    "  <li>local - cluster with static ips discovery and pre-configured list of IP addresses.</li>",
-    "</ul>"
-  ],
   "general": [
     {
       "label": "General",
-      "id": "general-data",
-      "preview": "general",
+      "group": "general",
       "fields": [
         {
           "label": "Name",
@@ -38,6 +30,7 @@
         },
         {
           "label": "Caches",
+          "id": "caches",
           "type": "dropdown-multiple",
           "model": "caches",
           "placeholder": "Choose caches",
@@ -52,6 +45,7 @@
         },
         {
           "label": "Discovery",
+          "id": "discovery",
           "type": "dropdown-details",
           "settings": false,
           "path": "discovery",
@@ -330,8 +324,7 @@
   "advanced": [
     {
       "label": "Atomics configuration",
-      "id": "atomics-data",
-      "preview": "atomics",
+      "group": "atomics",
       "tip": [
         "Configuration for atomic data structures.",
         "Atomics are distributed across the cluster, essentially enabling performing atomic operations (such as increment-and-get or compare-and-set) with the same globally-visible value."
@@ -339,6 +332,7 @@
       "fields": [
         {
           "label": "Cache mode",
+          "id": "cacheMode",
           "type": "dropdown",
           "path": "atomicConfiguration",
           "model": "cacheMode",
@@ -355,6 +349,7 @@
         },
         {
           "label": "Sequence reserve",
+          "id": "atomicSequenceReserveSize",
           "type": "number",
           "path": "atomicConfiguration",
           "model": "atomicSequenceReserveSize",
@@ -366,6 +361,7 @@
         },
         {
           "label": "Backups",
+          "id": "backups",
           "type": "number",
           "path": "atomicConfiguration",
           "model": "backups",
@@ -379,14 +375,14 @@
     },
     {
       "label": "Communication",
-      "id": "communication-data",
-      "preview": "communication",
+      "group": "communication",
       "tip": [
         "Cluster communication network properties."
       ],
       "fields": [
         {
           "label": "Timeout",
+          "id": "networkTimeout",
           "type": "number",
           "model": "networkTimeout",
           "placeholder": 5000,
@@ -396,6 +392,7 @@
         },
         {
           "label": "Send retry delay",
+          "id": "networkSendRetryDelay",
           "type": "number",
           "model": "networkSendRetryDelay",
           "placeholder": 1000,
@@ -405,6 +402,7 @@
         },
         {
           "label": "Send retry count",
+          "id": "networkSendRetryCount",
           "type": "number",
           "model": "networkSendRetryCount",
           "placeholder": 3,
@@ -414,6 +412,7 @@
         },
         {
           "label": "Segment check frequency",
+          "id": "segmentCheckFrequency",
           "type": "number",
           "model": "segmentCheckFrequency",
           "placeholder": 10000,
@@ -424,6 +423,7 @@
         },
         {
           "label": "Wait for segment on start",
+          "id": "waitForSegmentOnStart",
           "type": "check",
           "model": "waitForSegmentOnStart",
           "tip": [
@@ -437,6 +437,7 @@
         },
         {
           "label": "Discovery startup delay",
+          "id": "discoveryStartupDelay",
           "type": "number",
           "model": "discoveryStartupDelay",
           "placeholder": 600000,
@@ -448,14 +449,14 @@
     },
     {
       "label": "Deployment",
-      "id": "deployment-data",
-      "preview": "deployment",
+      "group": "deployment",
       "tip": [
         "Task and resources deployment in cluster."
       ],
       "fields": [
         {
           "label": "Mode",
+          "id": "deploymentMode",
           "type": "dropdown",
           "model": "deploymentMode",
           "placeholder": "SHARED",
@@ -475,14 +476,14 @@
     },
     {
       "label": "Events",
-      "id": "events-data",
-      "preview": "events",
+      "group": "events",
       "tip": [
         " Grid events are used for notification about what happens within the grid."
       ],
       "fields": [
         {
           "label": "Include type",
+          "id": "includeEventTypes",
           "type": "dropdown-multiple",
           "model": "includeEventTypes",
           "placeholder": "Choose recorded event types",
@@ -496,8 +497,7 @@
     },
     {
       "label": "Marshaller",
-      "id": "marshaller-data",
-      "preview": "marshaller",
+      "group": "marshaller",
       "tip": [
         "Marshaller allows to marshal or unmarshal objects in grid.",
         "It provides serialization/deserialization mechanism for all instances that are sent across networks or are otherwise serialized."
@@ -505,6 +505,7 @@
       "fields": [
         {
           "label": "Marshaller",
+          "model": "marshaller",
           "type": "dropdown-details",
           "settings": true,
           "path": "marshaller",
@@ -577,14 +578,14 @@
     },
     {
       "label": "Metrics",
-      "id": "metrics-data",
-      "preview": "metrics",
+      "group": "metrics",
       "tip": [
         "Cluster runtime metrics settings."
       ],
       "fields": [
         {
           "label": "Elapsed time",
+          "id": "metricsExpireTime",
           "type": "number",
           "model": "metricsExpireTime",
           "placeholder": "Long.MAX_VALUE",
@@ -595,6 +596,7 @@
         },
         {
           "label": "History size",
+          "id": "metricsHistorySize",
           "type": "number",
           "model": "metricsHistorySize",
           "placeholder": 10000,
@@ -605,6 +607,7 @@
         },
         {
           "label": "Log frequency",
+          "id": "metricsLogFrequency",
           "type": "number",
           "model": "metricsLogFrequency",
           "placeholder": 60000,
@@ -614,6 +617,7 @@
         },
         {
           "label": "Update frequency",
+          "id": "metricsUpdateFrequency",
           "type": "number",
           "model": "metricsUpdateFrequency",
           "placeholder": 60000,
@@ -630,14 +634,14 @@
     },
     {
       "label": "Peer Class Loading",
-      "id": "p2p-data",
-      "preview": "p2p",
+      "group": "p2p",
       "tip": [
         "Cluster peer class loading settings."
       ],
       "fields": [
         {
           "label": "Enable peer class loading",
+          "id": "peerClassLoadingEnabled",
           "type": "check",
           "model": "peerClassLoadingEnabled",
           "tip": [
@@ -645,19 +649,11 @@
           ]
         },
         {
-          "label": "Local class path exclude",
-          "type": "text",
-          "model": "peerClassLoadingLocalClassPathExclude",
-          "placeholder": "[]",
-          "tip": [
-            "List of packages separated by comma from the system classpath that need to be peer-to-peer loaded from task originating node.",
-            "'*' is supported at the end of the package name which means that all sub-packages and their classes are included like in Java package import clause."
-          ]
-        },
-        {
           "label": "Missed resources cache size",
+          "id": "peerClassLoadingMissedResourcesCacheSize",
           "type": "number",
           "model": "peerClassLoadingMissedResourcesCacheSize",
+          "disabled": "!backupItem.peerClassLoadingEnabled",
           "placeholder": 100,
           "tip": [
             "If size greater than 0, missed resources will be cached and next resource request ignored.",
@@ -666,26 +662,41 @@
         },
         {
           "label": "Pool size",
+          "id": "peerClassLoadingThreadPoolSize",
           "type": "number",
           "model": "peerClassLoadingThreadPoolSize",
+          "disabled": "!backupItem.peerClassLoadingEnabled",
           "placeholder": "availableProcessors",
           "tip": [
             "Thread pool size to use for peer class loading."
+          ]
+        },
+        {
+          "label": "Local class path exclude",
+          "id": "peerClassLoadingLocalClassPathExclude",
+          "type": "table-simple",
+          "model": "peerClassLoadingLocalClassPathExclude",
+          "disabled": "!backupItem.peerClassLoadingEnabled",
+          "focusId": "PeerClsPathExclude",
+          "addTip": "Add package name.",
+          "removeTip": "Remove package name.",
+          "tableTip": [
+            "List of packages from the system classpath that need to be peer-to-peer loaded from task originating node.",
+            "'*' is supported at the end of the package name which means that all sub-packages and their classes are included like in Java package import clause."
           ]
         }
       ]
     },
     {
       "label": "Swap",
-      "id": "swap-data",
-      "preview": "swap",
-      "id": "swap-data",
+      "group": "swap",
       "tip": [
         "Settings for overflow data to disk if it cannot fit in memory."
       ],
       "fields": [
         {
           "label": "Swap space SPI",
+          "id": "swapSpaceSpi",
           "type": "dropdown-details",
           "settings": true,
           "path": "swapSpaceSpi",
@@ -696,7 +707,6 @@
             "Provides a mechanism in grid for storing data on disk.",
             "Ignite cache uses swap space to overflow data to disk if it cannot fit in memory."
           ],
-          "id": "swapSpaceSpi",
           "details": {
             "FileSwapSpaceSpi": {
               "fields": [
@@ -761,14 +771,14 @@
     },
     {
       "label": "Time configuration",
-      "id": "time-data",
-      "preview": "time",
+      "group": "time",
       "tip": [
         "Time settings for CLOCK write ordering mode."
       ],
       "fields": [
         {
           "label": "Samples size",
+          "id": "clockSyncSamples",
           "type": "number",
           "model": "clockSyncSamples",
           "placeholder": 8,
@@ -779,6 +789,7 @@
         },
         {
           "label": "Frequency",
+          "id": "clockSyncFrequency",
           "type": "number",
           "model": "clockSyncFrequency",
           "placeholder": 120000,
@@ -789,6 +800,7 @@
         },
         {
           "label": "Port base",
+          "id": "timeServerPortBase",
           "type": "number",
           "model": "timeServerPortBase",
           "max": 65535,
@@ -800,6 +812,7 @@
         },
         {
           "label": "Port range",
+          "id": "timeServerPortRange",
           "type": "number",
           "model": "timeServerPortRange",
           "placeholder": 100,
@@ -811,14 +824,14 @@
     },
     {
       "label": "Thread pools size",
-      "id": "pools-data",
-      "preview": "pools",
+      "group": "pools",
       "tip": [
         "Settings for node thread pools."
       ],
       "fields": [
         {
           "label": "Public",
+          "id": "publicThreadPoolSize",
           "type": "number",
           "model": "publicThreadPoolSize",
           "placeholder": "max(8, availableProcessors) * 2",
@@ -828,6 +841,7 @@
         },
         {
           "label": "System",
+          "id": "systemThreadPoolSize",
           "type": "number",
           "model": "systemThreadPoolSize",
           "placeholder": "max(8, availableProcessors) * 2",
@@ -837,6 +851,7 @@
         },
         {
           "label": "Management",
+          "id": "managementThreadPoolSize",
           "type": "number",
           "model": "managementThreadPoolSize",
           "placeholder": 4,
@@ -846,6 +861,7 @@
         },
         {
           "label": "IGFS",
+          "id": "igfsThreadPoolSize",
           "type": "number",
           "model": "igfsThreadPoolSize",
           "placeholder": "availableProcessors",
@@ -857,14 +873,14 @@
     },
     {
       "label": "Transactions",
-      "id": "transactions-data",
-      "preview": "transactions",
+      "group": "transactions",
       "tip": [
         "Settings for transactions."
       ],
       "fields": [
         {
           "label": "Concurrency",
+          "id": "defaultTxConcurrency",
           "type": "dropdown",
           "path": "transactionConfiguration",
           "model": "defaultTxConcurrency",
@@ -876,6 +892,7 @@
         },
         {
           "label": "Isolation",
+          "id": "transactionIsolation",
           "type": "dropdown",
           "path": "transactionConfiguration",
           "model": "transactionIsolation",
@@ -887,6 +904,7 @@
         },
         {
           "label": "Default timeout",
+          "id": "defaultTxTimeout",
           "type": "number",
           "path": "transactionConfiguration",
           "model": "defaultTxTimeout",
@@ -897,6 +915,7 @@
         },
         {
           "label": "Pessimistic log cleanup delay",
+          "id": "pessimisticTxLogLinger",
           "type": "number",
           "path": "transactionConfiguration",
           "model": "pessimisticTxLogLinger",
@@ -907,6 +926,7 @@
         },
         {
           "label": "Pessimistic log size",
+          "id": "pessimisticTxLogSize",
           "type": "number",
           "path": "transactionConfiguration",
           "model": "pessimisticTxLogSize",
@@ -917,7 +937,9 @@
         },
         {
           "label": "Manager lookup",
+          "id": "txManagerLookupClassName",
           "type": "text",
+          "path": "transactionConfiguration",
           "model": "txManagerLookupClassName",
           "tip": [
             "Class name of transaction manager finder for integration for JEE app servers."
@@ -925,6 +947,7 @@
         },
         {
           "label": "Enable serializable cache transactions",
+          "id": "txSerializableEnabled",
           "type": "check",
           "path": "transactionConfiguration",
           "model": "txSerializableEnabled",

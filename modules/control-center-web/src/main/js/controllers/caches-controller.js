@@ -15,20 +15,29 @@
  * limitations under the License.
  */
 
+// Controller for Caches screen.
 controlCenterModule.controller('cachesController', [
-        '$scope', '$http', '$timeout', '$common', '$focus', '$confirm', '$copy', '$table', '$preview',
-        function ($scope, $http, $timeout, $common, $focus, $confirm, $copy, $table, $preview) {
+        '$scope', '$controller', '$http', '$timeout', '$common', '$focus', '$confirm', '$copy', '$table', '$preview',
+        function ($scope, $controller, $http, $timeout, $common, $focus, $confirm, $copy, $table, $preview) {
+            // Initialize the super class and extend it.
+            angular.extend(this, $controller('save-remove', {$scope: $scope}));
+
             $scope.joinTip = $common.joinTip;
             $scope.getModel = $common.getModel;
             $scope.javaBuildInClasses = $common.javaBuildInClasses;
             $scope.compactJavaName = $common.compactJavaName;
+            $scope.saveBtnTipText = $common.saveBtnTipText;
 
             $scope.tableReset = $table.tableReset;
             $scope.tableNewItem = $table.tableNewItem;
             $scope.tableNewItemActive = $table.tableNewItemActive;
             $scope.tableEditing = $table.tableEditing;
             $scope.tableStartEdit = $table.tableStartEdit;
-            $scope.tableRemove = $table.tableRemove;
+            $scope.tableRemove = function (item, field, index) {
+                $table.tableRemove(item, field, index);
+
+                $common.markChanged($scope.ui.inputForm, 'cacheBackupItemChanged');
+            };
 
             $scope.tableSimpleSave = $table.tableSimpleSave;
             $scope.tableSimpleSaveVisible = $table.tableSimpleSaveVisible;
@@ -40,6 +49,9 @@ controlCenterModule.controller('cachesController', [
             $scope.tablePairSaveVisible = $table.tablePairSaveVisible;
 
             $scope.previewInit = $preview.previewInit;
+            $scope.previewChanged = $preview.previewChanged;
+
+            $scope.formChanged = $common.formChanged;
 
             $scope.hidePopover = $common.hidePopover;
 
@@ -89,12 +101,6 @@ controlCenterModule.controller('cachesController', [
 
             $scope.panels = {activePanels: [0]};
 
-            $scope.$watchCollection('panels.activePanels', function () {
-                $timeout(function() {
-                    $common.previewHeightUpdate();
-                })
-            });
-
             $scope.general = [];
             $scope.advanced = [];
 
@@ -112,7 +118,16 @@ controlCenterModule.controller('cachesController', [
             $scope.queryMetadata = [];
             $scope.storeMetadata = [];
 
-            $scope.preview = {};
+            $scope.preview = {
+                general: {xml: '', java: '', allDefaults: true},
+                memory: {xml: '', java: '', allDefaults: true},
+                query: {xml: '', java: '', allDefaults: true},
+                store: {xml: '', java: '', allDefaults: true},
+                concurrency: {xml: '', java: '', allDefaults: true},
+                rebalance: {xml: '', java: '', allDefaults: true},
+                serverNearCache: {xml: '', java: '', allDefaults: true},
+                statistics: {xml: '', java: '', allDefaults: true}
+            };
 
             $scope.required = function (field) {
                 var model = $common.isDefined(field.path) ? field.path + '.' + field.model : field.model;
@@ -136,17 +151,44 @@ controlCenterModule.controller('cachesController', [
             };
 
             $scope.tableSimpleValid = function (item, field, fx, index) {
-                if (!$common.isValidJavaClass('SQL function', fx, false, $table.tableFieldId(index, 'SqlFx')))
-                    return $table.tableFocusInvalidField(index, 'SqlFx');
+                var model;
 
-                var model = item[field.model];
+                switch (field.model) {
+                    case 'hibernateProperties':
+                        if (fx.indexOf('=') < 0)
+                            return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'HibProp'), 'Property should be present in format key=value!');
 
-                if ($common.isDefined(model)) {
-                    var idx = _.indexOf(model, fx);
+                        model = item.cacheStoreFactory.CacheHibernateBlobStoreFactory[field.model];
 
-                    // Found duplicate.
-                    if (idx >= 0 && idx != index)
-                        return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'SqlFx'), 'SQL function with such class name already exists!');
+                        var key = fx.split('=')[0];
+
+                        var exist = false;
+
+                        if ($common.isDefined(model)) {
+                            model.forEach(function (val) {
+                                if (val.split('=')[0] == key)
+                                    exist = true;
+                            })
+                        }
+
+                        if (exist)
+                            return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'HibProp'), 'Property with such name already exists!');
+
+                        break;
+
+                    case 'sqlFunctionClasses':
+                        if (!$common.isValidJavaClass('SQL function', fx, false, $table.tableFieldId(index, 'SqlFx')))
+                            return $table.tableFocusInvalidField(index, 'SqlFx');
+
+                        model = item[field.model];
+
+                        if ($common.isDefined(model)) {
+                            var idx = _.indexOf(model, fx);
+
+                            // Found duplicate.
+                            if (idx >= 0 && idx != index)
+                                return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'SqlFx'), 'SQL function with such class name already exists!');
+                        }
                 }
 
                 return true;
@@ -176,6 +218,86 @@ controlCenterModule.controller('cachesController', [
                 return true;
             };
 
+            // Fill cache previews.
+            function generatePreview(val) {
+                if ($common.isDefined(val)) {
+                    var qryMeta = _.reduce($scope.queryMetadata, function(memo, meta){
+                        if (_.contains(val.queryMetadata, meta.value)) {
+                            memo.push(meta.meta);
+                        }
+
+                        return memo;
+                    }, []);
+
+                    var storeMeta = _.reduce($scope.storeMetadata, function(memo, meta){
+                        if (_.contains(val.storeMetadata, meta.value)) {
+                            memo.push(meta.meta);
+                        }
+
+                        return memo;
+                    }, []);
+
+                    var varName = 'cache';
+
+                    $scope.preview.general.xml = $generatorXml.cacheGeneral(val).join('');
+                    $scope.preview.general.java = $generatorJava.cacheGeneral(val, varName).join('');
+                    $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
+
+                    $scope.preview.memory.xml = $generatorXml.cacheMemory(val).join('');
+                    $scope.preview.memory.java = $generatorJava.cacheMemory(val, varName).join('');
+                    $scope.preview.memory.allDefaults = $common.isEmptyString($scope.preview.memory.xml);
+
+                    $scope.preview.query.xml = $generatorXml.cacheMetadatas(qryMeta, null, $generatorXml.cacheQuery(val)).join('');
+                    $scope.preview.query.java = $generatorJava.cacheMetadatas(qryMeta, null, varName, $generatorJava.cacheQuery(val, varName)).join('');
+                    $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
+
+                    $scope.preview.store.xml = $generatorXml.cacheMetadatas(null, storeMeta, $generatorXml.cacheStore(val)).join('');
+                    $scope.preview.store.java = $generatorJava.cacheMetadatas(null, storeMeta, varName, $generatorJava.cacheStore(val, varName)).join('');
+                    $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
+
+                    $scope.preview.concurrency.xml = $generatorXml.cacheConcurrency(val).join('');
+                    $scope.preview.concurrency.java = $generatorJava.cacheConcurrency(val, varName).join('');
+                    $scope.preview.concurrency.allDefaults = $common.isEmptyString($scope.preview.concurrency.xml);
+
+                    $scope.preview.rebalance.xml = $generatorXml.cacheRebalance(val).join('');
+                    $scope.preview.rebalance.java = $generatorJava.cacheRebalance(val, varName).join('');
+                    $scope.preview.rebalance.allDefaults = $common.isEmptyString($scope.preview.rebalance.xml);
+
+                    $scope.preview.serverNearCache.xml = $generatorXml.cacheServerNearCache(val).join('');
+                    $scope.preview.serverNearCache.java = $generatorJava.cacheServerNearCache(val, varName).join('');
+                    $scope.preview.serverNearCache.allDefaults = $common.isEmptyString($scope.preview.serverNearCache.xml);
+
+                    $scope.preview.statistics.xml = $generatorXml.cacheStatistics(val).join('');
+                    $scope.preview.statistics.java = $generatorJava.cacheStatistics(val, varName).join('');
+                    $scope.preview.statistics.allDefaults = $common.isEmptyString($scope.preview.statistics.xml);
+                }
+                else {
+                    $scope.preview.general.xml = ' ';
+                    $scope.preview.general.java = ' ';
+
+                    $scope.preview.memory.xml = ' ';
+                    $scope.preview.memory.java = ' ';
+
+                    $scope.preview.query.xml = ' ';
+                    $scope.preview.query.java = ' ';
+
+                    $scope.preview.store.xml = ' ';
+                    $scope.preview.store.java = ' ';
+
+                    $scope.preview.concurrency.xml = ' ';
+                    $scope.preview.concurrency.java = ' ';
+
+                    $scope.preview.rebalance.xml = ' ';
+                    $scope.preview.rebalance.java = ' ';
+
+                    $scope.preview.serverNearCache.xml = ' ';
+                    $scope.preview.serverNearCache.java = ' ';
+
+                    $scope.preview.statistics.xml = ' ';
+                    $scope.preview.statistics.java = ' ';
+                }
+            }
+
             // When landing on the page, get caches and show them.
             $http.post('caches/list')
                 .success(function (data) {
@@ -201,13 +323,13 @@ controlCenterModule.controller('cachesController', [
 
                     if (restoredItem) {
                         restoredItem.queryMetadata = _.filter(restoredItem.queryMetadata, function (metaId) {
-                            return _.findIndex($scope.metadatas, function (scopeMeta) {
+                            return _.findIndex(metadatas, function (scopeMeta) {
                                     return scopeMeta.value == metaId;
                                 }) >= 0;
                         });
 
                         restoredItem.storeMetadata = _.filter(restoredItem.storeMetadata, function (metaId) {
-                            return _.findIndex($scope.metadatas, function (scopeMeta) {
+                            return _.findIndex(metadatas, function (scopeMeta) {
                                     return scopeMeta.value == metaId;
                                 }) >= 0;
                         });
@@ -239,13 +361,13 @@ controlCenterModule.controller('cachesController', [
                                     });
                                 }
 
-                                $scope.selectItem(cache, restoredItem);
+                                $scope.selectItem(cache, restoredItem, sessionStorage.cacheBackupItemChanged);
                             }
                             else
                                 sessionStorage.removeItem('cacheBackupItem');
                         }
                         else
-                            $scope.backupItem = restoredItem;
+                            $scope.selectItem(undefined, restoredItem, sessionStorage.cacheBackupItemChanged)
                     }
                     else if ($scope.caches.length > 0)
                         $scope.selectItem($scope.caches[0]);
@@ -254,72 +376,50 @@ controlCenterModule.controller('cachesController', [
                         if (val) {
                             sessionStorage.cacheBackupItem = angular.toJson(val);
 
-                            var qryMeta = _.reduce($scope.queryMetadata, function(memo, meta){
-                                if (_.contains(val.queryMetadata, meta.value)) {
-                                    memo.push(meta.meta);
-                                }
+                            generatePreview(val);
 
-                                return memo;
-                            }, []);
-
-                            var storeMeta = _.reduce($scope.storeMetadata, function(memo, meta){
-                                if (_.contains(val.storeMetadata, meta.value)) {
-                                    memo.push(meta.meta);
-                                }
-
-                                return memo;
-                            }, []);
-
-                            $scope.preview.generalXml = $generatorXml.cacheGeneral(val).join('');
-                            $scope.preview.memoryXml = $generatorXml.cacheMemory(val).join('');
-                            $scope.preview.queryXml = $generatorXml.cacheMetadatas(qryMeta, null, $generatorXml.cacheQuery(val)).join('');
-                            $scope.preview.storeXml = $generatorXml.cacheMetadatas(null, storeMeta, $generatorXml.cacheStore(val)).join('');
-                            $scope.preview.concurrencyXml = $generatorXml.cacheConcurrency(val).join('');
-                            $scope.preview.rebalanceXml = $generatorXml.cacheRebalance(val).join('');
-                            $scope.preview.serverNearCacheXml = $generatorXml.cacheServerNearCache(val).join('');
-                            $scope.preview.statisticsXml = $generatorXml.cacheStatistics(val).join('');
-
-                            var varName = 'cache';
-
-                            $scope.preview.generalJava = $generatorJava.cacheGeneral(val, varName).join('');
-                            $scope.preview.memoryJava = $generatorJava.cacheMemory(val, varName).join('');
-                            $scope.preview.queryJava = $generatorJava.cacheMetadatas(qryMeta, null, varName, $generatorJava.cacheQuery(val, varName)).join('');
-                            $scope.preview.storeJava = $generatorJava.cacheMetadatas(null, storeMeta, varName, $generatorJava.cacheStore(val, varName)).join('');
-                            $scope.preview.concurrencyJava = $generatorJava.cacheConcurrency(val, varName).join('');
-                            $scope.preview.rebalanceJava = $generatorJava.cacheRebalance(val, varName).join('');
-                            $scope.preview.serverNearCacheJava = $generatorJava.cacheServerNearCache(val, varName).join('');
-                            $scope.preview.statisticsJava = $generatorJava.cacheStatistics(val, varName).join('');
+                            $common.markChanged($scope.ui.inputForm, 'cacheBackupItemChanged');
                         }
                     }, true);
-
-                    $timeout(function () {
-                        $common.initPreview();
-                    })
                })
                 .error(function (errMsg) {
                     $common.showError(errMsg);
                 });
 
-            $scope.selectItem = function (item, backup) {
-                $table.tableReset();
+            $scope.selectItem = function (item, backup, changed) {
+                function selectItem() {
+                    $table.tableReset();
 
-                $scope.selectedItem = item;
+                    $scope.selectedItem = item;
 
-                if (backup)
-                    $scope.backupItem = backup;
-                else if (item)
-                    $scope.backupItem = angular.copy(item);
-                else
-                    $scope.backupItem = undefined;
+                    if (item)
+                        sessionStorage.cacheSelectedItem = angular.toJson(item);
+                    else
+                        sessionStorage.removeItem('cacheSelectedItem');
 
-                if (item)
-                    sessionStorage.cacheSelectedItem = angular.toJson(item);
-                else
-                    sessionStorage.removeItem('cacheSelectedItem');
+                    generatePreview();
 
-                $timeout(function () {
-                    $common.previewHeightUpdate();
-                })
+                    $timeout(function () {
+                        if (backup)
+                            $scope.backupItem = backup;
+                        else if (item)
+                            $scope.backupItem = angular.copy(item);
+                        else
+                            $scope.backupItem = undefined;
+                    });
+
+                    $timeout(function () {
+                        if (changed)
+                            $common.markChanged($scope.ui.inputForm, 'cacheBackupItemChanged');
+                        else
+                            $common.markPristine($scope.ui.inputForm, 'cacheBackupItemChanged');
+                    }, 50);
+                }
+
+                $common.confirmUnsavedChanges($confirm, $scope.ui.inputForm, selectItem);
+
+                $scope.ui.formTitle = $common.isDefined($scope.backupItem) && $scope.backupItem._id ?
+                    'Selected cache: ' + $scope.backupItem.name : 'New cache';
             };
 
             // Add new cache.
@@ -327,12 +427,12 @@ controlCenterModule.controller('cachesController', [
                 $table.tableReset();
 
                 $timeout(function () {
-                    $common.ensureActivePanel($scope.panels, 'general-data', 'cacheName');
+                    $common.ensureActivePanel($scope.panels, 'general', 'cacheName');
                 });
 
                 var newItem = {
                     space: $scope.spaces[0]._id,
-                    cacheModes: 'PARTITIONED',
+                    cacheMode: 'PARTITIONED',
                     atomicityMode: 'ATOMIC',
                     readFromBackup: true,
                     copyOnRead: true,
@@ -347,11 +447,10 @@ controlCenterModule.controller('cachesController', [
             // Check cache logical consistency.
             function validate(item) {
                 if ($common.isEmptyString(item.name))
-                    return showPopoverMessage($scope.panels, 'general-data', 'cacheName', 'Name should not be empty');
-                        sessionStorage.removeItem('cacheSelectedItem');
+                    return showPopoverMessage($scope.panels, 'general', 'cacheName', 'Name should not be empty');
 
                 if (item.memoryMode == 'OFFHEAP_TIERED' && item.offHeapMaxMemory == null)
-                    return showPopoverMessage($scope.panels, 'memory-data', 'offHeapMaxMemory',
+                    return showPopoverMessage($scope.panels, 'memory', 'offHeapMaxMemory',
                         'Off-heap max memory should be specified');
 
                 var cacheStoreFactorySelected = item.cacheStoreFactory && item.cacheStoreFactory.kind;
@@ -359,35 +458,35 @@ controlCenterModule.controller('cachesController', [
                 if (cacheStoreFactorySelected) {
                     if (item.cacheStoreFactory.kind == 'CacheJdbcPojoStoreFactory') {
                         if ($common.isEmptyString(item.cacheStoreFactory.CacheJdbcPojoStoreFactory.dataSourceBean))
-                            return showPopoverMessage($scope.panels, 'store-data', 'dataSourceBean',
+                            return showPopoverMessage($scope.panels, 'store', 'dataSourceBean',
                                 'Data source bean should not be empty');
 
                         if (!item.cacheStoreFactory.CacheJdbcPojoStoreFactory.dialect)
-                            return showPopoverMessage($scope.panels, 'store-data', 'dialect',
+                            return showPopoverMessage($scope.panels, 'store', 'dialect',
                                 'Dialect should not be empty');
                     }
 
                     if (item.cacheStoreFactory.kind == 'CacheJdbcBlobStoreFactory') {
                         if ($common.isEmptyString(item.cacheStoreFactory.CacheJdbcBlobStoreFactory.user))
-                            return showPopoverMessage($scope.panels, 'store-data', 'user',
+                            return showPopoverMessage($scope.panels, 'store', 'user',
                                 'User should not be empty');
 
                         if ($common.isEmptyString(item.cacheStoreFactory.CacheJdbcBlobStoreFactory.dataSourceBean))
-                            return showPopoverMessage($scope.panels, 'store-data', 'dataSourceBean',
+                            return showPopoverMessage($scope.panels, 'store', 'dataSourceBean',
                                 'Data source bean should not be empty');
                     }
                 }
 
                 if ((item.readThrough || item.writeThrough) && !cacheStoreFactorySelected)
-                    return showPopoverMessage($scope.panels, 'store-data', 'cacheStoreFactory',
+                    return showPopoverMessage($scope.panels, 'store', 'cacheStoreFactory',
                         (item.readThrough ? 'Read' : 'Write') + ' through are enabled but store is not configured!');
 
                 if (item.writeBehindEnabled && !cacheStoreFactorySelected)
-                    return showPopoverMessage($scope.panels, 'store-data', 'cacheStoreFactory',
+                    return showPopoverMessage($scope.panels, 'store', 'cacheStoreFactory',
                         'Write behind enabled but store is not configured!');
 
                 if (cacheStoreFactorySelected && !(item.readThrough || item.writeThrough))
-                    return showPopoverMessage($scope.panels, 'store-data', 'readThrough',
+                    return showPopoverMessage($scope.panels, 'store', 'readThrough',
                         'Store is configured but read/write through are not enabled!');
 
                 return true;
@@ -397,6 +496,8 @@ controlCenterModule.controller('cachesController', [
             function save(item) {
                 $http.post('caches/save', item)
                     .success(function (_id) {
+                        $common.markPristine($scope.ui.inputForm, 'cacheBackupItemChanged');
+
                         var idx = _.findIndex($scope.caches, function (cache) {
                             return cache._id == _id;
                         });
@@ -429,7 +530,7 @@ controlCenterModule.controller('cachesController', [
             };
 
             // Save cache with new name.
-            $scope.saveItemAs = function () {
+            $scope.copyItem = function () {
                 $table.tableReset();
 
                 if (validate($scope.backupItem))
@@ -451,6 +552,8 @@ controlCenterModule.controller('cachesController', [
 
                 $confirm.show('Are you sure you want to remove cache: "' + selectedItem.name + '"?').then(
                     function () {
+                        $common.markPristine($scope.ui.inputForm, 'cacheBackupItemChanged');
+
                         var _id = selectedItem._id;
 
                         $http.post('caches/remove', {_id: _id})
@@ -471,6 +574,29 @@ controlCenterModule.controller('cachesController', [
                                     else
                                         $scope.selectItem(undefined, undefined);
                                 }
+                            })
+                            .error(function (errMsg) {
+                                $common.showError(errMsg);
+                            });
+                    }
+                );
+            };
+
+            // Remove all caches from db.
+            $scope.removeAllItems = function () {
+                $table.tableReset();
+
+                $confirm.show('Are you sure you want to remove all caches?').then(
+                    function () {
+                        $common.markPristine($scope.ui.inputForm, 'cacheBackupItemChanged');
+
+                        $http.post('caches/remove/all')
+                            .success(function () {
+                                $common.showInfo('All caches have been removed');
+
+                                $scope.caches = [];
+
+                                $scope.selectItem(undefined, undefined);
                             })
                             .error(function (errMsg) {
                                 $common.showError(errMsg);

@@ -323,7 +323,8 @@ var ClusterSchema = new Schema({
         defaultTxTimeout: Number,
         pessimisticTxLogLinger: Number,
         pessimisticTxLogSize: Number,
-        txSerializableEnabled: Boolean
+        txSerializableEnabled: Boolean,
+        txManagerLookupClassName: String
     },
     waitForSegmentOnStart: Boolean
 });
@@ -344,10 +345,17 @@ exports.Cluster = mongoose.model('Cluster', ClusterSchema);
 var NotebookSchema = new Schema({
     space: {type: ObjectId, ref: 'Space'},
     name: String,
+    expandedParagraphs: [Number],
     paragraphs: [{
         name: String,
         query: String,
-        result: {type: String, enum: ['table', 'bar']}
+        editor: Boolean,
+        result: {type: String, enum: ['none', 'table', 'bar', 'pie', 'line', 'area']},
+        pageSize: Number,
+        cache: {
+            name: String,
+            mode: {type: String, enum: ['PARTITIONED', 'REPLICATED', 'LOCAL']}
+        }
     }]
 });
 

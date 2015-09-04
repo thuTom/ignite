@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-var controlCenterModule = angular.module('ignite-web-control-center', ['smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize']);
+var controlCenterModule = angular.module('ignite-web-control-center', ['ngAnimate', 'smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize']);
 
 // Modal popup configuration.
 controlCenterModule.config(function ($modalProvider) {
@@ -52,7 +52,7 @@ controlCenterModule.config(function ($selectProvider) {
         noneText: 'Clear All',
         templateUrl: '/select',
         iconCheckmark: 'fa fa-check',
-        caretHtml: '<span class="caret"></span>'
+        caretHtml: '<span class="caret" style="float: right; margin-left: 5px; margin-top: 7px;"></span>'
     });
 });
 
@@ -63,6 +63,13 @@ controlCenterModule.config(function ($alertProvider) {
         placement: 'top-right',
         duration: '5',
         type: 'danger'
+    });
+});
+
+// Alerts configuration.
+controlCenterModule.config(function($modalProvider) {
+    angular.extend($modalProvider.defaults, {
+        animation: 'am-fade-and-scale'
     });
 });
 
@@ -481,24 +488,8 @@ controlCenterModule.service('$common', [
             return false;
         }
 
-        function resizePreview (el) {
-            var left = $('#' + el.id + '-left');
-
-            if (left.height() > 0) {
-                var right = $('#' + el.id + '-right');
-
-                var scrollHeight = right.find('.ace_scrollbar-h').height();
-
-                var parent = right.parent();
-
-                var parentHeight = Math.max(75, left.height() - 2 * parent.css('marginTop').replace("px", ""));
-
-                parent.outerHeight(parentHeight);
-
-                right.height(parentHeight - scrollHeight / 2);
-
-                right.resize();
-            }
+        function formChanged (form) {
+            return isDefined(form) && form.$dirty;
         }
 
         return {
@@ -600,7 +591,7 @@ controlCenterModule.service('$common', [
                 for (var i = 0; i < parts.length; i++) {
                     var part = parts[i];
 
-                    if (!isValidJavaIdentifier(msg, part))
+                    if (!isValidJavaIdentifier(msg, part, elemId))
                         return false;
                 }
 
@@ -650,24 +641,51 @@ controlCenterModule.service('$common', [
                 if (popover)
                     popover.hide();
             },
-            previewHeightUpdate: function () {
-                $('.panel-collapse').each(function (ix, el) {
-                    resizePreview(el);
-                })
+            markChanged: function (form, item) {
+                sessionStorage.setItem(item, 'true');
+
+                form.$setDirty();
             },
-            initPreview: function () {
-                MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+            markPristine: function (form, item) {
+                if (isDefined(form))
+                    form.$setPristine();
 
-                $('.panel-collapse').each(function (ix, el) {
-                    var observer = new MutationObserver(function(mutations, observer) {
-                        resizePreview(el);
-                    });
+                sessionStorage.removeItem(item);
+            },
+            formChanged: function (form) {
+                return isDefined(form) && form.$dirty;
+            },
+            confirmUnsavedChanges: function(confirm, form, selectFunc) {
+                if (formChanged(form))
+                    confirm.show('<span>You have unsaved changes.<br/><br/>Are you sure you want to discard them?</span>').then(
+                        function () {
+                            selectFunc();
+                        }
+                    );
+                else
+                    selectFunc();
 
-                    observer.observe(el, {
-                        childList: true,
-                        subtree: true
-                    });
-                });
+            },
+            saveBtnTipText: function (form, objectName) {
+                if (formChanged(form))
+                    return 'Save ' + objectName;
+
+                return 'Nothing to save';
+            },
+            download: function (type, name, data) {
+                var file = document.createElement('a');
+
+                file.setAttribute('href', 'data:' + type +';charset=utf-8,' + data);
+                file.setAttribute('download', name);
+                file.setAttribute('target', '_self');
+
+                file.style.display = 'none';
+
+                document.body.appendChild(file);
+
+                file.click();
+
+                document.body.removeChild(file);
             }
         }
     }]);
@@ -953,24 +971,201 @@ controlCenterModule.service('$table', ['$common', '$focus', function ($common, $
     }
 }]);
 
-
 // Preview support service.
-controlCenterModule.service('$preview', [function () {
+controlCenterModule.service('$preview', ['$timeout', '$interval', function ($timeout, $interval) {
+    var Range = require('ace/range').Range;
+
+    var previewPrevContent = [];
+
+    var animation = {editor: null, stage: 0, start: 0, stop: 0};
+
+    function _clearSelection(editor) {
+        _.forEach(editor.session.getMarkers(false), function (marker) {
+            editor.session.removeMarker(marker.id);
+        });
+    }
+
+    /**
+     * Switch to next stage of animation.
+     */
+    function _animate() {
+        animation.stage += animation.step;
+
+        var stage = animation.stage;
+
+        var editor = animation.editor;
+
+        _clearSelection(editor);
+
+        animation.selections.forEach(function (selection) {
+            editor.session.addMarker(new Range(selection.start, 0, selection.stop, 0),
+                'preview-highlight-' + stage, 'line', false);
+        });
+
+        if (stage == animation.finalStage) {
+            editor.animatePromise = null;
+
+            if (animation.clearOnFinal)
+                _clearSelection(editor);
+        }
+    }
+
+    /**
+     * Show selections with animation.
+     *
+     * @param editor Editor to show selection.
+     * @param selections Array of selection intervals.
+     */
+    function _fadeIn(editor, selections) {
+        _fade(editor, selections, 1, 0, 10, false);
+    }
+
+    /**
+     * Hide selections with animation.
+     *
+     * @param editor Editor to show selection.
+     * @param selections Array of selection intervals.
+     */
+    function _fadeOut(editor, selections) {
+        _fade(editor, selections, -1, 10, 0, true);
+    }
+
+    /**
+     * Selection with animation.
+     *
+     * @param editor Editor to show selection animation.
+     * @param selections Array of selection intervals.
+     * @param step Step of animation (1 or -1).
+     * @param startStage Start stage of animaiton.
+     * @param finalStage Final stage of animation.
+     * @param clearOnFinal Boolean flat to clear selection on animation finish.
+     */
+    function _fade(editor, selections, step, startStage, finalStage, clearOnFinal) {
+        var promise = editor.animatePromise;
+
+        if (promise) {
+            $interval.cancel(promise);
+
+            _clearSelection(editor);
+        }
+
+        animation = {editor: editor, step: step, stage: startStage, finalStage: finalStage, clearOnFinal: clearOnFinal, selections: selections};
+
+        editor.animatePromise = $interval(_animate, 100, 10, false);
+    }
+
+    function previewChanged (ace) {
+        var content = ace[0];
+
+        var editor = ace[1];
+
+        var clearPromise = editor.clearPromise;
+
+        var previewNewContent = content.lines;
+
+        if (content.action == 'remove')
+            previewPrevContent = content.lines;
+        // Do not mark the text changes for special marker value: ' '.
+        else if (previewPrevContent.length > 0 && previewNewContent.length > 0 && previewNewContent[0] != ' '
+            && previewPrevContent[0] != ' ') {
+            if (clearPromise) {
+                $timeout.cancel(clearPromise);
+
+                _clearSelection(editor);
+            }
+
+            var selections = [];
+
+            var newIx = 0;
+            var prevIx = 0;
+
+            var prevLen = previewPrevContent.length - (previewPrevContent[previewPrevContent.length - 1] == '' ? 1 : 0);
+            var newLen = previewNewContent.length - (previewNewContent[previewNewContent.length - 1] == '' ? 1 : 0);
+
+            var selected = false;
+            var scrollTo = -1;
+
+            while (newIx < newLen || prevIx < prevLen) {
+                var start = -1;
+                var end = -1;
+
+                // Find an index of a first line with different text.
+                for (; (newIx < newLen || prevIx < prevLen) && start < 0; newIx++, prevIx++) {
+                    if (previewNewContent[newIx] != previewPrevContent[prevIx]) {
+                        start = newIx;
+
+                        break;
+                    }
+                }
+
+                if (start >= 0) {
+                    // Find an index of a last line with different text by checking last string of old and new content in reverse order.
+                    for (var i = start; i < newLen && end < 0; i ++) {
+                        for (var j = prevIx; j < prevLen && end < 0; j ++) {
+                            if (previewNewContent[i] == previewPrevContent[j] && previewNewContent[i] != '') {
+                                end = i;
+
+                                newIx = i;
+                                prevIx = j;
+
+                                break;
+                            }
+                        }
+                    }
+
+                    if (end < 0) {
+                        end = newLen;
+
+                        newIx = newLen;
+                        prevIx = prevLen;
+                    }
+
+                    if (start <= end) {
+                        selections.push({start: start, stop: end});
+
+                        if (!selected)
+                            scrollTo = start;
+
+                        selected = true;
+                    }
+                }
+            }
+
+            // Run clear selection one time.
+            if (selected) {
+                _fadeIn(editor, selections);
+
+                editor.clearPromise = $timeout(function () {
+                    _fadeOut(editor, selections);
+
+                    editor.clearPromise = null;
+                }, 4000);
+
+                editor.scrollToRow(scrollTo)
+            }
+
+            previewPrevContent = [];
+        }
+    }
+
     return {
         previewInit: function (editor) {
             editor.setReadOnly(true);
             editor.setOption('highlightActiveLine', false);
+            editor.setAutoScrollEditorIntoView(true);
             editor.$blockScrolling = Infinity;
 
             var renderer = editor.renderer;
 
-            renderer.setShowGutter(false);
             renderer.setHighlightGutterLine(false);
             renderer.setShowPrintMargin(false);
             renderer.setOption('fontSize', '10px');
+            renderer.setOption('minLines', '3');
+            renderer.setOption('maxLines', '50');
 
             editor.setTheme('ace/theme/chrome');
-        }
+        },
+        previewChanged: previewChanged
     }
 }]);
 
@@ -1129,14 +1324,29 @@ controlCenterModule.factory('$focus', function ($timeout) {
 
                 var winOffset = window.pageYOffset;
 
-                if(elemOffset - 20 < winOffset || elemOffset + elem.outerHeight(true) + 20 > winOffset + window.innerHeight)
+                var topHeight = $('.padding-top-dflt.affix').outerHeight();
+
+                if(elemOffset - 20 - topHeight < winOffset
+                    || elemOffset + elem.outerHeight(true) + 20 > winOffset + window.innerHeight)
                     $('html, body').animate({
-                        scrollTop: elemOffset - 20
+                        scrollTop: elemOffset - 20 - topHeight
                     }, 10);
 
                 elem[0].focus();
             }
         });
+    };
+});
+
+// Directive to auto-focus element.
+controlCenterModule.directive('autoFocus', function() {
+    return {
+        link: {
+            post: function postLink(scope, element) {
+                // this succeeds since the element has been rendered
+                element[0].focus();
+            }
+        }
     };
 });
 
@@ -1269,12 +1479,16 @@ controlCenterModule.controller('agent-download', [
 }]);
 
 // Navigation bar controller.
-controlCenterModule.controller('notebooks', ['$scope', '$http', '$common', function ($scope, $http, $common) {
+controlCenterModule.controller('notebooks', ['$scope', '$modal', '$window', '$http', '$common',
+    function ($scope, $modal, $window, $http, $common) {
     $scope.$root.notebooks = [];
 
-    $scope.$root.rebuildDropdown = function () {
+    // Pre-fetch modal dialogs.
+    var _notebookNewModal = $modal({scope: $scope, templateUrl: '/notebooks/new', show: false});
+
+    $scope.$root.rebuildDropdown = function() {
         $scope.notebookDropdown = [
-            {text: 'Create new notebook', href: '/notebooks/new', target: '_self'},
+            {text: 'Create new notebook', click: 'inputNotebookName()'},
             {divider: true}
         ];
 
@@ -1287,7 +1501,7 @@ controlCenterModule.controller('notebooks', ['$scope', '$http', '$common', funct
         });
     };
 
-    $scope.$root.reloadNotebooks = function () {
+    $scope.$root.reloadNotebooks = function() {
         // When landing on the page, get clusters and show them.
         $http.post('/notebooks/list')
             .success(function (data) {
@@ -1300,5 +1514,27 @@ controlCenterModule.controller('notebooks', ['$scope', '$http', '$common', funct
             });
     };
 
+    $scope.$root.inputNotebookName = function() {
+        _notebookNewModal.$promise.then(_notebookNewModal.show);
+    };
+
+    $scope.$root.createNewNotebook = function(name) {
+        $http.post('/notebooks/new', {name: name})
+            .success(function (id) {
+                _notebookNewModal.hide();
+
+                $window.location = '/sql/' + id;
+            })
+            .error(function (message, state) {
+                $common.showError(message);
+            });
+    };
+
     $scope.$root.reloadNotebooks();
+}]);
+
+// Navigation bar controller.
+controlCenterModule.controller('save-remove', ['$scope', function ($scope) {
+    $scope.saveDropdown = [{ 'text': 'Copy', 'click': 'copyItem()'}];
+    $scope.removeDropdown = [{ 'text': 'Remove All', 'click': 'removeAllItems()'}];
 }]);

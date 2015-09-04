@@ -17,27 +17,38 @@
 
 package org.apache.ignite.internal.portable;
 
-import org.apache.ignite.*;
-import org.apache.ignite.internal.processors.cache.*;
-import org.apache.ignite.internal.util.typedef.internal.*;
-import org.apache.ignite.marshaller.*;
-import org.apache.ignite.portable.*;
-
-import org.jetbrains.annotations.*;
-
-import java.io.*;
-import java.lang.reflect.*;
-import java.math.*;
-import java.sql.*;
-import java.util.*;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.UUID;
+import org.apache.ignite.IgniteCheckedException;
+import org.apache.ignite.internal.processors.cache.CacheObjectImpl;
+import org.apache.ignite.internal.util.typedef.internal.U;
+import org.apache.ignite.marshaller.MarshallerExclusions;
+import org.apache.ignite.portable.PortableException;
+import org.apache.ignite.portable.PortableIdMapper;
+import org.apache.ignite.portable.PortableMarshalAware;
+import org.apache.ignite.portable.PortableSerializer;
+import org.jetbrains.annotations.Nullable;
 
-import static java.lang.reflect.Modifier.*;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.lang.reflect.Modifier.isTransient;
 
 /**
  * Portable class descriptor.
  */
-class PortableClassDescriptor {
+public class PortableClassDescriptor {
     /** */
     private final PortableContext ctx;
 
@@ -112,7 +123,7 @@ class PortableClassDescriptor {
         boolean keepDeserialized
     ) throws PortableException {
         this(ctx, cls, userType, typeId, typeName, idMapper, serializer, useTs, metaDataEnabled, keepDeserialized,
-             true);
+            true);
     }
 
     /**
@@ -274,7 +285,7 @@ class PortableClassDescriptor {
     /**
      * @return Type ID.
      */
-    int typeId() {
+    public int typeId() {
         return typeId;
     }
 
@@ -388,7 +399,7 @@ class PortableClassDescriptor {
                 break;
 
             case DECIMAL:
-                writer.doWriteDecimal((BigDecimal) obj);
+                writer.doWriteDecimal((BigDecimal)obj);
 
                 break;
 
@@ -645,39 +656,32 @@ class PortableClassDescriptor {
      * @return Whether further write is needed.
      */
     private boolean writeHeader(Object obj, PortableWriterExImpl writer) {
-        int handle = writer.handle(obj);
-
-        if (handle >= 0) {
-            writer.doWriteByte(GridPortableMarshaller.HANDLE);
-            writer.doWriteInt(handle);
-
+        if (writer.tryWriteAsHandle(obj))
             return false;
-        }
-        else {
-            int pos = writer.position();
 
-            writer.doWriteByte(GridPortableMarshaller.OBJ);
-            writer.doWriteBoolean(userType);
-            writer.doWriteInt(registered ? typeId : GridPortableMarshaller.UNREGISTERED_TYPE_ID);
-            writer.doWriteInt(obj instanceof CacheObjectImpl ? 0 : obj.hashCode());
+        int pos = writer.position();
 
-            // For length and raw offset.
-            int reserved = writer.reserve(8);
+        writer.doWriteByte(GridPortableMarshaller.OBJ);
+        writer.doWriteBoolean(userType);
+        writer.doWriteInt(registered ? typeId : GridPortableMarshaller.UNREGISTERED_TYPE_ID);
+        writer.doWriteInt(obj instanceof CacheObjectImpl ? 0 : obj.hashCode());
 
-            // Class name in case if typeId registration is failed.
-            if (!registered)
-                writer.doWriteString(cls.getName());
+        // For length and raw offset.
+        int reserved = writer.reserve(8);
 
-            int current = writer.position();
-            int len = current - pos;
+        // Class name in case if typeId registration is failed.
+        if (!registered)
+            writer.doWriteString(cls.getName());
 
-            // Default raw offset (equal to header length).
-            writer.position(reserved + 4);
-            writer.doWriteInt(len);
-            writer.position(current);
+        int current = writer.position();
+        int len = current - pos;
 
-            return true;
-        }
+        // Default raw offset (equal to header length).
+        writer.position(reserved + 4);
+        writer.doWriteInt(len);
+        writer.position(current);
+
+        return true;
     }
 
     /**
@@ -776,7 +780,7 @@ class PortableClassDescriptor {
         else if (cls == PortableObjectImpl.class)
             return Mode.PORTABLE_OBJ;
         else if (PortableMarshalAware.class.isAssignableFrom(cls))
-           return Mode.PORTABLE;
+            return Mode.PORTABLE;
         else if (Externalizable.class.isAssignableFrom(cls))
             return Mode.EXTERNALIZABLE;
         else if (Map.Entry.class.isAssignableFrom(cls))

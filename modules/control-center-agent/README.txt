@@ -22,6 +22,8 @@ Configuration file:
         serverURI
         nodeURI
         driverFolder
+        test-drive-metadata
+        test-drive-sql
 
     Example configuration file:
         login=john.smith@gmail.com

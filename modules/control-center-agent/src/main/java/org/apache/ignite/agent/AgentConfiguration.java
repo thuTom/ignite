@@ -17,11 +17,12 @@
 
 package org.apache.ignite.agent;
 
-import com.beust.jcommander.*;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import com.beust.jcommander.Parameter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.util.Properties;
 
 /**
  * Agent configuration.
@@ -221,6 +222,16 @@ public class AgentConfiguration {
 
         if (val != null)
             driversFolder(val);
+
+        val = (String)props.remove("test-drive-metadata");
+
+        if (val != null)
+            testDriveMetadata(Boolean.valueOf(val));
+
+        val = (String)props.remove("test-drive-sql");
+
+        if (val != null)
+            testDriveSql(Boolean.valueOf(val));
     }
 
     /**

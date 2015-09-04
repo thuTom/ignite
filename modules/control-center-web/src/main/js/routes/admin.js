@@ -38,6 +38,7 @@ router.post('/list', function (req, res) {
     });
 });
 
+// Remove user.
 router.post('/remove', function (req, res) {
     var userId = req.body.userId;
 
@@ -49,7 +50,8 @@ router.post('/remove', function (req, res) {
             _.forEach(spaces, function (space) {
                 db.Cluster.remove({space: space._id}).exec();
                 db.Cache.remove({space: space._id}).exec();
-                db.Persistence.remove({space: space._id}).exec();
+                db.CacheTypeMetadata.remove({space: space._id}).exec();
+                db.DatabasePreset.remove({space: space._id}).exec();
                 db.Notebook.remove({space: space._id}).exec();
                 db.Space.remove({owner: space._id}).exec();
             });
@@ -87,6 +89,7 @@ router.post('/remove', function (req, res) {
     });
 });
 
+// Save user.
 router.post('/save', function (req, res) {
     var userId = req.body.userId;
     var adminFlag = req.body.adminFlag;
@@ -99,6 +102,7 @@ router.post('/save', function (req, res) {
     });
 });
 
+// Become user.
 router.get('/become', function (req, res) {
     var viewedUserId = req.query.viewedUserId;
 
