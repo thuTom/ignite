@@ -391,7 +391,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         // Insert new chart.
         d3.select('#' + chartId + ' svg')
             .datum(datum)
-            .call(chart);
+            .call(chart)
+            .attr('height', 400);
 
         nv.utils.windowResize(chart.update);
 
@@ -403,12 +404,13 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
         nv.addGraph(function() {
             var chart = nv.models.discreteBarChart()
-                    .x(function (d) {
-                        return d.label;
-                    })
-                    .y(function (d) {
-                        return d.value;
-                    });
+                .x(function (d) {
+                    return d.label;
+                })
+                .y(function (d) {
+                    return d.value;
+                })
+                .height(400);
 
             var values = _.map(paragraph.rows, function (row) {
                 return {label: (row.length > 1) ? row[1] : index++, value: _isNumber(row, 0, 0)}
@@ -433,7 +435,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 .labelThreshold(.05)
                 .labelType("percent")
                 .donut(true)
-                .donutRatio(0.35);
+                .donutRatio(0.35)
+                .height(400);
 
             return _insertChart(paragraph, paragraph.rows, chart);
         });
@@ -451,7 +454,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.lineChart()
                 .x(_x)
-                .y(_y);
+                .y(_y)
+                .height(400);
 
             return _insertChart(paragraph, _datum('Line chart', paragraph.rows), chart);
         });
@@ -461,7 +465,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.stackedAreaChart()
                 .x(_x)
-                .y(_y);
+                .y(_y)
+                .height(400);
 
             return _insertChart(paragraph, _datum('Area chart', paragraph.rows), chart);
         });
