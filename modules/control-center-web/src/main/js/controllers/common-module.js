@@ -970,14 +970,62 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
         });
     }
 
+    /**
+     * Switch to next stage of animation.
+     */
     function _animate() {
-        animation.stage = animation.stage + 1;
+        animation.stage += animation.step;
 
-        animation.editor.session.addMarker(new Range(animation.start, 0, animation.stop, 0),
-            'preview-highlight-' + animation.stage, 'line', false);
+        var stage = animation.stage;
+
+        var editor = animation.editor;
+
+        _clearSelection(editor);
+
+        animation.selections.forEach(function (selection) {
+            editor.session.addMarker(new Range(selection.start, 0, selection.stop, 0),
+                'preview-highlight-' + stage, 'line', false);
+        });
+
+        if (stage == animation.finalStage) {
+            editor.animatePromise = null;
+
+            if (animation.clearOnFinal)
+                _clearSelection(editor);
+        }
     }
 
-    function _fade(editor, start, stop) {
+    /**
+     * Show selections with animation.
+     *
+     * @param editor Editor to show selection.
+     * @param selections Array of selection intervals.
+     */
+    function _fadeIn(editor, selections) {
+        _fade(editor, selections, 1, 0, 10, false);
+    }
+
+    /**
+     * Hide selections with animation.
+     *
+     * @param editor Editor to show selection.
+     * @param selections Array of selection intervals.
+     */
+    function _fadeOut(editor, selections) {
+        _fade(editor, selections, -1, 10, 0, true);
+    }
+
+    /**
+     * Selection with animation.
+     *
+     * @param editor Editor to show selection animation.
+     * @param selections Array of selection intervals.
+     * @param step Step of animation (1 or -1).
+     * @param startStage Start stage of animaiton.
+     * @param finalStage Final stage of animation.
+     * @param clearOnFinal Boolean flat to clear selection on animation finish.
+     */
+    function _fade(editor, selections, step, startStage, finalStage, clearOnFinal) {
         var promise = editor.animatePromise;
 
         if (promise) {
@@ -986,7 +1034,7 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
             _clearSelection(editor);
         }
 
-        animation = {editor: editor, stage: 0, start: start, stop: stop};
+        animation = {editor: editor, step: step, stage: startStage, finalStage: finalStage, clearOnFinal: clearOnFinal, selections: selections};
 
         editor.animatePromise = $interval(_animate, 100, 10, false);
     }
@@ -1010,6 +1058,8 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
 
                 _clearSelection(editor);
             }
+
+            var selections = [];
 
             var newIx = 0;
             var prevIx = 0;
@@ -1037,7 +1087,7 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
                     // Find an index of a last line with different text by checking last string of old and new content in reverse order.
                     for (var i = start; i < newLen && end < 0; i ++) {
                         for (var j = prevIx; j < prevLen && end < 0; j ++) {
-                            if (previewNewContent[i] == previewPrevContent[j]) {
+                            if (previewNewContent[i] == previewPrevContent[j] && previewNewContent[i] != '') {
                                 end = i;
 
                                 newIx = i;
@@ -1056,7 +1106,7 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
                     }
 
                     if (start <= end) {
-                        _fade(editor, start, end);
+                        selections.push({start: start, stop: end});
 
                         if (!selected)
                             scrollTo = start;
@@ -1068,8 +1118,10 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
 
             // Run clear selection one time.
             if (selected) {
+                _fadeIn(editor, selections);
+
                 editor.clearPromise = $timeout(function () {
-                    _clearSelection(editor);
+                    _fadeOut(editor, selections);
 
                     editor.clearPromise = null;
                 }, 4000);
