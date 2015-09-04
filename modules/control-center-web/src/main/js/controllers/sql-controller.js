@@ -16,8 +16,8 @@
  */
 
 // Controller for SQL notebook screen.
-controlCenterModule.controller('sqlController', ['$scope', '$window','$controller', '$http', '$common', '$confirm',
-    function ($scope, $window, $controller, $http, $common, $confirm) {
+controlCenterModule.controller('sqlController', ['$scope', '$window','$controller', '$http', '$timeout', '$common', '$confirm',
+    function ($scope, $window, $controller, $http, $timeout, $common, $confirm) {
     // Initialize the super class and extend it.
     angular.extend(this, $controller('agent-download', {$scope: $scope}));
     $scope.agentGoal = 'execute sql statements';
@@ -444,18 +444,20 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     function _insertChart(paragraph, datum, chart) {
         var chartId = 'chart-' + paragraph.id;
 
-        // Remove previous chart.
-        d3.selectAll('#' + chartId + ' svg > *').remove();
+        $timeout(function() {
+            chart.height(400);
 
-        // Insert new chart.
-        d3.select('#' + chartId + ' svg')
-            .datum(datum)
-            .call(chart)
-            .attr('height', 400);
+            // Remove previous chart.
+            d3.selectAll('#' + chartId + ' svg > *').remove();
 
-        nv.utils.windowResize(chart.update);
+            // Insert new chart.
+            d3.select('#' + chartId + ' svg')
+                .datum(datum)
+                .call(chart)
+                .attr('height', 400);
 
-        return chart;
+            chart.update();
+        });
     }
 
     function _barChart(paragraph) {
@@ -468,14 +470,13 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 })
                 .y(function (d) {
                     return d.value;
-                })
-                .height(400);
+                });
 
             var values = _.map(paragraph.rows, function (row) {
                 return {label: (row.length > 1) ? row[1] : index++, value: _isNumber(row, 0, 0)}
             });
 
-            return _insertChart(paragraph, [{key: 'bar', values: values}], chart);
+            _insertChart(paragraph, [{key: 'bar', values: values}], chart);
         });
     }
 
@@ -494,10 +495,9 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 .labelThreshold(.05)
                 .labelType("percent")
                 .donut(true)
-                .donutRatio(0.35)
-                .height(400);
+                .donutRatio(0.35);
 
-            return _insertChart(paragraph, paragraph.rows, chart);
+            _insertChart(paragraph, paragraph.rows, chart);
         });
     }
 
@@ -513,10 +513,9 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.lineChart()
                 .x(_x)
-                .y(_y)
-                .height(400);
+                .y(_y);
 
-            return _insertChart(paragraph, _datum('Line chart', paragraph.rows), chart);
+            _insertChart(paragraph, _datum('Line chart', paragraph.rows), chart);
         });
     }
 
@@ -524,10 +523,9 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.stackedAreaChart()
                 .x(_x)
-                .y(_y)
-                .height(400);
+                .y(_y);
 
-            return _insertChart(paragraph, _datum('Area chart', paragraph.rows), chart);
+            _insertChart(paragraph, _datum('Area chart', paragraph.rows), chart);
         });
     }
 }]);
