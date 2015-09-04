@@ -753,6 +753,13 @@ div.affix.padding-top-dflt {
     margin-top: -8px;
 }
 
+.popover .close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    float: none;
+}
+
 label {
     font-weight: normal;
     margin-bottom: 0;

@@ -351,7 +351,11 @@ var NotebookSchema = new Schema({
         query: String,
         editor: Boolean,
         result: {type: String, enum: ['none', 'table', 'bar', 'pie', 'line', 'area']},
-        pageSize: Number
+        pageSize: Number,
+        cache: {
+            name: String,
+            mode: {type: String, enum: ['PARTITIONED', 'REPLICATED', 'LOCAL']}
+        }
     }]
 });
 

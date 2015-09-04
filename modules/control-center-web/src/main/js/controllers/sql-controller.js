@@ -39,6 +39,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         {value: 'h', label: 'hours'}
     ];
 
+    $scope.exportDropdown = [{ 'text': 'Export all', 'click': 'exportAll(paragraph)'}];
+
     $scope.aceInit = function (editor) {
         editor.setAutoScrollEditorIntoView(true);
         editor.$blockScrolling = Infinity;
@@ -77,6 +79,14 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     loadNotebook();
 
+    var _saveNotebook = function (f) {
+        $http.post('/notebooks/save', $scope.notebook)
+            .success(f || function() {})
+            .error(function (errMsg) {
+                $common.showError(errMsg);
+            });
+    };
+
     $scope.renameNotebook = function (name) {
         if (!name)
             return;
@@ -84,33 +94,22 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         if ($scope.notebook.name != name) {
             $scope.notebook.name = name;
 
-            $http.post('/notebooks/save', $scope.notebook)
-                .success(function () {
-                    var idx = _.findIndex($scope.$root.notebooks, function (item) {
-                        return item._id == $scope.notebook._id;
-                    });
-
-                    if (idx >= 0) {
-                        $scope.$root.notebooks[idx].name = name;
-
-                        $scope.$root.rebuildDropdown();
-                    }
-
-                    $scope.notebook.edit = false;
-                })
-                .error(function (errMsg) {
-                    $common.showError(errMsg);
+            _saveNotebook(function () {
+                var idx = _.findIndex($scope.$root.notebooks, function (item) {
+                    return item._id == $scope.notebook._id;
                 });
+
+                if (idx >= 0) {
+                    $scope.$root.notebooks[idx].name = name;
+
+                    $scope.$root.rebuildDropdown();
+                }
+
+                $scope.notebook.edit = false;
+            });
         }
         else
             $scope.notebook.edit = false
-    };
-
-    $scope.saveNotebook = function () {
-        $http.post('/notebooks/save', $scope.notebook)
-            .error(function (errMsg) {
-                $common.showError(errMsg);
-            });
     };
 
     $scope.removeNotebook = function () {
@@ -146,13 +145,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         if (paragraph.name != newName) {
             paragraph.name = newName;
 
-            $http.post('/notebooks/save', $scope.notebook)
-                .success(function () {
-                    paragraph.edit = false;
-                })
-                .error(function (errMsg) {
-                    $common.showError(errMsg);
-                });
+            _saveNotebook(function () { paragraph.edit = false; });
         }
         else
             paragraph.edit = false
@@ -266,8 +259,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     var _processQueryResult = function (item) {
-        $scope.saveNotebook();
-
         return function (res) {
             item.meta = [];
 
@@ -287,6 +278,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.execute = function (item) {
+        _saveNotebook();
+
         _appendOnLast(item);
 
         $http.post('/agent/query', {query: item.query, pageSize: item.pageSize, cacheName: item.cache.name})
@@ -297,6 +290,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.explain = function (item) {
+        _saveNotebook();
+
         _appendOnLast(item);
 
         $http.post('/agent/query', {query: 'EXPLAIN ' + item.query, pageSize: item.pageSize, cacheName: item.cache.name})
@@ -307,6 +302,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.scan = function (item) {
+        _saveNotebook();
+
         _appendOnLast(item);
 
         $http.post('/agent/scan', {pageSize: item.pageSize, cacheName: item.cache.name})
@@ -327,6 +324,56 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
                 if (res.last)
                     delete item.queryId;
+            })
+            .error(function (errMsg) {
+                $common.showError(errMsg);
+            });
+    };
+
+    var _export = function(meta, rows) {
+        var csvContent = "";
+
+        if (meta) {
+            csvContent += meta.map(function (col) {
+                return $scope.columnToolTip(col);
+            }).join(",") + '\n';
+        }
+
+        rows.forEach(function (row) {
+            if (Array.isArray(row)) {
+                csvContent += row.map(function (elem) {
+                    return elem ? JSON.stringify(elem) : "";
+                }).join(",");
+            }
+            else {
+                var first = true;
+
+                for (var prop of meta) {
+                    if (first)
+                        first = false;
+                    else
+                        csvContent += ",";
+
+                    var elem = row[prop.fieldName];
+
+                    csvContent += elem ? JSON.stringify(elem) : "";
+                }
+            }
+
+            csvContent += '\n';
+        });
+
+        $common.download('application/octet-stream;charset=utf-8', 'export.csv', escape(csvContent));
+    };
+
+    $scope.exportPage = function(paragraph) {
+        _export(paragraph.meta, paragraph.rows);
+    };
+
+    $scope.exportAll = function(paragraph) {
+        $http.post('/agent/query/getAll', {query: paragraph.query, cacheName: paragraph.cache.name})
+            .success(function (item) {
+                _export(item.meta, item.rows);
             })
             .error(function (errMsg) {
                 $common.showError(errMsg);
@@ -355,6 +402,18 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             return  " " + paragraph.rate.value + paragraph.rate.unit;
 
         return "";
+    };
+
+    $scope.startRefresh = function (paragraph, value, unit) {
+        paragraph.rate = { value: value, unit: unit, ruined: true };
+
+        //TODO Start timer.
+    };
+
+    $scope.stopRefresh = function (paragraph) {
+        paragraph.rate.ruined = false;
+
+        //TODO Stop timer.
     };
 
     $scope.getter = function (value) {

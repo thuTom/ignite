@@ -107,18 +107,7 @@ controlCenterModule.controller('summaryController', ['$scope', '$http', '$common
     $scope.download = function () {
         $http.post('summary/download', {_id: $scope.selectedItem._id, os: $scope.os})
             .success(function (data) {
-                var file = document.createElement('a');
-
-                file.setAttribute('href', 'data:application/octet-stream;charset=utf-8,' + data);
-                file.setAttribute('download', $scope.selectedItem.name + '-configuration.zip');
-
-                file.style.display = 'none';
-
-                document.body.appendChild(file);
-
-                file.click();
-
-                document.body.removeChild(file);
+                $common.download('application/octet-stream', $scope.selectedItem.name + '-configuration.zip', data);
             })
             .error(function (errMsg) {
                 $common.showError('Failed to generate zip: ' + errMsg);

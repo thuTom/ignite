@@ -96,13 +96,15 @@ block container
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
                                 .panel-body(ng-show='paragraph.rows && paragraph.result === "table" && paragraph.rows')
                                     .row
-                                        .col-sm-8
-                                            lable Page #:&nbsp;
-                                            b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
-                                            | Results:&nbsp;
-                                            b {{paragraph.rows.length + paragraph.total}}
-                                        .col-sm-4
-                                            button.btn.btn-primary.fieldButton(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
+                                        lable Page #:&nbsp;
+                                        b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
+                                        | Results:&nbsp;
+                                        b {{paragraph.rows.length + paragraph.total}}
+                                        button.btn.btn-primary.fieldButton(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
+                                        .btn-group.fieldButton
+                                            button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
+                                            button.btn.dropdown-toggle.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
+                                                span.caret
                                     .table-responsive
                                         table.table.table-condensed(st-table='displayedCollection' st-safe-src='paragraph.rows')
                                             thead

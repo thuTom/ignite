@@ -78,6 +78,28 @@ router.post('/query', function (req, res) {
     }
 });
 
+/* Execute query getAll. */
+router.post('/query/getAll', function (req, res) {
+    var client = _client(req, res);
+
+    if (client) {
+        // Create sql query.
+        var qry = new SqlFieldsQuery(req.body.query);
+
+        // Set page size for query.
+        qry.setPageSize(1024);
+
+        // Get query cursor.
+        var cursor = client.ignite().cache(req.body.cacheName).query(qry);
+
+        cursor.getAll().then(function (rows) {
+            res.json({meta: cursor.fieldsMetadata(), rows: rows});
+        }, function (err) {
+            res.status(500).send(err);
+        });
+    }
+});
+
 /* Execute query. */
 router.post('/scan', function (req, res) {
     var client = _client(req, res);

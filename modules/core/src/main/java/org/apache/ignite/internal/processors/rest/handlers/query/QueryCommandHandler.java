@@ -196,10 +196,10 @@ public class QueryCommandHandler extends GridRestCommandHandlerAdapter {
                         break;
                     case SCAN:
                         CacheQueryFieldsMetaResult keyField = new CacheQueryFieldsMetaResult();
-                        keyField.setFieldName("Key");
+                        keyField.setFieldName("key");
 
                         CacheQueryFieldsMetaResult valField = new CacheQueryFieldsMetaResult();
-                        valField.setFieldName("Value");
+                        valField.setFieldName("value");
 
                         res.setFieldsMetadata(U.sealList(keyField, valField));
 

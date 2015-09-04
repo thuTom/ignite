@@ -671,6 +671,21 @@ controlCenterModule.service('$common', [
                     return 'Save ' + objectName;
 
                 return 'Nothing to save';
+            },
+            download: function (type, name, data) {
+                var file = document.createElement('a');
+
+                file.setAttribute('href', 'data:' + type +';charset=utf-8,' + data);
+                file.setAttribute('download', name);
+                file.setAttribute('target', '_self');
+
+                file.style.display = 'none';
+
+                document.body.appendChild(file);
+
+                file.click();
+
+                document.body.removeChild(file);
             }
         }
     }]);
@@ -1324,13 +1339,13 @@ controlCenterModule.factory('$focus', function ($timeout) {
 });
 
 // Directive to auto-focus element.
-controlCenterModule.directive('autoFocus', function($timeout) {
+controlCenterModule.directive('autoFocus', function() {
     return {
-        restrict: 'AC',
-        link: function(scope, element) {
-            $timeout(function(){
+        link: {
+            post: function postLink(scope, element) {
+                // this succeeds since the element has been rendered
                 element[0].focus();
-            });
+            }
         }
     };
 });
