@@ -183,19 +183,19 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 break;
 
             case 'bar':
-                barChart(paragraph);
+                _barChart(paragraph);
                 break;
 
             case 'pie':
-                pieChart(paragraph);
+                _pieChart(paragraph);
                 break;
 
             case 'line':
-                lineChart(paragraph);
+                _lineChart(paragraph);
                 break;
 
             case 'area':
-                areaChart(paragraph);
+                _areaChart(paragraph);
                 break;
 
             default:
@@ -355,7 +355,28 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         return value;
     };
 
-    function barChart(paragraph) {
+    function _isNumber(arr, idx, dflt) {
+        if (arr && arr.length > idx) {
+            var val = arr[idx];
+
+            if (_.isNumber(val))
+                return val;
+        }
+
+        return dflt;
+    }
+
+    function _datum(key, rows) {
+        var index = 0;
+
+        var values = _.map(rows, function (row) {
+            return {x: _isNumber(row, 1, index++), y: _isNumber(row, 0, 0)}
+        });
+
+        return [{key: key, values: values}];
+    }
+
+    function _barChart(paragraph) {
         var index = 0;
 
         nv.addGraph(function() {
@@ -368,7 +389,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                     });
 
             var values = _.map(paragraph.rows, function (row) {
-                return {label: (row.length > 1) ? row[1] : index++, value: (row.length > 0) ? row[0] : 0}
+                return {label: (row.length > 1) ? row[1] : index++, value: _isNumber(row, 0, 0)}
             });
 
             d3.selectAll("#chart svg > *").remove();
@@ -382,7 +403,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         });
     }
 
-    function pieChart(paragraph) {
+    function _pieChart(paragraph) {
         var index = 0;
 
         nv.addGraph(function() {
@@ -410,25 +431,19 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         });
     }
 
-    function lineChart(paragraph) {
-        var index = 0;
-
+    function _lineChart(paragraph) {
         nv.addGraph(function() {
             var chart = nv.models.lineChart()
                 .x(function (d) {
-                    return d.label;
+                    return d.x;
                 })
                 .y(function (d) {
-                    return d.value;
+                    return d.y;
                 });
-
-            var values = _.map(paragraph.rows, function (row) {
-                return {label: (row.length > 1) ? row[1] : index++, value: (row.length > 0) ? row[0] : 0}
-            });
 
             d3.selectAll("#chart svg > *").remove();
             d3.select('#chart svg')
-                .datum([{key: 'bar', values: values}])
+                .datum(_datum('Line chart', paragraph.rows))
                 .call(chart);
 
             nv.utils.windowResize(chart.update);
@@ -437,25 +452,19 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         });
     }
 
-    function areaChart(paragraph) {
-        var index = 0;
-
+    function _areaChart(paragraph) {
         nv.addGraph(function() {
             var chart = nv.models.stackedAreaChart()
                 .x(function (d) {
-                    return d.label;
+                    return d.x;
                 })
                 .y(function (d) {
-                    return d.value;
+                    return d.y;
                 });
-
-            var values = _.map(paragraph.rows, function (row) {
-                return {label: (row.length > 1) ? row[1] : index++, value: (row.length > 0) ? row[0] : 0}
-            });
 
             d3.selectAll("#chart svg > *").remove();
             d3.select('#chart svg')
-                .datum([{key: 'bar', values: values}])
+                .datum(_datum('Area chart', paragraph.rows))
                 .call(chart);
 
             nv.utils.windowResize(chart.update);
