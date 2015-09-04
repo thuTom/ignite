@@ -43,7 +43,14 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
         $scope.tableSimpleDown = $table.tableSimpleDown;
         $scope.tableSimpleDownVisible = $table.tableSimpleDownVisible;
 
-        $scope.previewInit = $preview.previewInit;
+        var previews = [];
+
+        $scope.previewInit = function (preview) {
+            previews.push(preview);
+
+            $preview.previewInit(preview);
+        };
+
         $scope.previewChanged = $preview.previewChanged;
 
         $scope.formChanged = $common.formChanged;
@@ -211,43 +218,6 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 $scope.preview.transactions.java = $generatorJava.clusterTransactions(val).join('');
                 $scope.preview.transactions.allDefaults = $common.isEmptyString($scope.preview.transactions.xml);
             }
-            else {
-                $scope.preview.general.xml = ' ';
-                $scope.preview.general.java = ' ';
-
-                $scope.preview.atomics.xml = ' ';
-                $scope.preview.atomics.java = ' ';
-
-                $scope.preview.communication.xml = ' ';
-                $scope.preview.communication.java = ' ';
-
-                $scope.preview.deployment.xml = ' ';
-                $scope.preview.deployment.java = ' ';
-
-                $scope.preview.events.xml = ' ';
-                $scope.preview.events.java = ' ';
-
-                $scope.preview.marshaller.xml = ' ';
-                $scope.preview.marshaller.java = ' ';
-
-                $scope.preview.metrics.xml = ' ';
-                $scope.preview.metrics.java = ' ';
-
-                $scope.preview.p2p.xml = ' ';
-                $scope.preview.p2p.java = ' ';
-
-                $scope.preview.swap.xml = ' ';
-                $scope.preview.swap.java = ' ';
-
-                $scope.preview.time.xml = ' ';
-                $scope.preview.time.java = ' ';
-
-                $scope.preview.pools.xml = ' ';
-                $scope.preview.pools.java = ' ';
-
-                $scope.preview.transactions.xml = ' ';
-                $scope.preview.transactions.java = ' ';
-            }
         }
 
         // When landing on the page, get clusters and show them.
@@ -325,16 +295,16 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 else
                     sessionStorage.removeItem('clusterSelectedItem');
 
-                generatePreview();
-
-                $timeout(function () {
-                    if (backup)
-                        $scope.backupItem = backup;
-                    else if (item)
-                        $scope.backupItem = angular.copy(item);
-                    else
-                        $scope.backupItem = undefined;
+                _.forEach(previews, function(preview) {
+                    preview.attractAttention = false;
                 });
+
+                if (backup)
+                    $scope.backupItem = backup;
+                else if (item)
+                    $scope.backupItem = angular.copy(item);
+                else
+                    $scope.backupItem = undefined;
 
                 $timeout(function () {
                     if (changed)

@@ -56,7 +56,14 @@ controlCenterModule.controller('metadataController', [
             $scope.tablePairSave = $table.tablePairSave;
             $scope.tablePairSaveVisible = $table.tablePairSaveVisible;
 
-            $scope.previewInit = $preview.previewInit;
+            var previews = [];
+
+            $scope.previewInit = function (preview) {
+                previews.push(preview);
+
+                $preview.previewInit(preview);
+            };
+
             $scope.previewChanged = $preview.previewChanged;
 
             $scope.formChanged = $common.formChanged;
@@ -195,17 +202,17 @@ controlCenterModule.controller('metadataController', [
                     $scope.selectItem($scope.metadatas[0]);
             }
 
-            function setSelectedAndBackupItem(sel, bak, changed) {
+            function setSelectedAndBackupItem(sel, backup, changed) {
                 function setSelectedAndBackupItem() {
                     $table.tableReset();
 
                     $scope.selectedItem = sel;
 
-                    generatePreview();
-
-                    $timeout(function () {
-                        $scope.backupItem = bak;
+                    _.forEach(previews, function(preview) {
+                        preview.attractAttention = false;
                     });
+
+                    $scope.backupItem = backup;
 
                     $timeout(function () {
                         if (changed)
@@ -498,19 +505,6 @@ controlCenterModule.controller('metadataController', [
                     $scope.preview.store.xml = $generatorXml.metadataStore(val).join('');
                     $scope.preview.store.java = $generatorJava.metadataStore(val).join('');
                     $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
-                }
-                else {
-                    $scope.preview.general.xml = ' ';
-                    $scope.preview.general.java = ' ';
-                    $scope.preview.general.allDefaults = ' ';
-
-                    $scope.preview.query.xml = ' ';
-                    $scope.preview.query.java = ' ';
-                    $scope.preview.query.allDefaults = ' ';
-
-                    $scope.preview.store.xml = ' ';
-                    $scope.preview.store.java = ' ';
-                    $scope.preview.store.allDefaults = ' ';
                 }
             }
 

@@ -48,7 +48,14 @@ controlCenterModule.controller('cachesController', [
             $scope.tablePairSave = $table.tablePairSave;
             $scope.tablePairSaveVisible = $table.tablePairSaveVisible;
 
-            $scope.previewInit = $preview.previewInit;
+            var previews = [];
+
+            $scope.previewInit = function (preview) {
+                previews.push(preview);
+
+                $preview.previewInit(preview);
+            };
+
             $scope.previewChanged = $preview.previewChanged;
 
             $scope.formChanged = $common.formChanged;
@@ -271,31 +278,6 @@ controlCenterModule.controller('cachesController', [
                     $scope.preview.statistics.java = $generatorJava.cacheStatistics(val, varName).join('');
                     $scope.preview.statistics.allDefaults = $common.isEmptyString($scope.preview.statistics.xml);
                 }
-                else {
-                    $scope.preview.general.xml = ' ';
-                    $scope.preview.general.java = ' ';
-
-                    $scope.preview.memory.xml = ' ';
-                    $scope.preview.memory.java = ' ';
-
-                    $scope.preview.query.xml = ' ';
-                    $scope.preview.query.java = ' ';
-
-                    $scope.preview.store.xml = ' ';
-                    $scope.preview.store.java = ' ';
-
-                    $scope.preview.concurrency.xml = ' ';
-                    $scope.preview.concurrency.java = ' ';
-
-                    $scope.preview.rebalance.xml = ' ';
-                    $scope.preview.rebalance.java = ' ';
-
-                    $scope.preview.serverNearCache.xml = ' ';
-                    $scope.preview.serverNearCache.java = ' ';
-
-                    $scope.preview.statistics.xml = ' ';
-                    $scope.preview.statistics.java = ' ';
-                }
             }
 
             // When landing on the page, get caches and show them.
@@ -397,16 +379,16 @@ controlCenterModule.controller('cachesController', [
                     else
                         sessionStorage.removeItem('cacheSelectedItem');
 
-                    generatePreview();
-
-                    $timeout(function () {
-                        if (backup)
-                            $scope.backupItem = backup;
-                        else if (item)
-                            $scope.backupItem = angular.copy(item);
-                        else
-                            $scope.backupItem = undefined;
+                    _.forEach(previews, function(preview) {
+                        preview.attractAttention = false;
                     });
+
+                    if (backup)
+                        $scope.backupItem = backup;
+                    else if (item)
+                        $scope.backupItem = angular.copy(item);
+                    else
+                        $scope.backupItem = undefined;
 
                     $timeout(function () {
                         if (changed)

@@ -975,7 +975,7 @@ controlCenterModule.service('$table', ['$common', '$focus', function ($common, $
 controlCenterModule.service('$preview', ['$timeout', '$interval', function ($timeout, $interval) {
     var Range = require('ace/range').Range;
 
-    var previewPrevContent = [];
+    var prevContent = [];
 
     var animation = {editor: null, stage: 0, start: 0, stop: 0};
 
@@ -1061,13 +1061,13 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
 
         var clearPromise = editor.clearPromise;
 
-        var previewNewContent = content.lines;
+        var newContent = content.lines;
 
         if (content.action == 'remove')
-            previewPrevContent = content.lines;
-        // Do not mark the text changes for special marker value: ' '.
-        else if (previewPrevContent.length > 0 && previewNewContent.length > 0 && previewNewContent[0] != ' '
-            && previewPrevContent[0] != ' ') {
+            prevContent = content.lines;
+        else if (prevContent.length > 0 && newContent.length > 0 && editor.attractAttention) {
+            editor.attractAttention = true;
+
             if (clearPromise) {
                 $timeout.cancel(clearPromise);
 
@@ -1079,8 +1079,8 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
             var newIx = 0;
             var prevIx = 0;
 
-            var prevLen = previewPrevContent.length - (previewPrevContent[previewPrevContent.length - 1] == '' ? 1 : 0);
-            var newLen = previewNewContent.length - (previewNewContent[previewNewContent.length - 1] == '' ? 1 : 0);
+            var prevLen = prevContent.length - (prevContent[prevContent.length - 1] == '' ? 1 : 0);
+            var newLen = newContent.length - (newContent[newContent.length - 1] == '' ? 1 : 0);
 
             var selected = false;
             var scrollTo = -1;
@@ -1091,7 +1091,7 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
 
                 // Find an index of a first line with different text.
                 for (; (newIx < newLen || prevIx < prevLen) && start < 0; newIx++, prevIx++) {
-                    if (previewNewContent[newIx] != previewPrevContent[prevIx]) {
+                    if (newContent[newIx] != prevContent[prevIx]) {
                         start = newIx;
 
                         break;
@@ -1102,7 +1102,7 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
                     // Find an index of a last line with different text by checking last string of old and new content in reverse order.
                     for (var i = start; i < newLen && end < 0; i ++) {
                         for (var j = prevIx; j < prevLen && end < 0; j ++) {
-                            if (previewNewContent[i] == previewPrevContent[j] && previewNewContent[i] != '') {
+                            if (newContent[i] == prevContent[j] && newContent[i] != '') {
                                 end = i;
 
                                 newIx = i;
@@ -1144,18 +1144,19 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
                 editor.scrollToRow(scrollTo)
             }
 
-            previewPrevContent = [];
+            prevContent = [];
         }
     }
 
     return {
-        previewInit: function (editor) {
-            editor.setReadOnly(true);
-            editor.setOption('highlightActiveLine', false);
-            editor.setAutoScrollEditorIntoView(true);
-            editor.$blockScrolling = Infinity;
+        previewInit: function (preview) {
+            preview.setReadOnly(true);
+            preview.setOption('highlightActiveLine', false);
+            preview.setAutoScrollEditorIntoView(true);
+            preview.$blockScrolling = Infinity;
+            preview.attractAttention = true;
 
-            var renderer = editor.renderer;
+            var renderer = preview.renderer;
 
             renderer.setHighlightGutterLine(false);
             renderer.setShowPrintMargin(false);
@@ -1163,7 +1164,7 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
             renderer.setOption('minLines', '3');
             renderer.setOption('maxLines', '50');
 
-            editor.setTheme('ace/theme/chrome');
+            preview.setTheme('ace/theme/chrome');
         },
         previewChanged: previewChanged
     }
