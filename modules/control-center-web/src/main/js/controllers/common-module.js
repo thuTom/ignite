@@ -1066,8 +1066,6 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
         if (content.action == 'remove')
             prevContent = content.lines;
         else if (prevContent.length > 0 && newContent.length > 0 && editor.attractAttention) {
-            editor.attractAttention = true;
-
             if (clearPromise) {
                 $timeout.cancel(clearPromise);
 
@@ -1146,6 +1144,9 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
 
             prevContent = [];
         }
+        else
+            editor.attractAttention = true;
+
     }
 
     return {
