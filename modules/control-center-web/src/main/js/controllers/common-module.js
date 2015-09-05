@@ -1066,8 +1066,6 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
         if (content.action == 'remove')
             prevContent = content.lines;
         else if (prevContent.length > 0 && newContent.length > 0 && editor.attractAttention) {
-            editor.attractAttention = true;
-
             if (clearPromise) {
                 $timeout.cancel(clearPromise);
 
@@ -1146,6 +1144,9 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
 
             prevContent = [];
         }
+        else
+            editor.attractAttention = true;
+
     }
 
     return {
@@ -1340,13 +1341,13 @@ controlCenterModule.factory('$focus', function ($timeout) {
 });
 
 // Directive to auto-focus element.
-controlCenterModule.directive('autoFocus', function() {
+controlCenterModule.directive('autoFocus', function($timeout) {
     return {
-        link: {
-            post: function postLink(scope, element) {
-                // this succeeds since the element has been rendered
+        restrict: 'AC',
+        link: function(scope, element) {
+            $timeout(function(){
                 element[0].focus();
-            }
+            });
         }
     };
 });
