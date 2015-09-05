@@ -62,7 +62,7 @@ block container
                                     .btn-group(ng-model='paragraph.result' ng-click='$event.stopPropagation()' style='float: right')
                                         +btn-toolbar-data('fa-table', 'table', 'Show data in tabular form.')
                                         +btn-toolbar-data('fa-bar-chart', 'bar', 'Show bar chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
-                                        +btn-toolbar-data('fa-pie-chart', 'pie', 'Show pie chart.<br/>By default first column - pie values, second column - pie labels.<br/>In case of one column it will be treated as pies values.')
+                                        +btn-toolbar-data('fa-pie-chart', 'pie', 'Show pie chart.<br/>By default first column - pie values, second column - pie labels.<br/>In case of one column it will be treated as pie values.')
                                         +btn-toolbar-data('fa-line-chart', 'line', 'Show line chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
                                         +btn-toolbar-data('fa-area-chart', 'area', 'Show area chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
                                 div(ng-show='paragraph.edit')
@@ -114,6 +114,7 @@ block container
                                                 tr(ng-repeat='row in displayedCollection track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
                                 .panel-body(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
+                                    +btn-toolbar('chart-btn fa-cog', 'console.log("zzz")', 'Chart settings')
                                     div(id='chart-{{paragraph.id}}')
                                         svg
                                 .panel-body(ng-show='!paragraph.rows')
