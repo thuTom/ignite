@@ -21,7 +21,7 @@ var db = require('../db');
 var utils = require('./../helpers/common-utils');
 
 router.get('/new', function (req, res) {
-    res.render('templates/notebook-new', {});
+    res.render('sql/notebook-new', {});
 });
 
 /**

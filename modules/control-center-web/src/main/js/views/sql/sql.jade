@@ -114,7 +114,7 @@ block container
                                                 tr(ng-repeat='row in displayedCollection track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
                                 .panel-body(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
-                                    +btn-toolbar('chart-btn fa-cog', 'console.log("zzz")', 'Chart settings')
+                                    button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='top-right' data-auto-close='1' data-trigger='click')
                                     div(id='chart-{{paragraph.id}}')
                                         svg
                                 .panel-body(ng-show='!paragraph.rows')

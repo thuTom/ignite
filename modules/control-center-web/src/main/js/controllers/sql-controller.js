@@ -258,32 +258,44 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             $scope.addParagraph();
     };
 
-    var _processQueryResult = function (item) {
+    $scope.chartColumns = [];
+
+    var _processQueryResult = function (paragraph) {
         return function (res) {
-            item.meta = [];
+            paragraph.meta = [];
 
-            if (res.meta)
-                item.meta = res.meta;
+            if (res.meta) {
+                paragraph.meta = res.meta;
 
-            item.page = 1;
+                var idx = 0;
 
-            item.total = 0;
+                _.forEach(paragraph.meta, function (meta) {
+                    $scope.chartColumns.push({value: meta.fieldName, label: meta.fieldName, index: idx++});
+                });
 
-            item.queryId = res.queryId;
+                paragraph.chartX = paragraph.meta.length > 0 ? paragraph.meta[0] : null;
+                paragraph.chartY = paragraph.meta.length > 1 ? paragraph.meta[1] : null;
+            }
 
-            item.rows = res.rows;
+            paragraph.page = 1;
 
-            item.result = 'table';
+            paragraph.total = 0;
+
+            paragraph.queryId = res.queryId;
+
+            paragraph.rows = res.rows;
+
+            paragraph.result = 'table';
         }
     };
 
-    $scope.execute = function (item) {
+    $scope.execute = function (paragraph) {
         _saveNotebook();
 
-        _appendOnLast(item);
+        _appendOnLast(paragraph);
 
-        $http.post('/agent/query', {query: item.query, pageSize: item.pageSize, cacheName: item.cache.name})
-            .success(_processQueryResult(item))
+        $http.post('/agent/query', {query: paragraph.query, pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
+            .success(_processQueryResult(paragraph))
             .error(function (errMsg) {
                 $common.showError(errMsg);
             });
