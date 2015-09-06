@@ -121,19 +121,17 @@ function Client(ws, manager) {
  * @param {Function} [cb] Callback. Take 3 arguments: {String} error, {number} httpCode, {string} response.
  */
 Client.prototype.executeRest = function(path, params, method, headers, body, cb) {
-    var self = this;
-
     if (typeof(params) != 'object')
-        throw "'params' argument must be an object";
+        throw '"params" argument must be an object';
 
     if (typeof(cb) != 'function')
-        throw "callback must be a function";
+        throw 'callback must be a function';
 
     if (body && typeof(body) != 'string')
-        throw "body must be a string";
+        throw 'body must be a string';
 
     if (headers && typeof(headers) != 'object')
-        throw "headers must be an object";
+        throw 'headers must be an object';
 
     if (!method)
         method = 'GET';
@@ -141,7 +139,7 @@ Client.prototype.executeRest = function(path, params, method, headers, body, cb)
         method = method.toUpperCase();
 
     if (method != 'GET' && method != 'POST')
-        throw "Unknown HTTP method: " + method;
+        throw 'Unknown HTTP method: ' + method;
 
     var newArgs = argsToArray(arguments);
 
@@ -230,9 +228,12 @@ Client.prototype._invokeRmtMethod = function(methodName, args) {
 Client.prototype._rmtAuthMessage = function(msg) {
     var self = this;
 
-    var account = db.Account.findByUsername(msg.login, function(err, account) {
+    db.Account.findByUsername(msg.login, function(err, account) {
         if (err) {
-            self.authResult("User not found");
+            self.authResult(err);
+        }
+        else if (!account) {
+            self.authResult('User not found');
         }
         else {
             account.authenticate(msg.password, function(err, user, res) {
@@ -303,7 +304,7 @@ var manager = null;
 
 exports.createManager = function(srv) {
     if (manager)
-        throw "Agent manager already cleared!";
+        throw 'Agent manager already cleared!';
 
     manager = new AgentManager(srv);
 };
