@@ -91,7 +91,7 @@ block container
                                         button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
                                         .pull-right
                                             label Refresh rate:
-                                            button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url="rate" data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
+                                            button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url='rate' data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
                                 .panel-body(ng-show='paragraph.rows && paragraph.result === "table" && paragraph.rows')

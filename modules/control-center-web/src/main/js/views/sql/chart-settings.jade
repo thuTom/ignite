@@ -24,11 +24,11 @@
                 .col-sm-2
                     label X:
                 .col-sm-10
-                    button.form-control(id='chart-settings-X' ng-model='colX' data-placeholder='Col X' bs-select bs-options='item.value as item.label for item in chartColumns' tabindex='0')
+                    button.form-control(id='chart-settings-X' ng-model='paragraph.chartColX' data-placeholder='Col X' bs-select bs-options='item.value as item.label for item in paragraph.chartColumns' tabindex='0')
                 .col-sm-2
                     label Y:
                 .col-sm-10
-                    button.form-control(id='chart-settings-Y' ng-model='colY' data-placeholder='Col Y' bs-select bs-options='item.value as item.label for item in chartColumns' tabindex='1')
+                    button.form-control(id='chart-settings-Y' ng-model='paragraph.chartColY' data-placeholder='Col Y' bs-select bs-options='item.value as item.label for item in paragraph.chartColumns' tabindex='1')
             .form-actions(style='margin-top: 30px; padding: 5px')
                 button.btn.btn-primary(id='chart-settings-apply' ng-disabled='chartSettingsForm.$invalid' type='button' ng-click='$hide()') Apply
 

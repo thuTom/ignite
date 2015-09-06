@@ -258,23 +258,29 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             $scope.addParagraph();
     };
 
-    $scope.chartColumns = [];
-
     var _processQueryResult = function (paragraph) {
         return function (res) {
             paragraph.meta = [];
+            paragraph.chartColumns = [];
 
             if (res.meta) {
                 paragraph.meta = res.meta;
 
                 var idx = 0;
+                paragraph.chartColX = null;
+                paragraph.chartColY = null;
 
                 _.forEach(paragraph.meta, function (meta) {
-                    $scope.chartColumns.push({value: meta.fieldName, label: meta.fieldName, index: idx++});
-                });
+                    var col = {value: meta.fieldName, label: meta.fieldName, index: idx++};
 
-                paragraph.chartX = paragraph.meta.length > 0 ? paragraph.meta[0] : null;
-                paragraph.chartY = paragraph.meta.length > 1 ? paragraph.meta[1] : null;
+                    paragraph.chartColumns.push(col);
+
+                    if (idx == 1)
+                        paragraph.chartColX = col.value;
+
+                    if (idx == 2)
+                        paragraph.chartColY = col.value;
+                });
             }
 
             paragraph.page = 1;
