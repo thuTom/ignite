@@ -622,7 +622,6 @@ table tr:hover {
 }
 
 .metadata-scrollable {
-    height: 200px;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -632,6 +631,12 @@ table tr:hover {
 
     tr:hover {
         cursor: default;
+    }
+
+    thead > tr th.header {
+        input[type="text"] {
+            font-weight: normal;
+        }
     }
 }
 
