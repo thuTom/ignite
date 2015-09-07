@@ -669,17 +669,21 @@ $generatorXml.cacheServerNearCache = function(cache, res) {
     if (!res)
         res = $generatorCommon.builder();
 
-    if (cache.nearCacheEnabled) {
+    if (cache.cacheMode == 'PARTITIONED' && cache.nearCacheEnabled) {
         res.emptyLineIfNeeded();
 
         res.startBlock('<property name="nearConfiguration">');
         res.startBlock('<bean class="org.apache.ignite.configuration.NearCacheConfiguration">');
 
-        if (cache.nearConfiguration && cache.nearConfiguration.nearStartSize)
-            $generatorXml.property(res, cache.nearConfiguration, 'nearStartSize');
+        if (cache.nearConfiguration) {
+            if (cache.nearConfiguration.nearStartSize)
+                $generatorXml.property(res, cache.nearConfiguration, 'nearStartSize');
 
-        if (cache.nearConfiguration && cache.nearConfiguration.nearEvictionPolicy.kind)
+
             $generatorXml.evictionPolicy(res, cache.nearConfiguration.nearEvictionPolicy, 'nearEvictionPolicy');
+        }
+
+
 
         res.endBlock('</bean>');
         res.endBlock('</property>');

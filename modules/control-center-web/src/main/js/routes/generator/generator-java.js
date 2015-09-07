@@ -291,16 +291,16 @@ $generatorJava.beanProperty = function (res, varName, bean, beanPropName, beanVa
  *
  * @param res Resulting output with generated code.
  * @param varName Current using variable name.
- * @param evictionPolicy Data to add.
- * @param propertyName Name in source data.
+ * @param evtPlc Data to add.
+ * @param propName Name in source data.
  */
-$generatorJava.evictionPolicy = function (res, varName, evictionPolicy, propertyName) {
-    if (evictionPolicy && evictionPolicy.kind) {
-        var evictionPolicyDesc = $generatorCommon.EVICTION_POLICIES[evictionPolicy.kind];
+$generatorJava.evictionPolicy = function (res, varName, evtPlc, propName) {
+    if (evtPlc && evtPlc.kind) {
+        var evictionPolicyDesc = $generatorCommon.EVICTION_POLICIES[evtPlc.kind];
 
-        var obj = evictionPolicy[evictionPolicy.kind.toUpperCase()];
+        var obj = evtPlc[evtPlc.kind.toUpperCase()];
 
-        $generatorJava.beanProperty(res, varName, obj, propertyName, propertyName,
+        $generatorJava.beanProperty(res, varName, obj, propName, propName,
             evictionPolicyDesc.className, evictionPolicyDesc.fields, true);
     }
 };

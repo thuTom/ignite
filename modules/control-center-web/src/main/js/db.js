@@ -183,6 +183,7 @@ var CacheSchema = new Schema({
     readFromBackup: Boolean,
     copyOnRead: Boolean,
     maxConcurrentAsyncOperations: Number,
+    nearCacheEnabled: Boolean,
     nearConfiguration: {
         nearStartSize: Number,
         nearEvictionPolicy: {
