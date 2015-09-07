@@ -26,6 +26,10 @@ router.get('/chart-settings', function (req, res) {
     res.render('sql/chart-settings', {});
 });
 
+router.get('/cache-metadata', function (req, res) {
+    res.render('sql/cache-metadata', {});
+});
+
 router.get('/:noteId', function (req, res) {
     res.render('sql/sql', {noteId: req.params.noteId});
 });

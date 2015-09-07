@@ -76,17 +76,17 @@ block container
                                         ng-model='paragraph.query'
                                         ng-class='{"disable": paragraph.status == "RUNNING" || paragraph.status == "PENDING" }')
                                     .col-xs-4.col-sm-3
-                                        div(ng-show='caches.length > 0' style='padding: 5px 10px' st-table='displayedCollection' st-safe-src='caches')
+                                        div(ng-show='caches.length > 0' style='padding: 5px 10px' st-table='displayedCaches' st-safe-src='caches')
                                             lable.labelField.labelFormField Caches:
                                             .input-tip
-                                                input.form-control(type='text' st-search placeholder='Filter caches...')
+                                                input.form-control(type='text' placeholder='Filter caches...')
                                             table.links
                                                 tbody
-                                                    tr(ng-repeat='cache in displayedCollection track by cache.name')
+                                                    tr(ng-repeat='cache in displayedCaches track by cache.name')
                                                         td(style='width: 100%')
                                                             a(ng-class='{active: cache.name == paragraph.cache.name}' ng-click='paragraph.cache = cache') {{$index + 1}}) {{::cache.name}}
                                                         td(style='width: 15px')
-                                                            i.fa.fa-info-circle()
+                                                            i.fa.fa-info-circle(bs-popover data-template-url='cache-metadata' data-placement='left' data-auto-close='1' data-trigger='click')
                                         div(ng-show='caches.length == 0')
                                             label Placeholder empty caches
                                 .col-sm-12
@@ -117,12 +117,12 @@ block container
                                                     button.btn.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
                                                         span.caret
                                     .sql-table-wrapper
-                                        table.table.table-condensed(st-table='displayedCollection' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
+                                        table.table.table-condensed(st-table='displayedResult' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
                                             thead
                                                 tr
                                                     th(ng-repeat='col in paragraph.meta track by $index' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)' data-placement='bottom')
                                             tbody
-                                                tr(ng-repeat='row in displayedCollection track by $index')
+                                                tr(ng-repeat='row in displayedResult track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
                                 .panel-body(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
                                     button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='top-right' data-auto-close='1' data-trigger='click')
