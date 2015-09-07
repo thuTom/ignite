@@ -47,6 +47,7 @@ controlCenterModule.config(function ($tooltipProvider) {
 // Comboboxes configuration.
 controlCenterModule.config(function ($selectProvider) {
     angular.extend($selectProvider.defaults, {
+        container: 'body',
         maxLength: '1',
         allText: 'Select All',
         noneText: 'Clear All',
