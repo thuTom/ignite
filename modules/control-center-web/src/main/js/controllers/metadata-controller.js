@@ -282,7 +282,7 @@ controlCenterModule.controller('metadataController', [
                                 $scope.loadMeta.action = 'connect';
                                 $scope.loadMeta.tables = [];
 
-                                loadMetaModal.show();
+                                $common.confirmUnsavedChanges($confirm, $scope.ui.inputForm, loadMetaModal.show);
 
                                 $focus('jdbcUrl');
                             });
@@ -364,7 +364,7 @@ controlCenterModule.controller('metadataController', [
                 return javaName.charAt(0).toLocaleLowerCase() + javaName.slice(1);
             }
 
-            $scope.packageName = 'org.apache.ignite';
+            $scope.ui.packageName = 'org.apache.ignite';
 
             function _saveMetadata() {
                 $scope.preset.space = $scope.spaces[0];
@@ -374,104 +374,136 @@ controlCenterModule.controller('metadataController', [
                         $common.showError(errMsg);
                     });
 
-                loadMetaModal.hide();
+                var tables = [];
+                var isIntersections = false;
 
                 _.forEach($scope.loadMeta.tables, function (table) {
-                    if (table.use) {
-                        var qryFields = [];
-                        var ascFields = [];
-                        var descFields = [];
-                        var groups = [];
-                        var keyFields = [];
-                        var valFields = [];
-
-                        var tableName = table.tbl;
-
-                        var valType = $scope.packageName + '.' + toJavaClassName(tableName);
-
-                        function queryField(name, jdbcType) {
-                            return {name: toJavaName(name), className: jdbcType.javaType}
-                        }
-
-                        function dbField(name, jdbcType) {
-                            return {databaseName: name, databaseType: jdbcType.dbName,
-                                javaName: toJavaName(name), javaType: jdbcType.javaType}
-                        }
-
-                        function colType(colName) {
-                            var col = _.find(table.cols, function(col) {
-                                return col.name == colName;
-                            });
-
-                            if (col)
-                                return $common.findJdbcType(col.type).javaType;
-
-                            return 'Unknown';
-                        }
-
-                        _.forEach(table.cols, function(col) {
-                            var colName = col.name;
-                            var jdbcType = $common.findJdbcType(col.type);
-
-                            qryFields.push(queryField(colName, jdbcType));
-
-                            if (_.includes(table.ascCols, colName))
-                                ascFields.push(queryField(colName, jdbcType));
-
-                            if (_.includes(table.descCols, colName))
-                                descFields.push(queryField(colName, jdbcType));
-
-                            if (col.key)
-                                keyFields.push(dbField(colName, jdbcType));
-                            else
-                                valFields.push(dbField(colName, jdbcType));
-                        });
-
-                        var idxs = table.idxs;
-
-                        if (table.idxs) {
-                            var indexes = Object.keys(idxs);
-
-                            _.forEach(indexes, function (indexName) {
-                                var index = idxs[indexName];
-
-                                var fields = Object.keys(index);
-
-                                if (fields.length > 1)
-                                    groups.push(
-                                        {name: indexName, fields: _.map(fields, function (fieldName) {
-                                            return {
-                                                name: fieldName,
-                                                className: colType(fieldName),
-                                                direction: index[fieldName]
-                                            };
-                                        })});
-                            });
-                        }
-
-                        var metaName = toProperCase(tableName);
-
-                        var meta = _.find($scope.metadatas, function (meta) {
-                            return meta.name == metaName;
-                        });
-
-                        if (!meta)
-                            meta = {space: $scope.spaces[0], name: metaName};
-
-                        meta.databaseSchema = table.schema;
-                        meta.databaseTable = tableName;
-                        meta.keyType = valType + 'Key';
-                        meta.valueType = valType;
-                        meta.queryFields = qryFields;
-                        meta.ascendingFields = ascFields;
-                        meta.descendingFields = descFields;
-                        meta.groups = groups;
-                        meta.keyFields = keyFields;
-                        meta.valueFields = valFields;
-
-                        save(meta);
-                    }
+                    if (table.use)
+                        if (tables.indexOf(table.tbl) >= 0)
+                            isIntersections = true;
+                        else
+                            tables.push(table.tbl)
                 });
+
+                tables = [];
+
+                function saveImported() {
+                    loadMetaModal.hide();
+
+                    _.forEach($scope.loadMeta.tables, function (table) {
+                        if (table.use) {
+                            if (tables.indexOf(table.tbl) == -1) {
+                                var qryFields = [];
+                                var ascFields = [];
+                                var descFields = [];
+                                var groups = [];
+                                var keyFields = [];
+                                var valFields = [];
+
+                                var tableName = table.tbl;
+
+                                var valType = $scope.ui.packageName + '.' + toJavaClassName(tableName);
+
+                                function queryField(name, jdbcType) {
+                                    return {name: toJavaName(name), className: jdbcType.javaType}
+                                }
+
+                                function dbField(name, jdbcType) {
+                                    return {databaseName: name, databaseType: jdbcType.dbName,
+                                        javaName: toJavaName(name), javaType: jdbcType.javaType}
+                                }
+
+                                function colType(colName) {
+                                    var col = _.find(table.cols, function (col) {
+                                        return col.name == colName;
+                                    });
+
+                                    if (col)
+                                        return $common.findJdbcType(col.type).javaType;
+
+                                    return 'Unknown';
+                                }
+
+                                _.forEach(table.cols, function (col) {
+                                    var colName = col.name;
+                                    var jdbcType = $common.findJdbcType(col.type);
+
+                                    qryFields.push(queryField(colName, jdbcType));
+
+                                    if (_.includes(table.ascCols, colName))
+                                        ascFields.push(queryField(colName, jdbcType));
+
+                                    if (_.includes(table.descCols, colName))
+                                        descFields.push(queryField(colName, jdbcType));
+
+                                    if (col.key)
+                                        keyFields.push(dbField(colName, jdbcType));
+                                    else
+                                        valFields.push(dbField(colName, jdbcType));
+                                });
+
+                                var idxs = table.idxs;
+
+                                if (table.idxs) {
+                                    var indexes = Object.keys(idxs);
+
+                                    _.forEach(indexes, function (indexName) {
+                                        var index = idxs[indexName];
+
+                                        var fields = Object.keys(index);
+
+                                        if (fields.length > 1)
+                                            groups.push(
+                                                {name: indexName, fields: _.map(fields, function (fieldName) {
+                                                    return {
+                                                        name: fieldName,
+                                                        className: colType(fieldName),
+                                                        direction: index[fieldName]
+                                                    };
+                                                })});
+                                    });
+                                }
+
+                                var metaName = toProperCase(tableName);
+
+                                var meta = _.find($scope.metadatas, function (meta) {
+                                    return meta.name == metaName;
+                                });
+
+                                if (!meta)
+                                    meta = {space: $scope.spaces[0], name: metaName};
+
+                                meta.databaseSchema = table.schema;
+                                meta.databaseTable = tableName;
+                                meta.keyType = valType + 'Key';
+                                meta.valueType = valType;
+                                meta.queryFields = qryFields;
+                                meta.ascendingFields = ascFields;
+                                meta.descendingFields = descFields;
+                                meta.groups = groups;
+                                meta.keyFields = keyFields;
+                                meta.valueFields = valFields;
+
+                                save(meta, true);
+
+                                tables.push(table.tbl)
+                            }
+                        }
+                    });
+
+                    $common.showInfo('Cache type metadata loaded from database.');
+                }
+
+                if (isIntersections)
+                    $confirm.show('<span>' +
+                        'Loaded metadata has intersections in schemas by table names.<br/>' +
+                        'Will be loaded only first table for every name.<br/><br/>' +
+                        'Continue to load metadata with skipping of repeat table names?' +
+                        '</span>').then(function () {
+                        saveImported();
+                    });
+                else
+                    saveImported();
             }
 
             $scope.loadMetadataNext = function () {
@@ -481,6 +513,10 @@ controlCenterModule.controller('metadataController', [
                     _loadMetadata();
                 else if  ($scope.loadMeta.action == 'tables')
                     _saveMetadata();
+            };
+
+            $scope.nextAvailable = function () {
+                return $scope.loadMeta.action != 'tables' || $('#metadataTableData').find(':checked').length > 0;
             };
 
             $scope.loadMetadataPrev = function () {
@@ -674,7 +710,7 @@ controlCenterModule.controller('metadataController', [
             }
 
             // Save cache type metadata into database.
-            function save(item) {
+            function save(item, quiet) {
                 var qry = queryConfigured(item);
                 var str = storeConfigured(item);
 
@@ -688,8 +724,6 @@ controlCenterModule.controller('metadataController', [
                 $http.post('metadata/save', item)
                     .success(function (_id) {
                         $common.markPristine($scope.ui.inputForm, 'metadataBackupItemChanged');
-
-                        $common.showInfo('Metadata "' + item.name + '" saved.');
 
                         var idx = _.findIndex($scope.metadatas, function (metadata) {
                             return metadata._id == _id;
@@ -705,7 +739,8 @@ controlCenterModule.controller('metadataController', [
 
                         $scope.selectItem(item);
 
-                        $common.showInfo('Cache type metadata"' + item.name + '" saved.');
+                        if (!quiet)
+                            $common.showInfo('Cache type metadata"' + item.name + '" saved.');
                     })
                     .error(function (errMsg) {
                         $common.showError(errMsg);
