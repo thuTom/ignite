@@ -179,7 +179,7 @@ public class DatabaseMetadataExtractor {
         for (String fileName : list) {
             if (fileName.endsWith(".jar")) {
                 try {
-                    String spec = normalizePath("jar:file:/" + drvFolder + '/' + fileName +
+                    String spec = normalizePath("jar:file:" + (drvFolder.startsWith("/") ? "" : "/") + drvFolder + '/' + fileName +
                         "!/META-INF/services/java.sql.Driver");
 
                     URL url = new URL(spec);

@@ -38,6 +38,7 @@ controlCenterModule.config(function ($popoverProvider) {
 controlCenterModule.config(function ($tooltipProvider) {
     angular.extend($tooltipProvider.defaults, {
         container: 'body',
+        delay: 150,
         placement: 'right',
         html: 'true',
         trigger: 'click hover'

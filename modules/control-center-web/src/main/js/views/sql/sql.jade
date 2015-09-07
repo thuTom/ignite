@@ -69,32 +69,38 @@ block container
                                     input.sql-name-input(ng-model='paragraph.edit_name' required ng-click='$event.stopPropagation();' on-enter='renameParagraph(paragraph, paragraph.edit_name)' on-escape='paragraph.edit = false')
                                     i.tipLabel.fa.fa-floppy-o(ng-show='paragraph.edit_name' ng-click='renameParagraph(paragraph, paragraph.edit_name); $event.stopPropagation();' bs-tooltip data-title='Save paragraph name' data-trigger='hover')
                             .panel-collapse(role='tabpanel' bs-collapse-target)
-                                    .col-sm-12(ng-show='paragraph.editor')
-                                        .col-xs-8.col-sm-9(style='border-right: 1px solid #eee')
-                                            .sql-editor(ui-ace='{onLoad: aceInit, theme: "chrome", mode: "sql", require: ["ace/ext/language_tools"],' +
-                                                'advanced: {enableSnippets: false, enableBasicAutocompletion: true, enableLiveAutocompletion: true}}'
-                                            ng-model='paragraph.query'
-                                            ng-class='{"disable": paragraph.status == "RUNNING" || paragraph.status == "PENDING" }')
-                                        .col-xs-4.col-sm-3
-                                            div(ng-hide='caches.length == 0' style='padding-left:10px')
-                                                lable.labelHeader Caches:
-                                                table.links(st-table='caches')
-                                                    tbody
-                                                        tr(ng-repeat='cache in caches track by cache.name')
-                                                            td.col-sm-6
-                                                                a(ng-class='{active: cache.name == paragraph.cache.name}' ng-click='paragraph.cache = cache') {{$index + 1}}) {{::cache.name}}, {{::cache.mode}}
-                                    .col-sm-12
-                                        hr(style='margin: 0')
-                                    .col-sm-12
-                                        .details-row
-                                            button.btn.btn-primary(ng-click='explain(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Explain
-                                            button.btn.btn-primary(ng-click='execute(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Execute
-                                            button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
-                                            .pull-right
-                                                label Refresh rate:
-                                                button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url='rate' data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
-                                                label.tipLabel Page size:
-                                                button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
+                                .col-sm-12(ng-show='paragraph.editor')
+                                    .col-xs-8.col-sm-9(style='border-right: 1px solid #eee')
+                                        .sql-editor(ui-ace='{onLoad: aceInit, theme: "chrome", mode: "sql", require: ["ace/ext/language_tools"],' +
+                                            'advanced: {enableSnippets: false, enableBasicAutocompletion: true, enableLiveAutocompletion: true}}'
+                                        ng-model='paragraph.query'
+                                        ng-class='{"disable": paragraph.status == "RUNNING" || paragraph.status == "PENDING" }')
+                                    .col-xs-4.col-sm-3
+                                        div(ng-hide='caches.length == 0' style='padding: 5px 0 5px 10px')
+                                            lable.labelHeader Caches:
+                                            table.links(st-table='caches')
+                                                thead
+
+                                                tbody
+                                                    tr(ng-repeat='cache in caches track by cache.name')
+                                                        td
+                                                            a(ng-class='{active: cache.name == paragraph.cache.name}' ng-click='paragraph.cache = cache') {{$index + 1}}) {{::cache.name}}
+                                                        td(style='width: 15px')
+                                                            i.fa.fa-info-circle
+                                .col-sm-12
+                                    hr(style='margin: 0')
+                                .col-sm-12
+                                    .details-row
+                                        button.btn.btn-primary(ng-click='explain(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Explain
+                                        button.btn.btn-primary(ng-click='execute(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Execute
+                                        button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
+                                        .pull-right
+                                            label Refresh rate:
+                                            button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url='rate' data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
+                                            label.tipLabel Page size:
+                                            button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
+                                .col-sm-12(ng-show='paragraph.result != "none"')
+                                    hr(style='margin-top: 0; margin-bottom: 10px')
                                 div(ng-show='paragraph.rows && paragraph.result === "table"')
                                     .col-sm-12
                                         .sql-table-total
@@ -112,7 +118,7 @@ block container
                                         table.table.table-condensed(st-table='displayedCollection' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
                                             thead
                                                 tr
-                                                    th(ng-repeat='col in paragraph.meta track by $index' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)')
+                                                    th(ng-repeat='col in paragraph.meta track by $index' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)' data-placement='bottom')
                                             tbody
                                                 tr(ng-repeat='row in displayedCollection track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}

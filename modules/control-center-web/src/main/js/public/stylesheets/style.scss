@@ -370,10 +370,6 @@ h3 {
     margin-bottom: 1.5em;
 }
 
-table tr:hover {
-    cursor: pointer;
-}
-
 .base-control {
     text-align: left;
     padding: 3px 3px;
@@ -509,11 +505,20 @@ table tr:hover {
 }
 
 .theme-line table.links {
-    display: table;
     table-layout: fixed;
+    border-collapse: collapse;
 
-    td {
-        padding-left: 18px;
+    width: 100%;
+
+    tbody {
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+    }
+
+    tbody td:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     tfoot > tr > td {
@@ -1364,9 +1369,3 @@ a {
 button.dropdown-toggle {
     margin-right: 5px;
 }
-
-//table.floatThead-table {
-//    border-top: none;
-//    border-bottom: none;
-//    background-color: #FFF;
-//}

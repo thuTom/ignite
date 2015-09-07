@@ -57,7 +57,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         renderer.setHighlightGutterLine(false);
         renderer.setShowPrintMargin(false);
         renderer.setOption('fontSize', '14px');
-        renderer.setOption('minLines', '3');
+        renderer.setOption('minLines', '5');
         renderer.setOption('maxLines', '15');
 
         editor.setTheme('ace/theme/chrome');
