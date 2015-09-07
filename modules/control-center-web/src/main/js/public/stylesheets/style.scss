@@ -512,7 +512,6 @@ h3 {
 
     tbody {
         border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
     }
 
     tbody td:first-child {
@@ -1300,7 +1299,8 @@ a {
 
 .chart-btn {
     position: absolute;
-    right: 30px;
+    right: 25px;
+    margin: 0;
 }
 
 .chart-settings {

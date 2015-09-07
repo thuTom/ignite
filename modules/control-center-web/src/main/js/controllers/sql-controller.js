@@ -25,6 +25,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.joinTip = $common.joinTip;
 
+    $scope.caches = [];
+
     $scope.pageSizes = [10, 25, 50];
 
     $scope.modes = [
@@ -239,16 +241,12 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             $common.showError(errMsg);
         });
 
-    $scope.caches = undefined;
-
     $http.post('/agent/topology')
         .success(function (clusters) {
-            var node = clusters[0];
-
-            $scope.caches = node.caches;
+            $scope.caches = clusters[0].caches;
         })
         .error(function (err, status) {
-            $scope.caches = undefined;
+            $scope.caches = [];
 
             if (status == 503)
                 $scope.showDownloadAgent();
@@ -423,22 +421,22 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.rateAsString = function (paragraph) {
-        if (paragraph.rate && paragraph.rate.ruined)
+        if (paragraph.rate && paragraph.rate.executed)
             return  " " + paragraph.rate.value + paragraph.rate.unit;
 
         return "";
     };
 
     $scope.startRefresh = function (paragraph, value, unit) {
-        paragraph.rate = { value: value, unit: unit, ruined: true };
+        paragraph.rate = { value: value, unit: unit, executed: true };
 
-        //TODO Start timer.
+        //TODO IGNITE-843 Start timer.
     };
 
     $scope.stopRefresh = function (paragraph) {
-        paragraph.rate.ruined = false;
+        paragraph.rate.executed = false;
 
-        //TODO Stop timer.
+        //TODO IGNITE-843 Stop timer.
     };
 
     $scope.getter = function (value) {
