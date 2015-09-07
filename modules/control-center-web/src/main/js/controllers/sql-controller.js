@@ -41,6 +41,13 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.exportDropdown = [{ 'text': 'Export all', 'click': 'exportAll(paragraph)'}];
 
+    $scope.floatTheadOptions = {
+        useAbsolutePositioning: true,
+        scrollContainer: function($table) {
+            return $table.closest(".sql-table-wrapper");
+        }
+    };
+
     $scope.aceInit = function (editor) {
         editor.setAutoScrollEditorIntoView(true);
         editor.$blockScrolling = Infinity;
@@ -348,7 +355,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             });
     };
 
-    var _export = function(meta, rows) {
+    var _export = function(fileName, meta, rows) {
         var csvContent = "";
 
         if (meta) {
@@ -381,17 +388,17 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             csvContent += '\n';
         });
 
-        $common.download('application/octet-stream;charset=utf-8', 'export.csv', escape(csvContent));
+        $common.download('application/octet-stream;charset=utf-8', fileName, escape(csvContent));
     };
 
     $scope.exportPage = function(paragraph) {
-        _export(paragraph.meta, paragraph.rows);
+        _export('export.csv', paragraph.meta, paragraph.rows);
     };
 
     $scope.exportAll = function(paragraph) {
         $http.post('/agent/query/getAll', {query: paragraph.query, cacheName: paragraph.cache.name})
             .success(function (item) {
-                _export(item.meta, item.rows);
+                _export('export-all.csv', item.meta, item.rows);
             })
             .error(function (errMsg) {
                 $common.showError(errMsg);

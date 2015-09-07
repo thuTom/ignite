@@ -69,8 +69,7 @@ block container
                                     input.sql-name-input(ng-model='paragraph.edit_name' required ng-click='$event.stopPropagation();' on-enter='renameParagraph(paragraph, paragraph.edit_name)' on-escape='paragraph.edit = false')
                                     i.tipLabel.fa.fa-floppy-o(ng-show='paragraph.edit_name' ng-click='renameParagraph(paragraph, paragraph.edit_name); $event.stopPropagation();' bs-tooltip data-title='Save paragraph name' data-trigger='hover')
                             .panel-collapse(role='tabpanel' bs-collapse-target)
-                                .panel-body(ng-show='paragraph.editor')
-                                    .row
+                                    .col-sm-12(ng-show='paragraph.editor')
                                         .col-xs-8.col-sm-9(style='border-right: 1px solid #eee')
                                             .sql-editor(ui-ace='{onLoad: aceInit, theme: "chrome", mode: "sql", require: ["ace/ext/language_tools"],' +
                                                 'advanced: {enableSnippets: false, enableBasicAutocompletion: true, enableLiveAutocompletion: true}}'
@@ -84,32 +83,36 @@ block container
                                                         tr(ng-repeat='cache in caches track by cache.name')
                                                             td.col-sm-6
                                                                 a(ng-class='{active: cache.name == paragraph.cache.name}' ng-click='paragraph.cache = cache') {{$index + 1}}) {{::cache.name}}, {{::cache.mode}}
-                                    hr(style='margin: 0')
-                                    .settings-row
-                                        button.btn.btn-primary(ng-click='explain(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Explain
-                                        button.btn.btn-primary(ng-click='execute(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Execute
-                                        button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
-                                        .pull-right
-                                            label Refresh rate:
-                                            button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url='rate' data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
-                                            label.tipLabel Page size:
-                                            button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
-                                .panel-body(ng-show='paragraph.rows && paragraph.result === "table" && paragraph.rows')
-                                    .row
-                                        lable Page #:&nbsp;
-                                        b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
-                                        | Results:&nbsp;
-                                        b {{paragraph.rows.length + paragraph.total}}
-                                        button.btn.btn-primary.fieldButton(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
-                                        .btn-group.fieldButton
-                                            button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
-                                            button.btn.dropdown-toggle.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
-                                                span.caret
-                                    .table-responsive
-                                        table.table.table-condensed(st-table='displayedCollection' st-safe-src='paragraph.rows')
+                                    .col-sm-12
+                                        hr(style='margin: 0')
+                                    .col-sm-12
+                                        .details-row
+                                            button.btn.btn-primary(ng-click='explain(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Explain
+                                            button.btn.btn-primary(ng-click='execute(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Execute
+                                            button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
+                                            .pull-right
+                                                label Refresh rate:
+                                                button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.ruined}' bs-popover data-template-url='rate' data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
+                                                label.tipLabel Page size:
+                                                button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select)
+                                div(ng-show='paragraph.rows && paragraph.result === "table"')
+                                    .col-sm-12
+                                        .sql-table-total
+                                            label Page #:&nbsp;
+                                            b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
+                                            label Results:&nbsp;
+                                            b {{paragraph.rows.length + paragraph.total}}
+                                            .pull-right
+                                                button.btn.btn-primary(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
+                                                .btn-group
+                                                    button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
+                                                    button.btn.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
+                                                        span.caret
+                                    .sql-table-wrapper
+                                        table.table.table-condensed(st-table='displayedCollection' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
                                             thead
                                                 tr
-                                                    th(ng-repeat='col in paragraph.meta track by $index' st-sort='getter' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)')
+                                                    th(ng-repeat='col in paragraph.meta track by $index' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)')
                                             tbody
                                                 tr(ng-repeat='row in displayedCollection track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
@@ -117,6 +120,5 @@ block container
                                     button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='top-right' data-auto-close='1' data-trigger='click')
                                     div(id='chart-{{paragraph.id}}')
                                         svg
-                                .panel-body(ng-show='!paragraph.rows')
-                                    div(style='text-align: center;')
-                                        label Result set is empty.
+                                .sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"')
+                                    label Result set is empty.
