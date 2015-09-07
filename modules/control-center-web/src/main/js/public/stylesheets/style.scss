@@ -617,22 +617,22 @@ table tr:hover {
     }
 }
 
+.metadata-content {
+    margin: 15px;
+}
+
+.metadata-scrollable {
+    height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .theme-line table.metadata {
+    margin-bottom: 10px;
+
     tr:hover {
         cursor: default;
     }
-
-    thead > tr th.header {
-        input[type="text"] {
-            font-weight: normal;
-        }
-    }
-
-    margin-bottom: 10px;
-}
-
-.metadata-content {
-    margin: 15px;
 }
 
 .theme-line table.sql-results {
@@ -642,14 +642,6 @@ table tr:hover {
     }
 
     margin: 0;
-
-    //tbody, thead { display: block; }
-    //
-    //tbody {
-    //    height: 100px;
-    //    overflow-y: auto;
-    //    overflow-x: hidden;
-    //}
 
     td {
         padding: 3px 6px;
