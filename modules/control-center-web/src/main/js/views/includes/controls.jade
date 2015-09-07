@@ -481,12 +481,12 @@ mixin save-remove-buttons(objectName)
     -var removeTip = '"Remove current ' + objectName+ '"'
 
     .panel-tip-container(ng-hide='backupItem._id')
-        a.btn.btn-primary(ng-disabled='!formChanged(ui.inputForm)' ng-click='if (formChanged(ui.inputForm)) saveItem()' bs-tooltip data-title='{{saveBtnTipText(ui.inputForm, "#{objectName}")}}' data-placement='bottom') Save
+        a.btn.btn-primary(ng-disabled='!formChanged(ui.inputForm)' ng-click='formChanged(ui.inputForm) ? saveItem() : ""' bs-tooltip data-title='{{saveBtnTipText(ui.inputForm, "#{objectName}")}}' data-placement='bottom' data-trigger='hover') Save
     .btn-group.panel-tip-container(ng-show='backupItem._id')
-        a.btn.btn-primary(id='save-item' ng-disabled='!formChanged(ui.inputForm)' ng-click='if (formChanged(ui.inputForm)) saveItem()' bs-tooltip data-title='{{saveBtnTipText(ui.inputForm, "#{objectName}")}}' data-placement='bottom' data-trigger='hover') Save
+        a.btn.btn-primary(id='save-item' ng-disabled='!formChanged(ui.inputForm)' ng-click='formChanged(ui.inputForm) ? saveItem() : ""' bs-tooltip data-title='{{saveBtnTipText(ui.inputForm, "#{objectName}")}}' data-placement='bottom' data-trigger='hover') Save
         button.btn.dropdown-toggle.btn-primary(id='save-item-dropdown' ng-disabled='!backupItem._id' data-toggle='dropdown' data-container='body' bs-dropdown='saveDropdown' data-placement='bottom-right')
             span.caret
     .btn-group.panel-tip-container(ng-show='backupItem._id')
-        button.btn.btn-primary(id='remove-item' ng-click='removeItem()' bs-tooltip=removeTip data-placement='bottom') Remove
+        button.btn.btn-primary(id='remove-item' ng-click='removeItem()' bs-tooltip=removeTip data-placement='bottom' data-trigger='hover') Remove
         button.btn.dropdown-toggle.btn-primary(id='remove-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='removeDropdown' data-placement='bottom-right')
             span.caret
