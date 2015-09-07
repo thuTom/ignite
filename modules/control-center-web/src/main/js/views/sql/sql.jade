@@ -103,19 +103,18 @@ block container
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select style='margin-right: 0')
                                 .col-sm-12(ng-show='paragraph.result != "none"')
                                     hr(style='margin-top: 0; margin-bottom: 10px')
-                                div(ng-show='paragraph.rows && paragraph.result === "table"')
-                                    .col-sm-12
-                                        .sql-table-total
-                                            label Page #:&nbsp;
-                                            b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
-                                            label Results:&nbsp;
-                                            b {{paragraph.rows.length + paragraph.total}}
-                                            .pull-right
-                                                button.btn.btn-primary(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
-                                                .btn-group
-                                                    button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
-                                                    button.btn.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
-                                                        span.caret
+                                .col-sm-12(ng-show='paragraph.rows && paragraph.result === "table"')
+                                    .sql-table-total
+                                        label Page #:&nbsp;
+                                        b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
+                                        label Results:&nbsp;
+                                        b {{paragraph.rows.length + paragraph.total}}
+                                        .pull-right
+                                            button.btn.btn-primary(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
+                                            .btn-group
+                                                button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
+                                                button.btn.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
+                                                    span.caret
                                     .sql-table-wrapper
                                         table.table.table-condensed(st-table='displayedResult' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
                                             thead
@@ -124,9 +123,8 @@ block container
                                             tbody
                                                 tr(ng-repeat='row in displayedResult track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
-                                .panel-body(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
+                                .col-sm-12(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
                                     button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='top-right' data-auto-close='1' data-trigger='click')
                                     div(id='chart-{{paragraph.id}}')
                                         svg
-                                .sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"')
-                                    label Result set is empty.
+                                .col-sm-12.sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"') Result set is empty.
