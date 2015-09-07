@@ -36,7 +36,7 @@ function AgentManager(srv) {
     var self = this;
 
     this._wss.on('connection', function(ws) {
-        var client = new Client(ws, self);
+        new Client(ws, self);
     });
 }
 
@@ -230,7 +230,8 @@ Client.prototype._rmtAuthMessage = function(msg) {
 
     db.Account.findByUsername(msg.login, function(err, account) {
         if (err) {
-            self.authResult(err);
+            self.authResult('Failed to authorize user');
+            // TODO IGNITE-1379 send error to web master.
         }
         else if (!account) {
             self.authResult('User not found');

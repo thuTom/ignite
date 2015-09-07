@@ -44,10 +44,6 @@ include ../includes/controls
                                     input(type='checkbox' ng-model='schema.use' ng-change='selectSchema()')
                                 td
                                     label {{::schema.name}}
-                        tfoot
-                            tr
-                                td.text-right(colspan='3')
-                                    div(st-pagination st-items-by-page='10' st-displayed-pages='5')
             .metadata-content(ng-show='loadMeta.action == "tables"')
                 .settings-row
                     label.col-sm-2.required Package:

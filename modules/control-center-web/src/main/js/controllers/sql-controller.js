@@ -278,15 +278,15 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 paragraph.chartColY = null;
 
                 _.forEach(paragraph.meta, function (meta) {
-                    var col = {value: meta.fieldName, label: meta.fieldName, index: idx++};
+                    var col = {value: idx++, label: meta.fieldName};
 
                     paragraph.chartColumns.push(col);
 
                     if (idx == 1)
-                        paragraph.chartColX = col.value;
+                        paragraph.chartColX = 0;
 
                     if (idx == 2)
-                        paragraph.chartColY = col.value;
+                        paragraph.chartColY = 1;
                 });
             }
 
@@ -445,7 +445,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         return value;
     };
 
-    function _isNumber(arr, idx, dflt) {
+    function _chartNumber(arr, idx, dflt) {
         if (arr && arr.length > idx) {
             var val = arr[idx];
 
@@ -456,11 +456,18 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         return dflt;
     }
 
-    function _datum(key, rows) {
+    function _chartLabel(arr, idx, dflt) {
+        if (arr && arr.length > idx)
+            return arr[idx];
+
+        return dflt;
+    }
+
+    function _chartDatum(key, paragraph) {
         var index = 0;
 
-        var values = _.map(rows, function (row) {
-            return {x: _isNumber(row, 1, index++), y: _isNumber(row, 0, 0)}
+        var values = _.map(paragraph.rows, function (row) {
+            return {x: _chartNumber(row, paragraph.chartColX, index++), y: _chartNumber(row, paragraph.chartColY, 0)}
         });
 
         return [{key: key, values: values}];
@@ -485,6 +492,35 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         });
     }
 
+    $scope.applyChartSettings = function (paragraph) {
+        if (paragraph.rows && paragraph.rows.length > 0) {
+            switch (paragraph.result) {
+                case 'table':
+                case 'none':
+                    break;
+
+                case 'bar':
+                    _barChart(paragraph);
+                    break;
+
+                case 'pie':
+                    _pieChart(paragraph);
+                    break;
+
+                case 'line':
+                    _lineChart(paragraph);
+                    break;
+
+                case 'area':
+                    _areaChart(paragraph);
+                    break;
+
+                default:
+                    $common.showError('Unknown result: ' + new_result);
+            }
+        }
+    };
+
     function _barChart(paragraph) {
         var index = 0;
 
@@ -498,7 +534,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 });
 
             var values = _.map(paragraph.rows, function (row) {
-                return {label: (row.length > 1) ? row[1] : index++, value: _isNumber(row, 0, 0)}
+                return {
+                    label: _chartLabel(row, paragraph.chartColY, index++),
+                    value: _chartNumber(row, paragraph.chartColX, 0)
+                }
             });
 
             _insertChart(paragraph, [{key: 'bar', values: values}], chart);
@@ -511,10 +550,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.pieChart()
                     .x(function (row) {
-                        return (row.length > 1) ? row[1] : index++;
+                        return _chartLabel(row, paragraph.chartColX, index++);
                     })
                     .y(function (row) {
-                        return _isNumber(row, 0, 0);
+                        return _chartNumber(row, paragraph.chartColX, 0);
                     })
                 .showLabels(true)
                 .labelThreshold(.05)
@@ -540,7 +579,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 .x(_x)
                 .y(_y);
 
-            _insertChart(paragraph, _datum('Line chart', paragraph.rows), chart);
+            _insertChart(paragraph, _chartDatum('Line chart', paragraph), chart);
         });
     }
 
@@ -550,7 +589,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 .x(_x)
                 .y(_y);
 
-            _insertChart(paragraph, _datum('Area chart', paragraph.rows), chart);
+            _insertChart(paragraph, _chartDatum('Area chart', paragraph), chart);
         });
     }
 }]);
