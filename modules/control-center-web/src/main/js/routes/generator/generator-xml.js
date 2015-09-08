@@ -118,7 +118,7 @@ $generatorXml.beanProperty = function (res, bean, beanPropName, desc, createBean
         tmpRes.emptyLineIfNeeded();
         tmpRes.startBlock('<property name="' + beanPropName + '">');
         tmpRes.startBlock('<bean class="' + desc.className + '">');
-        
+
         var hasData = false;
 
         for (var propName in props) {
@@ -201,6 +201,8 @@ $generatorXml.evictionPolicy = function (res, evtPlc, propName) {
 $generatorXml.clusterGeneral = function (cluster, res) {
     if (!res)
         res = $generatorCommon.builder();
+
+    $generatorXml.property(res, cluster, 'name', 'gridName');
 
     if (cluster.discovery) {
         res.startBlock('<property name="discoverySpi">');

@@ -312,6 +312,9 @@ $generatorJava.clusterGeneral = function (cluster, clientNearCfg, res) {
 
     $generatorJava.declareVariable(res, true, 'cfg', 'org.apache.ignite.configuration.IgniteConfiguration');
 
+    $generatorJava.property(res, 'cfg', cluster, 'name', null, 'gridName');
+    res.needEmptyLine = true;
+
     if (clientNearCfg) {
         res.line('cfg.setClientMode(true);');
 
