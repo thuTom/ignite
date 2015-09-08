@@ -371,7 +371,8 @@ var DatabasePresetSchema = new Schema({
     jdbcDriverJar: String,
     jdbcDriverClass: String,
     jdbcUrl: String,
-    user: String
+    user: String,
+    packageName: String
 });
 
 // Define Database preset model.
