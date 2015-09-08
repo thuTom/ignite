@@ -21,26 +21,26 @@ Test drive of Ignite Web Agent:
     2) Test drive for metadata load from database. Activated by option: -tm or --test-drive-metadata.
        In this mode an in-memory H2 database will started.
        How to evaluate:
-         1.1) Go to Ignite Web Control Center "Metadata" screen.
-         1.2) Select "Load from database".
-         1.3) Select H2 driver and enter JDBC URL: "jdbc:h2:mem:test-drive-db".
-         1.4) You should see list of available schemas and tables. Select some of them and click "Save".
+         2.1) Go to Ignite Web Control Center "Metadata" screen.
+         2.2) Select "Load from database".
+         2.3) Select H2 driver and enter JDBC URL: "jdbc:h2:mem:test-drive-db".
+         2.4) You should see list of available schemas and tables. Select some of them and click "Save".
 
     3) Test drive for SQL. Activated by option: -ts or --test-drive-sql.
        In this mode internal Ignite node will be started. Cache created and populated with data.
        How to evaluate:
-       2.1) Go to Ignite Web Control Center "SQL" menu and select "Create new notebook" menu item.
-       2.2) In notebook paragraph enter SQL queries for tables: "Country, Department, Employee" in "test-drive-employee" cache
+       3.1) Go to Ignite Web Control Center "SQL" menu and select "Create new notebook" menu item.
+       3.2) In notebook paragraph enter SQL queries for tables: "Country, Department, Employee" in "test-drive-employee" cache
         and for tables: "Parking, Car" in "test-drive-car" cache.
 
        For example:
-        2.3) select "test-drive-car" cache,
-        2.4) enter SQL:
+        3.3) select "test-drive-car" cache,
+        3.4) enter SQL:
                 select count(*) cnt, p.ParkingName from car c
                  inner join PARKING p on (p.PARKINGID=c.PARKINGID)
                 group by c.PARKINGID order by p.ParkingName
-        2.5) Click "Execute" button. You should get some data in table.
-        2.6) Click charts buttons to see auto generated charts.
+        3.5) Click "Execute" button. You should get some data in table.
+        3.6) Click charts buttons to see auto generated charts.
 
 Configuration file:
     Should be a file with simple line-oriented format as described here: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.Reader)
