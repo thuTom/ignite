@@ -778,7 +778,12 @@ public final class GridNearLockFuture extends GridCompoundIdentityFuture<Boolean
             else {
                 fut.listen(new CI1<IgniteInternalFuture<AffinityTopologyVersion>>() {
                     @Override public void apply(IgniteInternalFuture<AffinityTopologyVersion> t) {
-                        mapOnTopology(remap);
+                        try {
+                            mapOnTopology(remap);
+                        }
+                        finally {
+                            cctx.shared().txContextReset();
+                        }
                     }
                 });
             }
@@ -1429,7 +1434,12 @@ public final class GridNearLockFuture extends GridCompoundIdentityFuture<Boolean
                     if (affFut != null && !affFut.isDone()) {
                         affFut.listen(new CI1<IgniteInternalFuture<?>>() {
                             @Override public void apply(IgniteInternalFuture<?> fut) {
-                                remap();
+                                try {
+                                    remap();
+                                }
+                                finally {
+                                    cctx.shared().txContextReset();
+                                }
                             }
                         });
                     }

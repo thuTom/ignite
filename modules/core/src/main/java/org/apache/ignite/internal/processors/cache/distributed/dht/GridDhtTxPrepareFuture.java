@@ -538,6 +538,9 @@ public final class GridDhtTxPrepareFuture extends GridCompoundFuture<IgniteInter
                         catch (IgniteCheckedException e) {
                             onError(e);
                         }
+                        finally {
+                            cctx.txContextReset();
+                        }
                     }
                 });
             }
