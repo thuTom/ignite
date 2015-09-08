@@ -11,7 +11,7 @@ Two main functions of Ignite Web Agent:
     You may need to copy JDBC driver into "./jdbc-drivers" subfolder or specify path via "-drv" option.
 
 Usage example:
-    ignite-control-center-agent.sh -l john.smith@gmail.com -t 1a2b3c4d5f -s wss://control-center.example.com
+    ignite-control-center-agent.sh -t 1a2b3c4d5f -s wss://control-center.example.com
 
 Test drive of Ignite Web Agent:
     In order to simplify evaluation two test drive modes were implemented:
@@ -46,7 +46,6 @@ Configuration file:
     Should be a file with simple line-oriented format as described here: http://docs.oracle.com/javase/7/docs/api/java/util/Properties.html#load(java.io.Reader)
 
     Available entries names:
-        login
         token
         serverURI
         nodeURI
@@ -55,7 +54,6 @@ Configuration file:
         test-drive-sql
 
     Example configuration file:
-        login=john.smith@gmail.com
         token=1a2b3c4d5f
         serverURI=wss://control-center.example.com:3001
         test-drive-sql=true
@@ -70,9 +68,6 @@ Options:
     -drv, --driver-folder
        Path to folder with JDBC drivers, for example "/home/user/drivers".
        Default: "./jdbc-drivers".
-
-    -l, --login
-       User's login (email) on Ignite Web Agent.
 
     -n, --node-uri
        URI for connect to Ignite REST server, for example: "http://localhost:8080".
