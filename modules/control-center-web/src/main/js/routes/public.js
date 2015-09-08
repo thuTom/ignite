@@ -21,7 +21,7 @@ var nodemailer = require('nodemailer');
 
 var db = require('../db');
 var config = require('../helpers/configuration-loader.js');
-var utils = require('./../helpers/common-utils');
+var $commonUtils = require('./../helpers/common-utils');
 
 // GET dropdown-menu template.
 router.get('/select', function (req, res) {
@@ -58,7 +58,11 @@ router.post('/register', function (req, res) {
 
         req.body.admin = cnt == 0;
 
-        db.Account.register(new db.Account(req.body), req.body.password, function (err, account) {
+        var account = new db.Account(req.body);
+
+        account.token = $commonUtils.randomString(20);
+
+        db.Account.register(account, req.body.password, function (err, account) {
             if (err)
                 return res.status(401).send(err.message);
 
@@ -122,7 +126,7 @@ router.post('/password/forgot', function(req, res) {
         return res.status(401).send('Can\'t send e-mail with instructions to reset password.<br />' +
             'Please ask webmaster to setup smtp server!');
 
-    var token = utils.randomValueHex(20);
+    var token = $commonUtils.randomString(20);
 
     db.Account.findOne({ email: req.body.email }, function(err, user) {
         if (!user)

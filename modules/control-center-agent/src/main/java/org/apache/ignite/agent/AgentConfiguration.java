@@ -39,8 +39,8 @@ public class AgentConfiguration {
     private String login;
 
     /** */
-    @Parameter(names = {"-p", "--password"}, description = "User's password")
-    private String pwd;
+    @Parameter(names = {"-t", "--token"}, description = "User's access token")
+    private String token;
 
     /** */
     @Parameter(names = {"-s", "--server-uri"}, description = "URI for connect to Ignite Web Control Center via " +
@@ -91,17 +91,17 @@ public class AgentConfiguration {
     }
 
     /**
-     * @return Password.
+     * @return Token.
      */
-    public String password() {
-        return pwd;
+    public String token() {
+        return token;
     }
 
     /**
-     * @param pwd Password.
+     * @param token Token.
      */
-    public void password(String pwd) {
-        this.pwd = pwd;
+    public void token(String token) {
+        this.token = token;
     }
 
     /**
@@ -203,10 +203,10 @@ public class AgentConfiguration {
         if (val != null)
             login(val);
 
-        val = (String)props.remove("password");
+        val = (String)props.remove("token");
 
         if (val != null)
-            password(val);
+            token(val);
 
         val = (String)props.remove("serverURI");
 
@@ -241,8 +241,8 @@ public class AgentConfiguration {
         if (cmd.login() != null)
             login(cmd.login());
 
-        if (cmd.password() != null)
-            password(cmd.password());
+        if (cmd.token() != null)
+            token(cmd.token());
 
         if (cmd.serverUri() != null)
             serverUri(cmd.serverUri());

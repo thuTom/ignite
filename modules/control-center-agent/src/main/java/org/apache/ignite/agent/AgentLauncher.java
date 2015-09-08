@@ -76,10 +76,10 @@ public class AgentLauncher {
             cfg.login(System.console().readLine().trim());
         }
 
-        if (cfg.password() == null) {
-            System.out.print("Password: ");
+        if (cfg.token() == null) {
+            System.out.print("Token: ");
 
-            cfg.password(new String(System.console().readPassword()));
+            cfg.token(new String(System.console().readPassword()));
         }
 
         RestExecutor restExecutor = new RestExecutor(cfg);

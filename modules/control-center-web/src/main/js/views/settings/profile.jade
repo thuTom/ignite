@@ -40,6 +40,10 @@ block container
                             .col-xs-5.col-sm-4
                                 input.form-control(type='email' ng-model='profileUser.email' placeholder='you@domain.com' required)
                         .details-row
+                            +lbl('Access token:')
+                            label {{profileUser.token}}
+                            i.tipLabel.fa.fa-refresh(ng-click='generateToken()' bs-tooltip data-title='Generate random access token')
+                        .details-row
                             .checkbox
                                 label
                                     input(type='checkbox' ng-model='profileUser.changePassword')

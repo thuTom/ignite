@@ -32,6 +32,30 @@ router.get('/', function (req, res) {
     });
 });
 
+function updateUser(user, params) {
+    var updated = false;
+
+    if (params.userName) {
+        user.username = params.userName;
+
+        updated = true;
+    }
+
+    if (params.email) {
+        user.email = params.email;
+
+        updated = true;
+    }
+
+    if (params.token) {
+        user.token = params.token;
+
+        updated = true;
+    }
+
+    return updated;
+}
+
 /**
  * Save user profile.
  */
@@ -48,40 +72,30 @@ router.post('/save', function (req, res) {
             if (err)
                 return res.status(500).send(err);
 
-            user.setPassword(newPassword, function (err, updatedUser) {
+            user.setPassword(newPassword, function (err, user) {
                 if (err)
                     return res.status(500).send(err.message);
 
-                if (params.userName)
-                    updatedUser.username = params.userName;
+                if (updateUser(user, params))
+                    user.save(function (err) {
+                        if (err)
+                            return res.status(500).send(err.message);
 
-                if (params.email)
-                    updatedUser.email = params.email;
-
-                updatedUser.save(function (err) {
-                    if (err)
-                        return res.status(500).send(err.message);
-
-                    res.json(user);
-                });
+                        res.json(user);
+                    });
             });
         });
     }
-    else if (params.userName || params.email) {
-        var upd = {};
+    else {
+        var user = {};
 
-        if (params.userName)
-            upd.username = params.userName;
+        if (updateUser(user, params))
+            db.Account.findByIdAndUpdate(params._id, user, {'new': true}, function (err, val) {
+                if (err)
+                    return res.status(500).send(err.message);
 
-        if (params.email)
-            upd.email = params.email;
-
-        db.Account.findByIdAndUpdate(params._id, upd, {new: true}, function (err, val) {
-            if (err)
-                return res.status(500).send(err.message);
-
-            res.json(val);
-        })
+                res.json(val);
+            })
     }
 });
 

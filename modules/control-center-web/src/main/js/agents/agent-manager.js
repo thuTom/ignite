@@ -237,20 +237,22 @@ Client.prototype._rmtAuthMessage = function(msg) {
             self.authResult('User not found');
         }
         else {
-            account.authenticate(msg.password, function(err, user, res) {
-                if (!user) {
-                    self.authResult(res.message);
-                }
-                else {
-                    self.authResult(null);
+            var token = account.token;
 
-                    self._user = account;
+            if (!token)
+                token = account._id;
 
-                    self._manager._addClient(account._id, self);
+            if (token == msg.token) {
+                self.authResult(null);
 
-                    self._ignite = new apacheIgnite.Ignite(new AgentServer(self));
-                }
-            });
+                self._user = account;
+
+                self._manager._addClient(account._id, self);
+
+                self._ignite = new apacheIgnite.Ignite(new AgentServer(self));
+            }
+            else
+                self.authResult('Invalid token');
         }
     });
 };

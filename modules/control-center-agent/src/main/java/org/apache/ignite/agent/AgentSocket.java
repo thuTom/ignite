@@ -106,7 +106,7 @@ public class AgentSocket implements WebSocketSender {
 
         authMsg.addProperty("type", "AuthMessage");
         authMsg.addProperty("login", cfg.login());
-        authMsg.addProperty("password", cfg.password());
+        authMsg.addProperty("token", cfg.token());
 
         send(authMsg);
     }

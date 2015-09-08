@@ -19,6 +19,13 @@
 controlCenterModule.controller('profileController', ['$scope', '$http', '$common', function ($scope, $http, $common) {
     $scope.profileUser = angular.copy($scope.user);
 
+    if ($scope.profileUser && !$scope.profileUser.token)
+        $scope.profileUser.token = $scope.profileUser._id;
+
+    $scope.generateToken = function () {
+        $scope.profileUser.token = $commonUtils.randomString(20);
+    };
+
     $scope.saveUser = function () {
         var profile = $scope.profileUser;
 
@@ -29,11 +36,15 @@ controlCenterModule.controller('profileController', ['$scope', '$http', '$common
             var email = profile.email;
             var changeEmail = email != $scope.user.email;
 
-            if (changeUsername || changeEmail || profile.changePassword) {
+            var token = profile.token;
+            var changeToken = token != $scope.user.token;
+
+            if (changeUsername || changeEmail || changeToken || profile.changePassword) {
                 $http.post('/profile/save', {
                     _id: profile._id,
                     userName: changeUsername ? userName : undefined,
                     email: changeEmail ? email : undefined,
+                    token: changeToken ? token : undefined,
                     newPassword: profile.changePassword ? profile.newPassword : undefined
                 }).success(function (user) {
                     $common.showInfo('Profile saved.');

@@ -42,14 +42,19 @@ $commonUtils.hasProperty = function (obj, props) {
     return false;
 };
 
+$commonUtils.randomString = function (len) {
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var possibleLen = possible.length;
+
+    var res = '';
+
+    for (var i = 0; i < len; i++)
+        res += possible.charAt(Math.floor(Math.random() * possibleLen));
+
+    return res;
+};
+
 // For server side we should export Java code generation entry point.
 if (typeof window === 'undefined') {
-    // Generate random HEX string. Server side only.
-    $commonUtils.randomValueHex = function randomValueHex(len) {
-        return require('crypto').randomBytes(Math.ceil(len / 2))
-            .toString('hex') // convert to hexadecimal format
-            .slice(0, len);  // return required number of characters
-    };
-
     module.exports = $commonUtils;
 }

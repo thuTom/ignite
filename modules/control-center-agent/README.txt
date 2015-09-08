@@ -11,10 +11,12 @@ Two main functions of Ignite Web Agent:
     You may need to copy JDBC driver into "./jdbc-drivers" subfolder or specify path via "-drv" option.
 
 Usage example:
-    ignite-control-center-agent.sh -l john.smith@gmail.com -p qwerty -s wss://control-center.example.com
+    ignite-control-center-agent.sh -l john.smith@gmail.com -t 1a2b3c4d5f -s wss://control-center.example.com
 
 Test drive of Ignite Web Agent:
     In order to simplify evaluation two test drive modes were implemented:
+
+    1) Get access token on Web Control Center "Profile" screen.
 
     1) Test drive for metadata load from database. Activated by option: -tm or --test-drive-metadata.
        In this mode an in-memory H2 database will started.
@@ -45,7 +47,7 @@ Configuration file:
 
     Available entries names:
         login
-        password
+        token
         serverURI
         nodeURI
         driverFolder
@@ -54,6 +56,7 @@ Configuration file:
 
     Example configuration file:
         login=john.smith@gmail.com
+        token=1a2b3c4d5f
         serverURI=wss://control-center.example.com:3001
         test-drive-sql=true
 
@@ -75,8 +78,8 @@ Options:
        URI for connect to Ignite REST server, for example: "http://localhost:8080".
        Default: "http://localhost:8080".
 
-    -p, --password
-       User's password.
+    -t, --token
+       User's access token.
 
     -s, --server-uri
        URI for connect to Ignite Web Agent, for example: "wss://control-center.example.com:3001".

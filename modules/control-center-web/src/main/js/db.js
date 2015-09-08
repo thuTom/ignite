@@ -34,6 +34,7 @@ var AccountSchema = new Schema({
     email: String,
     lastLogin: Date,
     admin: Boolean,
+    token: String,
     resetPasswordToken: String
 });
 
@@ -49,6 +50,7 @@ AccountSchema.set('toJSON', {
             email: ret.email,
             username: ret.username,
             admin: ret.admin,
+            token: ret.token,
             lastLogin: ret.lastLogin
         };
     }
