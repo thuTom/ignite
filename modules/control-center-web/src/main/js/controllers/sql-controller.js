@@ -258,15 +258,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         );
     };
 
-    $http.get('/models/sql.json')
-        .success(function (data) {
-            $scope.screenTip = data.screenTip;
-            $scope.missingClientTip = data.missingClientTip;
-        })
-        .error(function (errMsg) {
-            $common.showError(errMsg);
-        });
-
     $http.post('/agent/topology')
         .success(function (nodes) {
             $scope.caches = [];
