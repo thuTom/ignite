@@ -30,7 +30,7 @@ controlCenterModule.config(function ($popoverProvider) {
         trigger: 'manual',
         placement: 'right',
         container: 'body',
-        templateUrl: '/popover'
+        templateUrl: '/validation-error'
     });
 });
 

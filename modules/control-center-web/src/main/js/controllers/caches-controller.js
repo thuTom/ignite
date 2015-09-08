@@ -163,7 +163,7 @@ controlCenterModule.controller('cachesController', [
                 switch (field.model) {
                     case 'hibernateProperties':
                         if (fx.indexOf('=') < 0)
-                            return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'HibProp'), 'Property should be present in format key=value!');
+                            return showPopoverMessage(null, null, $table.tableFieldId(index, 'HibProp'), 'Property should be present in format key=value!');
 
                         model = item.cacheStoreFactory.CacheHibernateBlobStoreFactory[field.model];
 
@@ -179,7 +179,7 @@ controlCenterModule.controller('cachesController', [
                         }
 
                         if (exist)
-                            return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'HibProp'), 'Property with such name already exists!');
+                            return showPopoverMessage(null, null, $table.tableFieldId(index, 'HibProp'), 'Property with such name already exists!');
 
                         break;
 
@@ -194,7 +194,7 @@ controlCenterModule.controller('cachesController', [
 
                             // Found duplicate.
                             if (idx >= 0 && idx != index)
-                                return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'SqlFx'), 'SQL function with such class name already exists!');
+                                return showPopoverMessage(null, null, $table.tableFieldId(index, 'SqlFx'), 'SQL function with such class name already exists!');
                         }
                 }
 
@@ -219,7 +219,7 @@ controlCenterModule.controller('cachesController', [
 
                     // Found duplicate.
                     if (idx >= 0 && idx != index)
-                        return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'KeyIndexedType'), 'Indexed type with such key class already exists!');
+                        return showPopoverMessage(null, null, $table.tableFieldId(index, 'KeyIndexedType'), 'Indexed type with such key class already exists!');
                 }
 
                 return true;

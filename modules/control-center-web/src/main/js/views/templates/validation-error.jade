@@ -14,11 +14,8 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-.popover-arrow.popover
-    table
-        tr
-            td
-                .popover-content
-                    label {{content}}
-            td
-                button.close(id='popover-btn-close' type='button' ng-click='$hide()') &times;
+.popover.validation-error
+    .arrow
+    .popover-content
+        label {{content}}&nbsp&nbsp
+        button.close(id='popover-btn-close' type='button' ng-click='$hide()') &times;

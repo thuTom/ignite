@@ -29,8 +29,8 @@ router.get('/select', function (req, res) {
 });
 
 // GET dropdown-menu template.
-router.get('/popover', function (req, res) {
-    res.render('templates/popover', {});
+router.get('/validation-error', function (req, res) {
+    res.render('templates/validation-error', {});
 });
 
 // GET confirmation dialog.

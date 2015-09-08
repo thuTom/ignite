@@ -767,48 +767,31 @@ div.affix.padding-top-dflt {
     background-color: $brand-primary;
 }
 
-.popover {
-    color: $brand-primary;
-    max-width: 400px;
-}
-
 .popover-content {
     padding: 5px;
 }
 
-.popover-arrow {
+.theme-line .popover.settings {
+    .close {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+    }
+}
+
+.theme-line .popover.validation-error {
+    max-width: 400px;
+    color: $brand-primary;
     background: white;
     border: 1px solid $brand-primary;
-}
 
-.popover-arrow:after, .popover-arrow:before {
-    right: 100%;
-    top: 50%;
-    border: solid transparent;
-    content: " ";
-    height: 0;
-    width: 0;
-    position: absolute;
-    pointer-events: none;
-}
+    &.right > .arrow {
+        border-right-color: $brand-primary;
+    }
 
-.popover-arrow:after {
-    border: solid 7px transparent;
-    border-right-color: white;
-    margin-top: -7px;
-}
-
-.popover-arrow:before {
-    border: solid 8px transparent;
-    border-right-color: $brand-primary;
-    margin-top: -8px;
-}
-
-.popover .close {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    float: none;
+    .close {
+        vertical-align: middle;
+    }
 }
 
 label {

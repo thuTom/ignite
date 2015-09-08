@@ -98,7 +98,7 @@ block container
                                         button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
                                         .pull-right
                                             label Refresh rate:
-                                            button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.executed}' bs-popover data-template-url='rate' data-placement='top-right' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
+                                            button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.executed}' bs-popover data-template-url='rate' data-placement='left' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select style='margin-right: 0')
                                 .col-sm-12(ng-show='paragraph.result != "none"')
@@ -124,7 +124,7 @@ block container
                                                 tr(ng-repeat='row in displayedResult track by $index')
                                                     td(ng-repeat='val in row track by $index') {{ val }}
                                 .col-sm-12(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
-                                    button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='top-right' data-auto-close='1' data-trigger='click')
+                                    button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='left' data-auto-close='1' data-trigger='click')
                                     div(id='chart-{{paragraph.id}}')
                                         svg
                                 .col-sm-12.sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"') Result set is empty.

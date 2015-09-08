@@ -660,12 +660,12 @@ controlCenterModule.controller('metadataController', [
                 if ($common.isEmptyString(item.keyType))
                     return showPopoverMessage($scope.panels, 'metadata', 'keyType', 'Key type should not be empty');
                 else if (!$common.isValidJavaClass('Key type', item.keyType, true, 'keyType'))
-                    return showPopoverMessage($scope.panels, 'metadata', 'keyType', 'Key type should be valid Java class');
+                    return false;
 
                 if ($common.isEmptyString(item.valueType))
                     return showPopoverMessage($scope.panels, 'metadata', 'valueType', 'Value type should not be empty');
                 else if (!$common.isValidJavaClass('Value type', item.valueType, false, 'valueType'))
-                    return showPopoverMessage($scope.panels, 'metadata', 'valueType', 'Value type should valid Java class');
+                    return false;
 
                 var qry = queryConfigured(item);
 
@@ -842,7 +842,7 @@ controlCenterModule.controller('metadataController', [
 
                     // Found duplicate.
                     if (idx >= 0 && idx != index)
-                        return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'TextField'), 'Field with such name already exists!');
+                        return showPopoverMessage(null, null, $table.tableFieldId(index, 'TextField'), 'Field with such name already exists!');
                 }
 
                 return true;
@@ -872,7 +872,7 @@ controlCenterModule.controller('metadataController', [
 
                         // Found duplicate.
                         if (idx >= 0 && idx != index)
-                            return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'Key' + pairField.id), 'Field with such name already exists!');
+                            return showPopoverMessage(null, null, $table.tableFieldId(index, 'Key' + pairField.id), 'Field with such name already exists!');
                     }
                 }
 
@@ -917,7 +917,7 @@ controlCenterModule.controller('metadataController', [
 
                         // Found duplicate.
                         if (idx >= 0 && index != idx)
-                            return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'DatabaseName' + dbFieldTable.id), 'Field with such database name already exists!');
+                            return showPopoverMessage(null, null, $table.tableFieldId(index, 'DatabaseName' + dbFieldTable.id), 'Field with such database name already exists!');
 
                         idx = _.findIndex(model, function (dbMeta) {
                             return dbMeta.javaName == dbFieldValue.javaName;
@@ -925,7 +925,7 @@ controlCenterModule.controller('metadataController', [
 
                         // Found duplicate.
                         if (idx >= 0 && index != idx)
-                            return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'JavaName' + dbFieldTable.id), 'Field with such java name already exists!');
+                            return showPopoverMessage(null, null, $table.tableFieldId(index, 'JavaName' + dbFieldTable.id), 'Field with such java name already exists!');
 
                         if (index < 0) {
                                 model.push(dbFieldValue);
@@ -974,7 +974,7 @@ controlCenterModule.controller('metadataController', [
 
                     // Found duplicate.
                     if (idx >= 0 && idx != index)
-                        return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'GroupName'), 'Group with such name already exists!');
+                        return showPopoverMessage(null, null, $table.tableFieldId(index, 'GroupName'), 'Group with such name already exists!');
                 }
 
                 var item = $scope.backupItem;
@@ -1084,7 +1084,7 @@ controlCenterModule.controller('metadataController', [
 
                     // Found duplicate.
                     if (idx >= 0 && idx != index)
-                        return $common.showPopoverMessage(null, null, $table.tableFieldId(index, 'FieldName'), 'Field with such name already exists in group!');
+                        return showPopoverMessage(null, null, $table.tableFieldId(index, 'FieldName'), 'Field with such name already exists in group!');
                 }
 
                 var group = $scope.backupItem.groups[groupIndex];
