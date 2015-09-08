@@ -339,15 +339,13 @@ public final class GridDhtTxPrepareFuture extends GridCompoundFuture<IgniteInter
                 boolean hasFilters = !F.isEmptyOrNulls(txEntry.filters()) && !F.isAlwaysTrue(txEntry.filters());
 
                 if (hasFilters || retVal || txEntry.op() == DELETE || txEntry.op() == TRANSFORM) {
-                    CacheObject val;
-
                     cached.unswap(retVal);
 
                     boolean readThrough = (retVal || hasFilters) &&
                         cacheCtx.config().isLoadPreviousValue() &&
                         !txEntry.skipStore();
 
-                    val = cached.innerGet(
+                    CacheObject val = cached.innerGet(
                         tx,
                         /*swap*/true,
                         readThrough,
@@ -685,26 +683,6 @@ public final class GridDhtTxPrepareFuture extends GridCompoundFuture<IgniteInter
         res.filterFailedKeys(filterFailedKeys);
 
         return res;
-    }
-
-    /**
-     * Checks if transaction involves a near-enabled cache on originating node.
-     *
-     * @return {@code True} if originating node has a near cache enabled and that cache participates in
-     *      the transaction.
-     */
-    private boolean originatingNodeHasNearCache() {
-        ClusterNode node = cctx.discovery().node(tx.originatingNodeId());
-
-        if (node == null)
-            return false;
-
-        for (int cacheId : tx.activeCacheIds()) {
-            if (cctx.discovery().cacheNearNode(node, cctx.cacheContext(cacheId).name()))
-                return true;
-        }
-
-        return false;
     }
 
     /**

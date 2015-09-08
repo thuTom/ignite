@@ -59,10 +59,8 @@ import org.apache.ignite.internal.transactions.IgniteTxHeuristicCheckedException
 import org.apache.ignite.internal.transactions.IgniteTxOptimisticCheckedException;
 import org.apache.ignite.internal.transactions.IgniteTxRollbackCheckedException;
 import org.apache.ignite.internal.util.future.GridCompoundFuture;
-import org.apache.ignite.internal.util.future.GridEmbeddedFuture;
 import org.apache.ignite.internal.util.future.GridFinishedFuture;
-import org.apache.ignite.internal.util.lang.GridClosureException;
-import org.apache.ignite.internal.util.typedef.C2;
+import org.apache.ignite.internal.util.typedef.C1;
 import org.apache.ignite.internal.util.typedef.CI1;
 import org.apache.ignite.internal.util.typedef.CI2;
 import org.apache.ignite.internal.util.typedef.F;
@@ -213,42 +211,40 @@ public class IgniteTxHandler {
         final GridNearTxLocal locTx,
         final GridNearTxPrepareRequest req
     ) {
-        IgniteInternalFuture<Object> fut = new GridFinishedFuture<>(); // TODO force preload keys.
+        IgniteInternalFuture<GridNearTxPrepareResponse> fut = locTx.prepareAsyncLocal(
+            req.reads(),
+            req.writes(),
+            req.transactionNodes(),
+            req.last(),
+            req.lastBackups());
 
-        return new GridEmbeddedFuture<>(
-            fut,
-            new C2<Object, Exception, IgniteInternalFuture<GridNearTxPrepareResponse>>() {
-                @Override public IgniteInternalFuture<GridNearTxPrepareResponse> apply(Object o, Exception ex) {
-                    if (ex != null)
-                        throw new GridClosureException(ex);
+        if (locTx.isRollbackOnly())
+            locTx.rollbackAsync();
 
-                    IgniteInternalFuture<GridNearTxPrepareResponse> fut = locTx.prepareAsyncLocal(
-                        req.reads(),
-                        req.writes(),
-                        req.transactionNodes(),
-                        req.last(),
-                        req.lastBackups());
-
-                    if (locTx.isRollbackOnly())
-                        locTx.rollbackAsync();
-
-                    return fut;
+        return fut.chain(new C1<IgniteInternalFuture<GridNearTxPrepareResponse>, GridNearTxPrepareResponse>() {
+            @Override public GridNearTxPrepareResponse apply(IgniteInternalFuture<GridNearTxPrepareResponse> f) {
+                try {
+                    return f.get();
                 }
-            },
-            new C2<GridNearTxPrepareResponse, Exception, GridNearTxPrepareResponse>() {
-                @Nullable @Override public GridNearTxPrepareResponse apply(GridNearTxPrepareResponse res, Exception e) {
-                    if (e != null) {
-                        locTx.setRollbackOnly(); // Just in case.
+                catch (Exception e) {
+                    locTx.setRollbackOnly(); // Just in case.
 
-                        if (!X.hasCause(e, IgniteTxOptimisticCheckedException.class) &&
-                            !X.hasCause(e, IgniteFutureCancelledException.class))
-                            U.error(log, "Failed to prepare DHT transaction: " + locTx, e);
-                    }
+                    if (!X.hasCause(e, IgniteTxOptimisticCheckedException.class) &&
+                        !X.hasCause(e, IgniteFutureCancelledException.class))
+                        U.error(log, "Failed to prepare DHT transaction: " + locTx, e);
 
-                    return res;
+                    return new GridNearTxPrepareResponse(
+                        req.version(),
+                        req.futureId(),
+                        req.miniId(),
+                        req.version(),
+                        req.version(),
+                        null,
+                        e,
+                        null);
                 }
             }
-        );
+        });
     }
 
     /**
