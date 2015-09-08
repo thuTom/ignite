@@ -263,7 +263,8 @@ controlCenterModule.controller('metadataController', [
                     allSchemasSelected: false,
                     tables: [],
                     allTablesSelected: false,
-                    button: 'Next'
+                    button: 'Next',
+                    info: 'Configure connection to database'
                 };
 
                 // Get available JDBC drivers via agent.
@@ -303,6 +304,7 @@ controlCenterModule.controller('metadataController', [
                     .success(function (schemas) {
                         $scope.loadMeta.schemas = _.map(schemas, function (schema) { return {use: false, name: schema}});
                         $scope.loadMeta.action = 'schemas';
+                        $scope.loadMeta.info = 'Select schemas to load tables';
                     })
                     .error(function (errMsg) {
                         $common.showError(errMsg);
@@ -311,6 +313,7 @@ controlCenterModule.controller('metadataController', [
 
             function _loadMetadata() {
                 $scope.loadMeta.allTablesSelected = false;
+                $scope.loadMeta.info = 'Select tables to import as cache type metadata';
 
                 $scope.preset.schemas = [];
 
@@ -546,9 +549,12 @@ controlCenterModule.controller('metadataController', [
                 if  ($scope.loadMeta.action == 'tables') {
                     $scope.loadMeta.action = 'schemas';
                     $scope.loadMeta.button = 'Next';
+                    $scope.loadMeta.info = 'Select schemas to load tables';
                 }
-                else if  ($scope.loadMeta.action == 'schemas')
+                else if  ($scope.loadMeta.action == 'schemas') {
                     $scope.loadMeta.action = 'connect';
+                    $scope.loadMeta.info = 'Configure connection to database';
+                }
             };
 
             function generatePreview(val) {

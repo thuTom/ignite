@@ -39,6 +39,7 @@ hr {
 
 a.active {
     font-weight: bold;
+    font-size: 1.2em;
 }
 
 .navbar-default .navbar-brand, .navbar-default .navbar-brand:hover {
@@ -663,7 +664,7 @@ h3 {
 }
 
 .metadata-content {
-    margin: 15px;
+    margin: 15px 30px;
 }
 
 .metadata-scrollable {
@@ -828,6 +829,10 @@ div.affix.padding-top-dflt {
     top: -10px;
 
     text-align: center;
+}
+
+.tooltip.top .tooltip-arrow {
+    border-top-color: $brand-primary;
 }
 
 .tooltip.right .tooltip-arrow {

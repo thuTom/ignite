@@ -25,11 +25,10 @@ mixin chk(mdl, change, tip)
             #errors-container.modal-header.header
                 button.close(type='button' ng-click='$hide()' aria-hidden='true') &times;
                 h4.modal-title Load metadata from database
-            .metadata-content(ng-show='loadMeta.action == "connect"')
+            .metadata-content(ng-show='loadMeta.action == "connect"' style='margin-bottom: 60px')
                 form.form-horizontal(name='loadForm' novalidate)
-                    .modal-body
-                        .settings-row(ng-repeat='field in metadataDb')
-                            +form-row-custom(['col-xs-4 col-sm-3 col-md-3'], ['col-xs-8 col-sm-9 col-md-9'], 'preset')
+                    .settings-row(ng-repeat='field in metadataDb')
+                        +form-row-custom(['col-xs-4 col-sm-3 col-md-3'], ['col-xs-8 col-sm-9 col-md-9'], 'preset')
             .metadata-content(ng-show='loadMeta.action == "schemas"')
                 table.table.metadata(st-table='displayedSchemas' st-safe-src='loadMeta.schemas')
                     thead
@@ -54,10 +53,10 @@ mixin chk(mdl, change, tip)
                                                     td
                                                         label {{::schema.name}}
             .metadata-content(ng-show='loadMeta.action == "tables"')
-                div.metadata-package-name
+                .metadata-package-name
                     label.required Package:
                     span
-                        input.form-control(type="text" ng-model='ui.packageName')
+                        input.form-control(type="text" ng-model='ui.packageName' placeholder='Package for POJOs generation' bs-tooltip='' data-title='Package that will be used for POJOs generation' data-placement='top' data-trigger='hover')
                 table.table.metadata(st-table='displayedTables' st-safe-src='loadMeta.tables')
                     thead
                         tr
@@ -85,5 +84,6 @@ mixin chk(mdl, change, tip)
                                                 td
                                                     label {{::table.tbl}}
             .modal-footer
+                label.labelField {{loadMeta.info}}
                 button.btn.btn-primary(ng-show='loadMeta.action != "connect"' ng-click='loadMetadataPrev()') Prev
                 a.btn.btn-primary(ng-click='loadMetadataNext()' ng-disabled='!nextAvailable()' bs-tooltip data-title='{{nextTooltipText()}}' data-placement='bottom') {{loadMeta.button}}
