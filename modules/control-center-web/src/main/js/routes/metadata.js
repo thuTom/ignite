@@ -44,10 +44,31 @@ router.post('/list', function (req, res) {
                 return value._id;
             });
 
-            // Get all metadata for spaces.
-            db.CacheTypeMetadata.find({space: {$in: space_ids}}).sort('name').exec(function (err, metadatas) {
-                if (db.processed(err, res))
-                    res.json({spaces: spaces, metadatas: metadatas});
+            // Get all caches for spaces.
+            db.Cache.find({space: {$in: space_ids}}).sort('name').exec(function (err, caches) {
+                if (db.processed(err, res)) {
+                    // Get all metadata for spaces.
+                    db.CacheTypeMetadata.find({space: {$in: space_ids}}).sort('name').exec(function (err, metadatas) {
+                        if (db.processed(err, res)) {
+                            // Remove deleted caches.
+                            _.forEach(metadatas, function (meta) {
+                                meta.caches = _.filter(meta.caches, function (cacheId) {
+                                    return _.findIndex(caches, function (cache) {
+                                            return cache._id.equals(cacheId);
+                                        }) >= 0;
+                                });
+                            });
+
+                            res.json({
+                                spaces: spaces,
+                                caches: caches.map(function (cache) {
+                                    return {value: cache._id, label: cache.name};
+                                }),
+                                metadatas: metadatas
+                            });
+                        }
+                    });
+                }
             });
         }
     });
@@ -57,10 +78,20 @@ router.post('/list', function (req, res) {
  * Save metadata.
  */
 router.post('/save', function (req, res) {
+    var params = req.body;
+    var metaId = params._id;
+    var caches = params.caches;
+
     if (req.body._id)
         db.CacheTypeMetadata.update({_id: req.body._id}, req.body, {upsert: true}, function (err) {
             if (db.processed(err, res))
-                res.send(req.body._id);
+                db.Cache.update({_id: {$in: caches}}, {$addToSet: {metadatas: metaId}}, {multi: true}, function (err) {
+                    if (db.processed(err, res))
+                        db.Cache.update({_id: {$nin: caches}}, {$pull: {metadatas: metaId}}, {multi: true}, function (err) {
+                            if (db.processed(err, res))
+                                res.send(params._id);
+                        });
+                });
         });
     else {
         db.CacheTypeMetadata.findOne({space: req.body.space, name: req.body.name}, function (err, metadata) {
@@ -69,10 +100,14 @@ router.post('/save', function (req, res) {
                     return res.status(500).send('Cache type metadata with name: "' + metadata.name + '" already exist.');
 
                 (new db.CacheTypeMetadata(req.body)).save(function (err, metadata) {
-                    if (err)
-                        return res.status(500).send(err.message);
+                    if (db.processed(err, res)) {
+                        metaId = metadata._id;
 
-                    res.send(metadata._id);
+                        db.Cache.update({_id: {$in: caches}}, {$addToSet: {metadatas: metaId}}, {multi: true}, function (err) {
+                            if (db.processed(err, res))
+                                res.send(metaId);
+                        });
+                    }
                 });
             }
         });

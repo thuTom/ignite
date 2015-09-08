@@ -122,8 +122,7 @@ controlCenterModule.controller('cachesController', [
                 });
 
             $scope.caches = [];
-            $scope.queryMetadata = [];
-            $scope.storeMetadata = [];
+            $scope.metadatas = [];
 
             $scope.preview = {
                 general: {xml: '', java: '', allDefaults: true},
@@ -228,16 +227,8 @@ controlCenterModule.controller('cachesController', [
             // Fill cache previews.
             function generatePreview(val) {
                 if ($common.isDefined(val)) {
-                    var qryMeta = _.reduce($scope.queryMetadata, function(memo, meta){
-                        if (_.contains(val.queryMetadata, meta.value)) {
-                            memo.push(meta.meta);
-                        }
-
-                        return memo;
-                    }, []);
-
-                    var storeMeta = _.reduce($scope.storeMetadata, function(memo, meta){
-                        if (_.contains(val.storeMetadata, meta.value)) {
+                    var metadatas = _.reduce($scope.metadatas, function(memo, meta){
+                        if (_.contains(val.metadatas, meta.value)) {
                             memo.push(meta.meta);
                         }
 
@@ -246,20 +237,20 @@ controlCenterModule.controller('cachesController', [
 
                     var varName = 'cache';
 
-                    $scope.preview.general.xml = $generatorXml.cacheGeneral(val).join('');
-                    $scope.preview.general.java = $generatorJava.cacheGeneral(val, varName).join('');
+                    $scope.preview.general.xml = $generatorXml.cacheMetadatas(metadatas, $generatorXml.cacheGeneral(val)).join('');
+                    $scope.preview.general.java = $generatorJava.cacheMetadatas(metadatas, varName, $generatorJava.cacheGeneral(val, varName)).join('');
                     $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
 
                     $scope.preview.memory.xml = $generatorXml.cacheMemory(val).join('');
                     $scope.preview.memory.java = $generatorJava.cacheMemory(val, varName).join('');
                     $scope.preview.memory.allDefaults = $common.isEmptyString($scope.preview.memory.xml);
 
-                    $scope.preview.query.xml = $generatorXml.cacheMetadatas(qryMeta, null, $generatorXml.cacheQuery(val)).join('');
-                    $scope.preview.query.java = $generatorJava.cacheMetadatas(qryMeta, null, varName, $generatorJava.cacheQuery(val, varName)).join('');
+                    $scope.preview.query.xml = $generatorXml.cacheQuery(val).join('');
+                    $scope.preview.query.java = $generatorJava.cacheQuery(val, varName).join('');
                     $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
 
-                    $scope.preview.store.xml = $generatorXml.cacheMetadatas(null, storeMeta, $generatorXml.cacheStore(val)).join('');
-                    $scope.preview.store.java = $generatorJava.cacheMetadatas(null, storeMeta, varName, $generatorJava.cacheStore(val, varName)).join('');
+                    $scope.preview.store.xml = $generatorXml.cacheStore(val).join('');
+                    $scope.preview.store.java = $generatorJava.cacheStore(val, varName).join('');
                     $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
 
                     $scope.preview.concurrency.xml = $generatorXml.cacheConcurrency(val).join('');
@@ -287,31 +278,15 @@ controlCenterModule.controller('cachesController', [
                     $scope.caches = data.caches;
                     $scope.clusters = data.clusters;
 
-                    var metadatas = _.map(data.metadatas, function (meta) {
+                    $scope.metadatas = _.map(data.metadatas, function (meta) {
                         return {value: meta._id, label: meta.name, kind: meta.kind, meta: meta}
-                    });
-
-                    _.forEach(metadatas, function (meta) {
-                        var kind = meta.kind;
-
-                        if (kind == 'query' || kind == 'both')
-                            $scope.queryMetadata.push(meta);
-
-                        if (kind == 'store' || kind == 'both')
-                            $scope.storeMetadata.push(meta);
                     });
 
                     var restoredItem = angular.fromJson(sessionStorage.cacheBackupItem);
 
                     if (restoredItem) {
-                        restoredItem.queryMetadata = _.filter(restoredItem.queryMetadata, function (metaId) {
-                            return _.findIndex(metadatas, function (scopeMeta) {
-                                    return scopeMeta.value == metaId;
-                                }) >= 0;
-                        });
-
-                        restoredItem.storeMetadata = _.filter(restoredItem.storeMetadata, function (metaId) {
-                            return _.findIndex(metadatas, function (scopeMeta) {
+                        restoredItem.metadatas = _.filter(restoredItem.metadatas, function (metaId) {
+                            return _.findIndex($scope.metadatas, function (scopeMeta) {
                                     return scopeMeta.value == metaId;
                                 }) >= 0;
                         });
@@ -419,8 +394,7 @@ controlCenterModule.controller('cachesController', [
                     readFromBackup: true,
                     copyOnRead: true,
                     clusters: [],
-                    queryMetadata: [],
-                    spaceMetadata: []
+                    metadatas: []
                 };
 
                 $scope.selectItem(undefined, newItem);

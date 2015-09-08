@@ -577,6 +577,7 @@ controlCenterModule.controller('metadataController', [
             $http.post('metadata/list')
                 .success(function (data) {
                     $scope.spaces = data.spaces;
+                    $scope.caches = data.caches;
                     $scope.metadatas = data.metadatas;
 
                     var restoredItem = angular.fromJson(sessionStorage.metadataBackupItem);
@@ -588,20 +589,6 @@ controlCenterModule.controller('metadataController', [
                             });
 
                             if (idx >= 0) {
-                                // Remove deleted metadata.
-                                restoredItem.queryMetadata = _.filter(restoredItem.queryMetadata, function (metaId) {
-                                    return _.findIndex($scope.metadatas, function (scopeMeta) {
-                                            return scopeMeta.value == metaId;
-                                        }) >= 0;
-                                });
-
-                                // Remove deleted metadata.
-                                restoredItem.storeMetadata = _.filter(restoredItem.storeMetadata, function (metaId) {
-                                    return _.findIndex($scope.metadatas, function (scopeMeta) {
-                                            return scopeMeta.value == metaId;
-                                        }) >= 0;
-                                });
-
                                 setSelectedAndBackupItem($scope.metadatas[idx], restoredItem, sessionStorage.metadataBackupItemChanged);
                             }
                             else {
@@ -663,7 +650,7 @@ controlCenterModule.controller('metadataController', [
                     $common.ensureActivePanel($scope.panels, 'metadata', 'metadataName');
                 });
 
-                setSelectedAndBackupItem(undefined, {space: $scope.spaces[0]._id});
+                setSelectedAndBackupItem(undefined, {space: $scope.spaces[0]._id, caches: []});
             };
 
             function queryConfigured(item) {

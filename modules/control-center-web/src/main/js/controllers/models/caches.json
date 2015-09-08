@@ -46,6 +46,21 @@
           }
         },
         {
+          "label": "Metadata",
+          "id": "metadata",
+          "type": "dropdown-multiple",
+          "model": "metadatas",
+          "placeholder": "Choose metadata",
+          "items": "metadatas",
+          "tip": [
+            "Select cache type metadata to describe types in cache."
+          ],
+          "addLink": {
+            "label": "Add metadata(s)",
+            "ref": "/configuration/metadata"
+          }
+        },
+        {
           "label": "Mode",
           "id": "cacheMode",
           "type": "dropdown",
@@ -353,21 +368,6 @@
           ]
         },
         {
-          "label": "Metadata",
-          "id": "queryMetadata",
-          "type": "dropdown-multiple",
-          "model": "queryMetadata",
-          "placeholder": "Choose metadata",
-          "items": "queryMetadata",
-          "tip": [
-            "Select cache type metadata to describe types in cache."
-          ],
-          "addLink": {
-            "label": "Add metadata(s)",
-            "ref": "/configuration/metadata"
-          }
-        },
-        {
           "ui": "table-pair",
           "id": "indexedTypes",
           "type": "indexedTypes",
@@ -462,16 +462,6 @@
                     "  <li>My SQL.</li>",
                     "  <li>H2 database.</li>",
                     "</ul>"
-                  ]
-                },
-                {
-                  "label": "Metadata",
-                  "type": "dropdown-multiple",
-                  "model": "storeMetadata",
-                  "placeholder": "Choose metadata",
-                  "items": "storeMetadata",
-                  "tip": [
-                    "Select cache type metadata to associate database with cache."
                   ]
                 }
               ]

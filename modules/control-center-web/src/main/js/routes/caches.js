@@ -59,14 +59,7 @@ router.post('/list', function (req, res) {
                                         });
 
                                         // Remove deleted metadata.
-                                        cache.queryMetadata = _.filter(cache.queryMetadata, function (metaId) {
-                                            return _.findIndex(metadatas, function (meta) {
-                                                    return meta._id.equals(metaId);
-                                                }) >= 0;
-                                        });
-
-                                        // Remove deleted metadata.
-                                        cache.storeMetadata = _.filter(cache.storeMetadata, function (metaId) {
+                                        cache.metadatas = _.filter(cache.metadatas, function (metaId) {
                                             return _.findIndex(metadatas, function (meta) {
                                                     return meta._id.equals(metaId);
                                                 }) >= 0;
@@ -75,11 +68,12 @@ router.post('/list', function (req, res) {
 
                                     res.json({
                                         spaces: spaces,
-                                        clusters: clusters.map(function(cluster) {
+                                        clusters: clusters.map(function (cluster) {
                                             return {value: cluster._id, label: cluster.name};
                                         }),
                                         metadatas: metadatas,
-                                        caches: caches});
+                                        caches: caches
+                                    });
                                 }
                             });
                         }
@@ -97,18 +91,25 @@ router.post('/save', function (req, res) {
     var params = req.body;
     var cacheId = params._id;
     var clusters = params.clusters;
+    var metadatas = params.metadatas;
 
-    if (params._id){
+    if (params._id) {
         db.Cache.update({_id: cacheId}, params, {upsert: true}, function (err) {
             if (db.processed(err, res))
-                db.Cluster.update({_id: {$in: clusters}}, {$addToSet: {caches: cacheId}}, {multi: true}, function(err) {
+                db.Cluster.update({_id: {$in: clusters}}, {$addToSet: {caches: cacheId}}, {multi: true}, function (err) {
                     if (db.processed(err, res))
-                        db.Cluster.update({_id: {$nin: clusters}}, {$pull: {caches: cacheId}}, {multi: true}, function(err) {
+                        db.Cluster.update({_id: {$nin: clusters}}, {$pull: {caches: cacheId}}, {multi: true}, function (err) {
                             if (db.processed(err, res))
-                                res.send(params._id);
+                                db.CacheTypeMetadata.update({_id: {$in: metadatas}}, {$addToSet: {caches: cacheId}}, {multi: true}, function (err) {
+                                    if (db.processed(err, res))
+                                        db.CacheTypeMetadata.update({_id: {$nin: metadatas}}, {$pull: {caches: cacheId}}, {multi: true}, function (err) {
+                                            if (db.processed(err, res))
+                                                res.send(params._id);
+                                        });
+                                });
                         });
                 });
-        });
+        })
     }
     else
         db.Cache.findOne({space: params.space, name: params.name}, function (err, cache) {
@@ -120,9 +121,12 @@ router.post('/save', function (req, res) {
                     if (db.processed(err, res)) {
                         cacheId = cache._id;
 
-                        db.Cluster.update({_id: {$in: clusters}}, {$addToSet: {caches: cacheId}}, {multi: true}, function(err) {
+                        db.Cluster.update({_id: {$in: clusters}}, {$addToSet: {caches: cacheId}}, {multi: true}, function (err) {
                             if (db.processed(err, res))
-                                res.send(cacheId);
+                                db.CacheTypeMetadata.update({_id: {$in: metadatas}}, {$addToSet: {caches: cacheId}}, {multi: true}, function (err) {
+                                    if (db.processed(err, res))
+                                        res.send(cacheId);
+                                });
                         });
                     }
                 });

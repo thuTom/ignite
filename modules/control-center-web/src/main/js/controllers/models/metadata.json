@@ -33,6 +33,21 @@
           "placeholder": "Input name"
         },
         {
+          "label": "Caches",
+          "id": "caches",
+          "type": "dropdown-multiple",
+          "model": "caches",
+          "placeholder": "Choose caches",
+          "items": "caches",
+          "tip": [
+            "Select caches to associate database with cache."
+          ],
+          "addLink": {
+            "label": "Add cache(s)",
+            "ref": "/configuration/caches"
+          }
+        },
+        {
           "label": "Key type",
           "id": "keyType",
           "type": "withJavaBuildInTypes",

@@ -73,6 +73,7 @@ exports.Space = mongoose.model('Space', new Schema({
 var CacheTypeMetadataSchema = new Schema({
     space: {type: ObjectId, ref: 'Space'},
     name: String,
+    caches: [{type: ObjectId, ref: 'Cache'}],
     kind: {type: String, enum: ['query', 'store', 'both']},
     databaseSchema: String,
     databaseTable: String,
@@ -95,6 +96,7 @@ var CacheSchema = new Schema({
     space: {type: ObjectId, ref: 'Space'},
     name: String,
     clusters: [{type: ObjectId, ref: 'Cluster'}],
+    metadatas: [{type: ObjectId, ref: 'CacheTypeMetadata'}],
     cacheMode: {type: String, enum: ['PARTITIONED', 'REPLICATED', 'LOCAL']},
     atomicityMode: {type: String, enum: ['ATOMIC', 'TRANSACTIONAL']},
 
@@ -134,7 +136,6 @@ var CacheSchema = new Schema({
     rebalanceTimeout: Number,
     rebalanceThrottle: Number,
 
-    storeMetadata: [{type: ObjectId, ref: 'CacheTypeMetadata'}],
     cacheStoreFactory: {
         kind: {
             type: String,
@@ -177,7 +178,6 @@ var CacheSchema = new Schema({
     sqlEscapeAll: Boolean,
     sqlOnheapRowCacheSize: Number,
     longQueryWarningTimeout: Number,
-    queryMetadata: [{type: ObjectId, ref: 'CacheTypeMetadata'}],
     indexedTypes: [{keyClass: String, valueClass: String}],
     sqlFunctionClasses: [String],
     statisticsEnabled: Boolean,
@@ -214,10 +214,7 @@ var CacheSchema = new Schema({
 
 // Install deep populate plugin.
 CacheSchema.plugin(deepPopulate, {
-    whitelist: [
-        'queryMetadata',
-        'storeMetadata'
-    ]
+    whitelist: ['metadatas']
 });
 
 // Define Cache model.
@@ -336,8 +333,7 @@ var ClusterSchema = new Schema({
 ClusterSchema.plugin(deepPopulate, {
     whitelist: [
         'caches',
-        'caches.queryMetadata',
-        'caches.storeMetadata'
+        'caches.metadatas'
     ]
 });
 

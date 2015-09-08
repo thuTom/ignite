@@ -872,38 +872,19 @@ $generatorXml.cacheMetadata = function(meta, res) {
 };
 
 // Generate cache type metadata configs.
-$generatorXml.cacheMetadatas = function(qryMeta, storeMeta, res) {
+$generatorXml.cacheMetadatas = function(metadatas, res) {
     if (!res)
         res = $generatorCommon.builder();
 
-    if ((qryMeta && qryMeta.length > 0) ||
-        (storeMeta && storeMeta.length > 0)) {
+    if (metadatas && metadatas.length > 0) {
         res.emptyLineIfNeeded();
 
         res.startBlock('<property name="typeMetadata">');
         res.startBlock('<list>');
 
-        var metaNames = [];
-
-        if (qryMeta && qryMeta.length > 0) {
-            _.forEach(qryMeta, function (meta) {
-                if (!_.contains(metaNames, meta.name)) {
-                    metaNames.push(meta.name);
-
-                    $generatorXml.cacheMetadata(meta, res);
-                }
-            });
-        }
-
-        if (storeMeta && storeMeta.length > 0) {
-            _.forEach(storeMeta, function (meta) {
-                if (!_.contains(metaNames, meta.name)) {
-                    metaNames.push(meta.name);
-
-                    $generatorXml.cacheMetadata(meta, res);
-                }
-            });
-        }
+        _.forEach(metadatas, function (meta) {
+            $generatorXml.cacheMetadata(meta, res);
+        });
 
         res.endBlock('</list>');
         res.endBlock('</property>');
@@ -937,7 +918,7 @@ $generatorXml.cache = function(cache, res) {
 
     $generatorXml.cacheStatistics(cache, res);
 
-    $generatorXml.cacheMetadatas(cache.queryMetadata, cache.storeMetadata, res);
+    $generatorXml.cacheMetadatas(cache.metadatas, res);
 
     res.endBlock('</bean>');
 

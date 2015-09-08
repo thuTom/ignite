@@ -989,35 +989,17 @@ $generatorJava.cacheMetadata = function(meta, res) {
 };
 
 // Generate cache type metadata configs.
-$generatorJava.cacheMetadatas = function (qryMeta, storeMeta, varName, res) {
+$generatorJava.cacheMetadatas = function (metadatas, varName, res) {
     if (!res)
         res = $generatorCommon.builder();
 
     // Generate cache type metadata configs.
-    if ((qryMeta && qryMeta.length > 0) || (storeMeta && storeMeta.length > 0)) {
+    if (metadatas && metadatas.length > 0) {
         $generatorJava.declareVariable(res, $generatorJava.needNewVariable(res, 'types'), 'types', 'java.util.Collection', 'java.util.ArrayList', 'org.apache.ignite.cache.CacheTypeMetadata');
 
-        var metaNames = [];
-
-        if (qryMeta && qryMeta.length > 0) {
-            _.forEach(qryMeta, function (meta) {
-                if (!_.contains(metaNames, meta.name)) {
-                    metaNames.push(meta.name);
-
-                    $generatorJava.cacheMetadata(meta, res);
-                }
-            });
-        }
-
-        if (storeMeta && storeMeta.length > 0) {
-            _.forEach(storeMeta, function (meta) {
-                if (!_.contains(metaNames, meta.name)) {
-                    metaNames.push(meta.name);
-
-                    $generatorJava.cacheMetadata(meta, res);
-                }
-            });
-        }
+        _.forEach(metadatas, function (meta) {
+            $generatorJava.cacheMetadata(meta, res);
+        });
 
         res.line(varName + '.setTypeMetadata(types);');
 
@@ -1048,7 +1030,7 @@ $generatorJava.cache = function(cache, varName, res) {
 
     $generatorJava.cacheStatistics(cache, varName, res);
 
-    $generatorJava.cacheMetadatas(cache.queryMetadata, cache.storeMetadata, varName, res);
+    $generatorJava.cacheMetadatas(cache.metadatas, varName, res);
 };
 
 // Generate cluster caches.
