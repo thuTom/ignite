@@ -16,6 +16,9 @@
 
 include ../includes/controls
 
+mixin chk(mdl, change, tip)
+    input(type='checkbox' ng-model=mdl ng-change=change bs-tooltip='' data-title=tip data-placement='bottom')
+
 .modal.center(role='dialog')
     .modal-dialog
         .modal-content
@@ -28,21 +31,22 @@ include ../includes/controls
                         .settings-row(ng-repeat='field in metadataDb')
                             +form-row-custom(['col-xs-4 col-sm-3 col-md-3'], ['col-xs-8 col-sm-9 col-md-9'], 'preset')
             .metadata-content(ng-show='loadMeta.action == "schemas"')
-                table.table.table-condensed.table-stripped.metadata(st-table='displayedSchemas' st-safe-src='loadMeta.schemas')
+                table.table.metadata(st-table='displayedSchemas' st-safe-src='loadMeta.schemas')
                     thead
                         tr
                             th.header(colspan='2')
-                                input.form-control(type='text' st-search='' placeholder='Filter schemas...')
+                                .col-sm-4.pull-right
+                                    input.form-control(type='text' st-search='' placeholder='Filter schemas...')
                         tr
                             th(width='50px')
-                                input(type='checkbox' ng-model='loadMeta.allSchemasSelected' ng-change='selectAllSchemas()')
+                                +chk('loadMeta.allSchemasSelected',  'selectAllSchemas()', 'Select all schemas')
                             th
                                 label Schema
                         tbody
                             tr
                                 td(colspan='2')
                                     .metadata-scrollable(style='height: 184px')
-                                        table(id='metadataSchemaData')
+                                        table.table-modal-striped(id='metadataSchemaData')
                                             tbody
                                                 tr(ng-repeat='schema in displayedSchemas')
                                                     td(width='50px')
@@ -50,18 +54,19 @@ include ../includes/controls
                                                     td
                                                         label {{::schema.name}}
             .metadata-content(ng-show='loadMeta.action == "tables"')
-                .settings-row
-                    label.col-sm-2.required Package:
-                    .col-sm-10
+                div.metadata-package-name
+                    label.required Package:
+                    span
                         input.form-control(type="text" ng-model='ui.packageName')
-                table.table.table-condensed.table-stripped.metadata(st-table='displayedTables' st-safe-src='loadMeta.tables')
+                table.table.metadata(st-table='displayedTables' st-safe-src='loadMeta.tables')
                     thead
                         tr
                             th.header(colspan='3')
-                                input.form-control(type='text' st-search='' placeholder='Filter tables...')
+                                .col-sm-4.pull-right
+                                    input.form-control(type='text' st-search='' placeholder='Filter tables...')
                         tr
                             th(width='50px')
-                                input(type='checkbox' ng-model='loadMeta.allTablesSelected' ng-change='selectAllTables()')
+                                +chk('loadMeta.allTablesSelected',  'selectAllTables()', 'Select all tables')
                             th(width='200px')
                                 label Schema
                             th
@@ -70,7 +75,7 @@ include ../includes/controls
                         tr
                             td(colspan='3')
                                 .metadata-scrollable(style='height: 146px')
-                                    table(id='metadataTableData')
+                                    table.table-modal-striped(id='metadataTableData')
                                         tbody
                                             tr(ng-repeat='table in displayedTables')
                                                 td(width='50px')
@@ -81,4 +86,4 @@ include ../includes/controls
                                                     label {{::table.tbl}}
             .modal-footer
                 button.btn.btn-primary(ng-show='loadMeta.action != "connect"' ng-click='loadMetadataPrev()') Prev
-                button.btn.btn-primary(ng-click='loadMetadataNext()' ng-disabled='!nextAvailable()') {{loadMeta.button}}
+                a.btn.btn-primary(ng-click='loadMetadataNext()' ng-disabled='!nextAvailable()' bs-tooltip data-title='{{nextTooltipText()}}' data-placement='bottom') {{loadMeta.button}}

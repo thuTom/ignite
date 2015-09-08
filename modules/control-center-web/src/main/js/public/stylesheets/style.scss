@@ -605,7 +605,7 @@ h3 {
         padding: 0 0 10px;
 
         div {
-            padding: 0
+            padding: 0;
         }
 
         input[type="text"] {
@@ -642,6 +642,26 @@ h3 {
     }
 }
 
+.metadata-package-name {
+    margin: 10px 0;
+    overflow: hidden;
+
+    label {
+        line-height: $input-height;
+        float: left;
+    }
+
+    input {
+        width: 100%
+    }
+
+    span {
+        display: block;
+        overflow: hidden;
+        padding-left: 10px;
+    }
+}
+
 .metadata-content {
     margin: 15px;
 }
@@ -658,12 +678,49 @@ h3 {
         cursor: default;
     }
 
+    thead > tr {
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
+    }
+
     thead > tr th.header {
+        padding: 0 0 10px;
+
+        .pull-right {
+            padding: 0;
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
+
         input[type="text"] {
             font-weight: normal;
         }
     }
+
+    tbody > tr > td {
+        padding: 0;
+    }
 }
+
+.table-modal-striped {
+    width: 100%;
+
+    > tbody > tr {
+        border-bottom: 2px solid $ignite-border-color;
+
+        input[type="checkbox"] {
+            cursor: pointer;
+        }
+    }
+
+    > tbody > tr > td {
+        padding: 8px !important;
+    }
+}
+
 
 .theme-line table.sql-results {
     [class*="col-"] {
