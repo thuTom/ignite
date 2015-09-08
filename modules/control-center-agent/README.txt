@@ -18,7 +18,7 @@ Test drive of Ignite Web Agent:
 
     1) Get access token on Web Control Center "Profile" screen.
 
-    1) Test drive for metadata load from database. Activated by option: -tm or --test-drive-metadata.
+    2) Test drive for metadata load from database. Activated by option: -tm or --test-drive-metadata.
        In this mode an in-memory H2 database will started.
        How to evaluate:
          1.1) Go to Ignite Web Control Center "Metadata" screen.
@@ -26,7 +26,7 @@ Test drive of Ignite Web Agent:
          1.3) Select H2 driver and enter JDBC URL: "jdbc:h2:mem:test-drive-db".
          1.4) You should see list of available schemas and tables. Select some of them and click "Save".
 
-    2) Test drive for SQL. Activated by option: -ts or --test-drive-sql.
+    3) Test drive for SQL. Activated by option: -ts or --test-drive-sql.
        In this mode internal Ignite node will be started. Cache created and populated with data.
        How to evaluate:
        2.1) Go to Ignite Web Control Center "SQL" menu and select "Create new notebook" menu item.
