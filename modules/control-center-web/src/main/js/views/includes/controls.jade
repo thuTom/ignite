@@ -294,7 +294,7 @@ mixin form-row-custom(lblClasses, fieldClasses, dataSource)
             div(class=fieldClasses)
                 +tipField('field.tip')
                 .input-tip
-                    button.form-control(id='{{::field.id}}' bs-select ng-disabled=fieldDisabled data-placeholder='{{::field.placeholder}}' bs-options='item.value as item.label for item in {{field.items}}' tabindex='0')&attributes(fieldCommon)
+                    button.form-control(id='{{::field.id}}' bs-select ng-disabled=fieldDisabled data-placeholder='{{::field.placeholder}}' bs-options='item.value as item.label for item in {{field.items}}' ng-attr-data-container='{{::field.container}}' tabindex='0')&attributes(fieldCommon)
         div(ng-switch-when='dropdown-multiple' ng-hide=fieldHide)
             dic(class=lblClasses)
                 label(ng-class=fieldRequiredClass) {{::field.label}}:

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-var controlCenterModule = angular.module('ignite-web-control-center', ['ngAnimate', 'smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize']);
+var controlCenterModule = angular.module('ignite-web-control-center', ['ngAnimate', 'smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize', 'treeControl']);
 
 // Modal popup configuration.
 controlCenterModule.config(function ($modalProvider) {
@@ -1554,13 +1554,6 @@ controlCenterModule.controller('notebooks', ['$scope', '$modal', '$window', '$ht
 
     $scope.$root.inputNotebookName = function() {
         _notebookNewModal.$promise.then(_notebookNewModal.show);
-    };
-
-    $scope.$root.cancelCreateNotebook = function() {
-        _notebookNewModal.hide();
-
-        if ($scope.$root.notebooks.length == 0)
-            $window.location = '/configuration/clusters';
     };
 
     $scope.$root.createNewNotebook = function(name) {

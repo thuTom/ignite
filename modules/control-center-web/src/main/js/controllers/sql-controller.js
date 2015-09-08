@@ -50,6 +50,21 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         }
     };
 
+    $scope.treeOptions = {
+        nodeChildren: "children",
+        dirSelectable: false,
+        injectClasses: {
+            ul: "a1",
+            li: "a2",
+            liSelected: "a7",
+            iExpanded: "a3",
+            iCollapsed: "a4",
+            iLeaf: "a5",
+            label: "a6",
+            labelSelected: "a8"
+        }
+    };
+
     $scope.aceInit = function (editor) {
         editor.setAutoScrollEditorIntoView(true);
         editor.$blockScrolling = Infinity;
@@ -137,7 +152,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                                 $window.location = "/sql/" +
                                     $scope.$root.notebooks[Math.min(idx,  $scope.$root.notebooks.length - 1)]._id;
                             else
-                                $scope.inputNotebookName();
+                                $window.location = '/configuration/clusters';
                         }
                     })
                     .error(function (errMsg) {
@@ -166,12 +181,23 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
         var sz = $scope.notebook.paragraphs.length;
 
-        var paragraph = {id: paragraphId++, name: 'Query' + (sz ==0 ? '' : sz), editor: true, query: '', pageSize: $scope.pageSizes[0], result: 'none'};
+        var paragraph = {
+            id: paragraphId++,
+            name: 'Query' + (sz ==0 ? '' : sz),
+            editor: true,
+            query: '',
+            pageSize: $scope.pageSizes[0],
+            result: 'none',
+            hideColumns: true,
+            rate: {
+                value: 1,
+                unit: 'm',
+                executed: false
+            }
+        };
 
         if ($scope.caches && $scope.caches.length > 0)
             paragraph.cache = $scope.caches[0];
-
-        paragraph.rate = {ruined: false, value: 0, unit: $scope.timeUnit[0].value};
 
         $scope.notebook.expandedParagraphs.push($scope.notebook.paragraphs.length);
 
@@ -242,8 +268,17 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         });
 
     $http.post('/agent/topology')
-        .success(function (clusters) {
-            $scope.caches = clusters[0].caches;
+        .success(function (nodes) {
+            $scope.caches = [];
+
+            nodes[0].caches.map(function (cache) {
+                $scope.caches.push({
+                    "name" : cache.name,
+                    meta: [
+                        {"name" : cache.name, "age" : "33", "children" : []}
+                    ]
+                });
+            })
         })
         .error(function (err, status) {
             $scope.caches = [];
@@ -254,15 +289,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 $common.showError('Receive agent error: ' + err);
         });
 
-    var _appendOnLast = function (item) {
-        var idx = _.findIndex($scope.notebook.paragraphs, function (paragraph) {
-            return paragraph == item;
-        });
-
-        if ($scope.notebook.paragraphs.length == (idx + 1))
-            $scope.addParagraph();
-    };
-
     var _processQueryResult = function (paragraph) {
         return function (res) {
             paragraph.meta = [];
@@ -272,20 +298,17 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 paragraph.meta = res.meta;
 
                 var idx = 0;
-                paragraph.chartColX = null;
-                paragraph.chartColY = null;
 
                 _.forEach(paragraph.meta, function (meta) {
                     var col = {value: idx++, label: meta.fieldName};
 
-                    paragraph.chartColumns.push(col);
-
-                    if (idx == 1)
-                        paragraph.chartColX = 0;
-
-                    if (idx == 2)
-                        paragraph.chartColY = 1;
+                    if (!(paragraph.hideColumns && (col.label === '_KEY' || col.label === '_VAL'))) {
+                        paragraph.chartColumns.push(col);
+                    }
                 });
+
+                paragraph.chartColX = paragraph.chartColumns.length > 0 ? paragraph.chartColumns[0].value : null;
+                paragraph.chartColY = paragraph.chartColumns.length > 1 ? paragraph.chartColumns[1].value : null;
             }
 
             paragraph.page = 1;
@@ -293,6 +316,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             paragraph.total = 0;
 
             paragraph.queryId = res.queryId;
+
+            delete paragraph.errMsg;
 
             paragraph.rows = res.rows;
 
@@ -303,36 +328,30 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     $scope.execute = function (paragraph) {
         _saveNotebook();
 
-        _appendOnLast(paragraph);
-
         $http.post('/agent/query', {query: paragraph.query, pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
             .success(_processQueryResult(paragraph))
             .error(function (errMsg) {
-                $common.showError(errMsg);
+                paragraph.errMsg = errMsg;
             });
     };
 
-    $scope.explain = function (item) {
+    $scope.explain = function (paragraph) {
         _saveNotebook();
 
-        _appendOnLast(item);
-
-        $http.post('/agent/query', {query: 'EXPLAIN ' + item.query, pageSize: item.pageSize, cacheName: item.cache.name})
-            .success(_processQueryResult(item))
+        $http.post('/agent/query', {query: 'EXPLAIN ' + paragraph.query, pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
+            .success(_processQueryResult(paragraph))
             .error(function (errMsg) {
-                $common.showError(errMsg);
+                paragraph.errMsg = errMsg;
             });
     };
 
-    $scope.scan = function (item) {
+    $scope.scan = function (paragraph) {
         _saveNotebook();
 
-        _appendOnLast(item);
-
-        $http.post('/agent/scan', {pageSize: item.pageSize, cacheName: item.cache.name})
-            .success(_processQueryResult(item))
+        $http.post('/agent/scan', {pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
+            .success(_processQueryResult(paragraph))
             .error(function (errMsg) {
-                $common.showError(errMsg);
+                paragraph.errMsg = errMsg;
             });
     };
 
@@ -390,13 +409,13 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.exportPage = function(paragraph) {
-        _export('export.csv', paragraph.meta, paragraph.rows);
+        _export(paragraph.name + '.csv', paragraph.meta, paragraph.rows);
     };
 
     $scope.exportAll = function(paragraph) {
         $http.post('/agent/query/getAll', {query: paragraph.query, cacheName: paragraph.cache.name})
             .success(function (item) {
-                _export('export-all.csv', item.meta, item.rows);
+                _export(paragraph.name + '-all.csv', item.meta, item.rows);
             })
             .error(function (errMsg) {
                 $common.showError(errMsg);
@@ -590,4 +609,13 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             _insertChart(paragraph, _chartDatum('Area chart', paragraph), chart);
         });
     }
+
+    $scope.actionAvailable = function (paragraph, needQuery) {
+        return paragraph.cache && (!needQuery || paragraph.query);
+    };
+
+    $scope.actionTooltip = function (paragraph, action, needQuery) {
+        return $scope.actionAvailable(paragraph, needQuery) ? undefined
+            : 'To ' + action + ' query select cache' + (needQuery ? ' and input query' : '');
+    };
 }]);

@@ -39,11 +39,12 @@ block container
                         label {{notebook.name}}
                         .btn-group
                             +btn-toolbar('fa-pencil', 'notebook.edit = true;notebook.edit_name = notebook.name', 'Rename notebook')
-                            +btn-toolbar('fa-paragraph', 'addParagraph()', 'Add new paragraph')
                             +btn-toolbar('fa-trash', 'removeNotebook()', 'Remove notebook')
                     h1.col-sm-6(ng-show='notebook.edit')
                         input.sql-name-input(ng-model='notebook.edit_name' required on-enter='renameNotebook(notebook.edit_name)' on-escape='notebook.edit = false;')
                         i.tipLabel.fa.fa-floppy-o(ng-show='notebook.edit_name' ng-click='renameNotebook(notebook.edit_name)' bs-tooltip data-title='Save notebook name' data-trigger='hover')
+                    .pull-right
+                        +btn-toolbar('fa-plus', 'addParagraph()', 'Add new query')
                 hr
                 .docs-body.paragraphs
                     .panel-group(bs-collapse ng-model='notebook.expandedParagraphs' data-allow-multiple='true' data-start-collapsed='false')
@@ -79,52 +80,60 @@ block container
                                         div(ng-show='caches.length > 0' style='padding: 5px 10px' st-table='displayedCaches' st-safe-src='caches')
                                             lable.labelField.labelFormField Caches:
                                             .input-tip
-                                                input.form-control(type='text' placeholder='Filter caches...')
+                                                input.form-control(type='text' st-search placeholder='Filter caches...')
                                             table.links
                                                 tbody
                                                     tr(ng-repeat='cache in displayedCaches track by cache.name')
                                                         td(style='width: 100%')
                                                             a(ng-class='{active: cache.name == paragraph.cache.name}' ng-click='paragraph.cache = cache') {{$index + 1}}) {{::cache.name}}
-                                                        td(style='width: 15px')
-                                                            i.fa.fa-info-circle(bs-popover data-template-url='cache-metadata' data-placement='left' data-auto-close='1' data-trigger='click')
-                                        div(ng-show='caches.length == 0')
-                                            label Placeholder empty caches
+                                                        //td(style='width: 15px')
+                                                        //    i.fa.fa-info-circle(bs-popover data-template-url='cache-metadata' data-placement='left' data-auto-close='1' data-trigger='click')
+                                        .empty-caches(ng-show='displayedCaches.length == 0 && caches.length != 0')
+                                            label Wrong caches filter
+                                        .empty-caches(ng-show='caches.length == 0')
+                                            label No caches
                                 .col-sm-12
                                     hr(style='margin: 0')
                                 .col-sm-12
                                     .details-row
-                                        button.btn.btn-primary(ng-click='explain(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Explain
-                                        button.btn.btn-primary(ng-click='execute(paragraph)' ng-disabled='!paragraph.query || !paragraph.cache') Execute
-                                        button.btn.btn-primary(ng-click='scan(paragraph)' ng-disabled='!paragraph.cache') Scan
+                                        a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, true)' ng-click='actionAvailable(paragraph, true) ? explain(paragraph) : ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "explain", true)}}') Explain
+                                        a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, true)' ng-click='actionAvailable(paragraph, true) ? execute(paragraph) : ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute", true)}}') Execute
+                                        a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, false)' ng-click='actionAvailable(paragraph, false) ? scan(paragraph): ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute scan", false)}}') Scan
+                                        label
+                                            input(type='checkbox' ng-model='paragraph.hideColumns' ng-disabled='paragraph.possibleHideColumns')
+                                            | Hide '_KEY', '_VAL'
                                         .pull-right
                                             label Refresh rate:
                                             button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.executed}' bs-popover data-template-url='rate' data-placement='left' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select style='margin-right: 0')
-                                .col-sm-12(ng-show='paragraph.result != "none"')
+                                .col-sm-12(ng-show='paragraph.errMsg')
                                     hr(style='margin-top: 0; margin-bottom: 10px')
-                                .col-sm-12(ng-show='paragraph.rows && paragraph.result === "table"')
-                                    .sql-table-total
-                                        label Page #:&nbsp;
-                                        b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
-                                        label Results:&nbsp;
-                                        b {{paragraph.rows.length + paragraph.total}}
-                                        .pull-right
-                                            button.btn.btn-primary(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
-                                            .btn-group
-                                                button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
-                                                button.btn.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
-                                                    span.caret
-                                    .sql-table-wrapper
-                                        table.table.table-condensed(st-table='displayedResult' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
-                                            thead
-                                                tr
-                                                    th(ng-repeat='col in paragraph.meta track by $index' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)' data-placement='bottom')
-                                            tbody
-                                                tr(ng-repeat='row in displayedResult track by $index')
-                                                    td(ng-repeat='val in row track by $index') {{ val }}
-                                .col-sm-12(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
-                                    button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='left' data-auto-close='1' data-trigger='click')
-                                    div(id='chart-{{paragraph.id}}')
-                                        svg
-                                .col-sm-12.sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"') Result set is empty.
+                                    .sql-error-result(ng-show='paragraph.errMsg') Error: {{paragraph.errMsg}}
+                                .col-sm-12(ng-show='!paragraph.errMsg')
+                                    hr(ng-show='paragraph.result != "none"' style='margin-top: 0; margin-bottom: 10px')
+                                    div(ng-show='paragraph.rows && paragraph.result === "table"')
+                                        .sql-table-total(ng-show='paragraph.rows && paragraph.result === "table"')
+                                            label Page #:&nbsp;
+                                            b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
+                                            label Results:&nbsp;
+                                            b {{paragraph.rows.length + paragraph.total}}
+                                            .pull-right
+                                                button.btn.btn-primary(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
+                                                .btn-group
+                                                    button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
+                                                    button.btn.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
+                                                        span.caret
+                                        .sql-table-wrapper
+                                            table.table.table-condensed(st-table='displayedResult' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
+                                                thead
+                                                    tr
+                                                        th(ng-repeat='col in paragraph.meta track by $index' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)' data-placement='bottom')
+                                                tbody
+                                                    tr(ng-repeat='row in displayedResult track by $index')
+                                                        td(ng-repeat='val in row track by $index') {{ val }}
+                                    div(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
+                                        button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='left' data-auto-close='1' data-trigger='click')
+                                        div(id='chart-{{paragraph.id}}')
+                                            svg
+                                    .sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"') Result set is empty.

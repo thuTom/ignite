@@ -199,6 +199,7 @@
       "label": "Driver JAR",
       "id": "jdbcDriverJar",
       "type": "dropdown",
+      "container": "false",
       "model": "jdbcDriverJar",
       "items": "jdbcDriverJars",
       "tip": [

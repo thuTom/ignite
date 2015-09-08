@@ -228,31 +228,21 @@ Client.prototype._invokeRmtMethod = function(methodName, args) {
 Client.prototype._rmtAuthMessage = function(msg) {
     var self = this;
 
-    db.Account.findByUsername(msg.login, function(err, account) {
+    db.Account.findOne({ $or: [{ token: msg.token }, {token: undefined, _id: msg.token} ] }, function(err, account) {
         if (err) {
             self.authResult('Failed to authorize user');
             // TODO IGNITE-1379 send error to web master.
         }
-        else if (!account) {
-            self.authResult('User not found');
-        }
+        else if (!account)
+            self.authResult('Invalid token, user not found');
         else {
-            var token = account.token;
+            self.authResult(null);
 
-            if (!token)
-                token = account._id;
+            self._user = account;
 
-            if (token == msg.token) {
-                self.authResult(null);
+            self._manager._addClient(account._id, self);
 
-                self._user = account;
-
-                self._manager._addClient(account._id, self);
-
-                self._ignite = new apacheIgnite.Ignite(new AgentServer(self));
-            }
-            else
-                self.authResult('Invalid token');
+            self._ignite = new apacheIgnite.Ignite(new AgentServer(self));
         }
     });
 };

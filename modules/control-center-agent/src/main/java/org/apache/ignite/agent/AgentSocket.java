@@ -105,7 +105,6 @@ public class AgentSocket implements WebSocketSender {
         JsonObject authMsg = new JsonObject();
 
         authMsg.addProperty("type", "AuthMessage");
-        authMsg.addProperty("login", cfg.login());
         authMsg.addProperty("token", cfg.token());
 
         send(authMsg);

@@ -70,12 +70,6 @@ public class AgentLauncher {
 
         cfg.merge(cmdCfg);
 
-        if (cfg.login() == null) {
-            System.out.print("Login: ");
-
-            cfg.login(System.console().readLine().trim());
-        }
-
         if (cfg.token() == null) {
             System.out.print("Token: ");
 

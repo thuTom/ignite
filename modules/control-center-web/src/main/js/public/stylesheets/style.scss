@@ -339,7 +339,7 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
-button {
+button, a.btn {
     margin-right: 5px;
 }
 
@@ -350,7 +350,7 @@ button {
 .btn-group {
     margin-right: 5px;
 
-    > button {
+    > button, a.btn {
         margin-right: 0;
     }
 }
@@ -426,6 +426,10 @@ h3 {
         margin-top: 30px;
     }
 
+    .btn-group {
+        margin-right: 0;
+    }
+
     .sql-editor {
         padding: 5px 0;
 
@@ -445,10 +449,6 @@ h3 {
             height: 27px;
         }
 
-        .btn-group {
-            margin-right: 0;
-        }
-
         margin-bottom: 10px;
     }
 
@@ -465,10 +465,30 @@ h3 {
         background-color: white;
     }
 
+    .wrong-caches-filter {
+        text-align: center;
+        color: $ignite-placeholder-color;
+        height: 65px;
+        line-height: 65px;
+    }
+
+    .empty-caches {
+        text-align: center;
+        color: $ignite-placeholder-color;
+        height: 100px;
+        line-height: 100px;
+    }
+
     .sql-empty-result {
         margin-bottom: 10px;
         text-align: center;
         color: $ignite-placeholder-color;
+    }
+
+    .sql-error-result {
+        margin-bottom: 10px;
+        text-align: center;
+        color: $brand-danger;
     }
 }
 

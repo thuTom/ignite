@@ -35,10 +35,6 @@ public class AgentConfiguration {
     private static final String DFLT_NODE_URI = "http://localhost:8080";
 
     /** */
-    @Parameter(names = {"-l", "--login"}, description = "User's login (email) on Ignite Web Control Center")
-    private String login;
-
-    /** */
     @Parameter(names = {"-t", "--token"}, description = "User's access token")
     private String token;
 
@@ -75,20 +71,6 @@ public class AgentConfiguration {
     /** */
     @Parameter(names = { "-h", "--help" }, help = true, description = "Print this help message")
     private Boolean help;
-
-    /**
-     * @return Login.
-     */
-    public String login() {
-        return login;
-    }
-
-    /**
-     * @param login Login.
-     */
-    public void login(String login) {
-        this.login = login;
-    }
 
     /**
      * @return Token.
@@ -198,12 +180,7 @@ public class AgentConfiguration {
             props.load(reader);
         }
 
-        String val = (String)props.remove("login");
-
-        if (val != null)
-            login(val);
-
-        val = (String)props.remove("token");
+        String val = (String)props.remove("token");
 
         if (val != null)
             token(val);
@@ -238,9 +215,6 @@ public class AgentConfiguration {
      * @param cmd Command.
      */
     public void merge(AgentConfiguration cmd) {
-        if (cmd.login() != null)
-            login(cmd.login());
-
         if (cmd.token() != null)
             token(cmd.token());
 
