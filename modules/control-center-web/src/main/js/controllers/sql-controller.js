@@ -27,7 +27,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.caches = [];
 
-    $scope.pageSizes = [10, 25, 50];
+    $scope.pageSizes = [10, 25, 50, 100];
 
     $scope.modes = [
         {value: 'PARTITIONED', label: 'PARTITIONED'},
@@ -44,7 +44,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     $scope.exportDropdown = [{ 'text': 'Export all', 'click': 'exportAll(paragraph)'}];
 
     $scope.floatTheadOptions = {
-        autoReflow:true,
+        autoReflow: true,
         useAbsolutePositioning: true,
         scrollContainer: function($table) {
             return $table.closest(".sql-table-wrapper");

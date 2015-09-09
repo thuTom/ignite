@@ -469,7 +469,7 @@ mixin preview(preview, id)
     -var previewState = preview + 'State'
 
     .preview-panel(ng-init='#{previewState} = false')
-        .preview-legend(ng-show='!preview[#{preview}].allDefaults')
+        .preview-legend
             a(ng-class='{active: !#{previewState}, inactive: #{previewState}}' ng-click='#{previewState} = false') XML&nbsp;
             a(ng-class='{active: #{previewState}, inactive: !#{previewState}}' ng-click='#{previewState} = true') Java
         +preview-content(preview, false, 'xml')

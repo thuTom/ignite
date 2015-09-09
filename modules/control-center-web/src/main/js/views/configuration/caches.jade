@@ -35,7 +35,7 @@ block content
             //label {{ui.formTitle}}
             br
             hr
-        form.form-horizontal(name='ui.inputForm' ng-if='backupItem' novalidate)
+        form.form-horizontal(name='ui.inputForm' ng-if='backupItem' novalidate unsaved-warning-form)
             .panel-group(bs-collapse ng-model='panels.activePanels' data-allow-multiple='true')
                 +groups('general', 'backupItem')
                 div(ng-show='ui.expanded')

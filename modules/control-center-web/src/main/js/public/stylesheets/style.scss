@@ -681,6 +681,10 @@ h3 {
     }
 
     thead > tr {
+        label {
+            font-weight: bold;
+        }
+
         input[type="checkbox"] {
             cursor: pointer;
         }
