@@ -228,7 +228,7 @@ Client.prototype._invokeRmtMethod = function(methodName, args) {
 Client.prototype._rmtAuthMessage = function(msg) {
     var self = this;
 
-    db.Account.findOne({ $or: [{ token: msg.token }, {token: undefined, _id: msg.token} ] }, function(err, account) {
+    db.Account.findOne({ token: msg.token }, function (err, account) {
         if (err) {
             self.authResult('Failed to authorize user');
             // TODO IGNITE-1379 send error to web master.
