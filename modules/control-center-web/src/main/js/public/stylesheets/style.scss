@@ -1349,9 +1349,9 @@ a {
     }
 }
 
-.chart-btn {
-    position: absolute;
-    right: 5px;
+.chart-settings-link {
+    font-size: $font-size-base;
+    color: $link-color !important;
 }
 
 .chart-settings {

@@ -60,12 +60,14 @@ block container
                                         +btn-toolbar('fa-pencil', 'paragraph.edit = true; paragraph.edit_name = paragraph.name;', 'Rename paragraph')
                                         +btn-toolbar('fa-remove', 'removeParagraph(paragraph)', 'Remove paragraph')
 
-                                    .btn-group(ng-model='paragraph.result' ng-click='$event.stopPropagation()' style='float: right')
-                                        +btn-toolbar-data('fa-table', 'table', 'Show data in tabular form.')
-                                        +btn-toolbar-data('fa-bar-chart', 'bar', 'Show bar chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
-                                        +btn-toolbar-data('fa-pie-chart', 'pie', 'Show pie chart.<br/>By default first column - pie values, second column - pie labels.<br/>In case of one column it will be treated as pie values.')
-                                        +btn-toolbar-data('fa-line-chart', 'line', 'Show line chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
-                                        +btn-toolbar-data('fa-area-chart', 'area', 'Show area chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
+                                    .pull-right
+                                        a.chart-settings-link(ng-hide='paragraph.chart' ng-click='$event.stopPropagation()' bs-popover data-template-url='chart-settings' data-placement='bottom' data-auto-close='1' data-trigger='click') Chart settings
+                                        .btn-group(ng-model='paragraph.result' ng-click='$event.stopPropagation()' style='float: right')
+                                            +btn-toolbar-data('fa-table', 'table', 'Show data in tabular form.')
+                                            +btn-toolbar-data('fa-bar-chart', 'bar', 'Show bar chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
+                                            +btn-toolbar-data('fa-pie-chart', 'pie', 'Show pie chart.<br/>By default first column - pie values, second column - pie labels.<br/>In case of one column it will be treated as pie values.')
+                                            +btn-toolbar-data('fa-line-chart', 'line', 'Show line chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
+                                            +btn-toolbar-data('fa-area-chart', 'area', 'Show area chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
                                 div(ng-show='paragraph.edit')
                                     input.sql-name-input(ng-model='paragraph.edit_name' required ng-click='$event.stopPropagation();' on-enter='renameParagraph(paragraph, paragraph.edit_name)' on-escape='paragraph.edit = false')
                                     i.tipLabel.fa.fa-floppy-o(ng-show='paragraph.edit_name' ng-click='renameParagraph(paragraph, paragraph.edit_name); $event.stopPropagation();' bs-tooltip data-title='Save paragraph name' data-trigger='hover')
@@ -133,7 +135,6 @@ block container
                                                     tr(ng-repeat='row in displayedResult track by $index')
                                                         td(ng-repeat='val in row track by $index' ng-if='paragraph.columnFilter(paragraph.meta[$index])') {{ val }}
                                     div(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
-                                        button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='left' data-auto-close='1' data-trigger='click')
                                         div(id='chart-{{paragraph.id}}')
                                             svg
                                     .sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"') Result set is empty.
