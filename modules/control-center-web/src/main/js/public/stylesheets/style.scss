@@ -137,16 +137,17 @@ ul.navbar-nav, .sidebar-nav {
     }
 
     .active {
+        font-size: 1em;
         background-color: $ignite-background-dark-color;
     }
 }
 
-.dropdown-menu {
+.theme-line .dropdown-menu {
+    min-width: 75px;
     max-height: 20em;
     overflow: auto;
     overflow-x: hidden;
 }
-
 
 .theme-line .border-left .sidebar-nav {
     padding-left: 15px;
@@ -1400,10 +1401,6 @@ a {
         -moz-transform: rotate(180deg);
         transform: rotate(180deg);
     }
-}
-
-.theme-line .dropdown-menu {
-    min-width: 75px;
 }
 
 .panel-tip-container {

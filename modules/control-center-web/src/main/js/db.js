@@ -351,7 +351,7 @@ var NotebookSchema = new Schema({
         editor: Boolean,
         result: {type: String, enum: ['none', 'table', 'bar', 'pie', 'line', 'area']},
         pageSize: Number,
-        hideColumns: Boolean,
+        hideSystemColumns: Boolean,
         cache: {
             name: String,
             mode: {type: String, enum: ['PARTITIONED', 'REPLICATED', 'LOCAL']}

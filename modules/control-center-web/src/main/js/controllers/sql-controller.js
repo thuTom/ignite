@@ -44,6 +44,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     $scope.exportDropdown = [{ 'text': 'Export all', 'click': 'exportAll(paragraph)'}];
 
     $scope.floatTheadOptions = {
+        autoReflow:true,
         useAbsolutePositioning: true,
         scrollContainer: function($table) {
             return $table.closest(".sql-table-wrapper");
@@ -65,6 +66,16 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         }
     };
 
+    var _hideColumn = function (col) {
+        return !(col.fieldName === "_KEY") && !(col.fieldName == "_VAL");
+    };
+
+    var _allColumn = function (col) {
+        return true;
+    };
+
+    var paragraphId = 0;
+
     $scope.aceInit = function (editor) {
         editor.setAutoScrollEditorIntoView(true);
         editor.$blockScrolling = Infinity;
@@ -79,8 +90,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
         editor.setTheme('ace/theme/chrome');
     };
-
-    var paragraphId = 0;
 
     var loadNotebook = function () {
         $http.post('/notebooks/get', {noteId: $scope.noteId})
@@ -188,7 +197,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             query: '',
             pageSize: $scope.pageSizes[0],
             result: 'none',
-            hideColumns: true,
+            hideSystemColumns: true,
+            disabledSystemColumns: false,
             rate: {
                 value: 1,
                 unit: 'm',
@@ -280,22 +290,31 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 $common.showError('Receive agent error: ' + err);
         });
 
+
+    $scope.applySystemColumns = function (paragraph) {
+        paragraph.columnFilter = !paragraph.disabledSystemColumns && paragraph.hideSystemColumns ? _hideColumn : _allColumn;
+    };
+
     var _processQueryResult = function (paragraph) {
         return function (res) {
             paragraph.meta = [];
             paragraph.chartColumns = [];
 
             if (res.meta) {
+                paragraph.disabledSystemColumns = res.meta.length == 2 &&
+                    res.meta[0].fieldName === "_KEY" && res.meta[1].fieldName === "_VAL";
+
+                $scope.applySystemColumns(paragraph);
+
                 paragraph.meta = res.meta;
 
                 var idx = 0;
 
-                _.forEach(paragraph.meta, function (meta) {
+                _.forEach(res.meta, function (meta) {
                     var col = {value: idx++, label: meta.fieldName};
 
-                    if (!(paragraph.hideColumns && (col.label === '_KEY' || col.label === '_VAL'))) {
+                    if (paragraph.disabledSystemColumns || _hideColumn(meta))
                         paragraph.chartColumns.push(col);
-                    }
                 });
 
                 paragraph.chartColX = paragraph.chartColumns.length > 0 ? paragraph.chartColumns[0].value : null;

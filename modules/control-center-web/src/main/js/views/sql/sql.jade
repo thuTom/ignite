@@ -99,14 +99,14 @@ block container
                                         a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, true)' ng-click='actionAvailable(paragraph, true) ? explain(paragraph) : ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "explain", true)}}') Explain
                                         a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, true)' ng-click='actionAvailable(paragraph, true) ? execute(paragraph) : ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute", true)}}') Execute
                                         a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, false)' ng-click='actionAvailable(paragraph, false) ? scan(paragraph): ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute scan", false)}}') Scan
-                                        label
-                                            input(type='checkbox' ng-model='paragraph.hideColumns' ng-disabled='paragraph.possibleHideColumns')
-                                            | Hide '_KEY', '_VAL'
                                         .pull-right
                                             label Refresh rate:
                                             button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.executed}' bs-popover data-template-url='rate' data-placement='left' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select style='margin-right: 0')
+                                            label(style='margin-left: 10px')
+                                                input(type='checkbox' ng-model='paragraph.hideSystemColumns' ng-click='applySystemColumns(paragraph)' ng-disabled='paragraph.disabledSystemColumns')
+                                                | Hide system columns
                                 .col-sm-12(ng-show='paragraph.errMsg')
                                     hr(style='margin-top: 0; margin-bottom: 10px')
                                     .sql-error-result(ng-show='paragraph.errMsg') Error: {{paragraph.errMsg}}
@@ -128,10 +128,10 @@ block container
                                             table.table.table-condensed(st-table='displayedResult' st-safe-src='paragraph.rows' float-thead='floatTheadOptions')
                                                 thead
                                                     tr
-                                                        th(ng-repeat='col in paragraph.meta track by $index' data-ng-bind='col.fieldName' bs-tooltip='columnToolTip(col)' data-placement='bottom')
+                                                        th(ng-repeat='col in paragraph.meta track by $index' ng-if='paragraph.columnFilter(col)' bs-tooltip='columnToolTip(col)' data-placement='bottom') {{col.fieldName}}
                                                 tbody
                                                     tr(ng-repeat='row in displayedResult track by $index')
-                                                        td(ng-repeat='val in row track by $index') {{ val }}
+                                                        td(ng-repeat='val in row track by $index' ng-if='paragraph.columnFilter(paragraph.meta[$index])') {{ val }}
                                     div(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
                                         button.btn.btn-default.chart-btn.fa.fa-cog(bs-popover data-template-url='chart-settings' data-placement='left' data-auto-close='1' data-trigger='click')
                                         div(id='chart-{{paragraph.id}}')
