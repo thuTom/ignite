@@ -35,7 +35,7 @@ public class AgentConfiguration {
     private static final String DFLT_NODE_URI = "http://localhost:8080";
 
     /** */
-    @Parameter(names = {"-t", "--token"}, description = "User's access token")
+    @Parameter(names = {"-t", "--token"}, description = "User's security token")
     private String token;
 
     /** */

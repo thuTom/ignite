@@ -16,7 +16,7 @@ Usage example:
 Test drive of Ignite Web Agent:
     In order to simplify evaluation two test drive modes were implemented:
 
-    1) Get access token on Web Control Center "Profile" screen.
+    1) Get security token on Web Control Center "Profile" screen.
 
     2) Test drive for metadata load from database. Activated by option: -tm or --test-drive-metadata.
        In this mode an in-memory H2 database will started.
@@ -74,7 +74,7 @@ Options:
        Default: "http://localhost:8080".
 
     -t, --token
-       User's access token.
+       User's security token.
 
     -s, --server-uri
        URI for connect to Ignite Web Agent, for example: "wss://control-center.example.com:3001".
