@@ -34,6 +34,7 @@ block container
                             th(st-sort='username') User name
                             th(st-sort='email') Email
                             th.col-sm-2(st-sort='lastLogin') Last login
+                            th.col-sm-2 Token
                             th(width='1%'  st-sort='admin') Admin
                             th(width='1%') Actions
                     tbody
@@ -43,6 +44,8 @@ block container
                                 a(ng-href='mailto:{{row.email}}') {{row.email}}
                             td
                                 span {{row.lastLogin | date:'medium'}}
+                            td
+                                label {{row.token}}
                             td(style='text-align: center;')
                                 input(type='checkbox' ng-disabled='row.adminChanging || row._id == user._id'
                                     ng-model='row.admin' ng-change='toggleAdmin(row)')
