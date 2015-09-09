@@ -20,7 +20,7 @@ controlCenterModule.controller('profileController', ['$scope', '$http', '$common
     $scope.profileUser = angular.copy($scope.user);
 
     if ($scope.profileUser && !$scope.profileUser.token)
-        $scope.profileUser.token = 'No access token. Regenerate please.';
+        $scope.profileUser.token = 'No security token. Regenerate please.';
 
     $scope.generateToken = function () {
         $scope.profileUser.token = $commonUtils.randomString(20);
