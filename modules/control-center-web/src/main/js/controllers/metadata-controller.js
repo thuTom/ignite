@@ -202,32 +202,6 @@ controlCenterModule.controller('metadataController', [
                     $scope.selectItem($scope.metadatas[0]);
             }
 
-            function setSelectedAndBackupItem(sel, backup, changed) {
-                function setSelectedAndBackupItem() {
-                    $table.tableReset();
-
-                    $scope.selectedItem = sel;
-
-                    _.forEach(previews, function(preview) {
-                        preview.attractAttention = false;
-                    });
-
-                    $scope.backupItem = backup;
-
-                    $timeout(function () {
-                        if (changed)
-                            $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
-                        else
-                            $common.markPristine($scope.ui.inputForm, 'metadataBackupItemChanged');
-                    }, 50);
-                }
-
-                $common.confirmUnsavedChanges($confirm, $scope.ui.inputForm, setSelectedAndBackupItem);
-
-                $scope.ui.formTitle = $common.isDefined($scope.backupItem) && $scope.backupItem._id ?
-                    'Selected metadata: ' + $scope.backupItem.name : 'New metadata';
-            }
-
             $scope.selectAllSchemas = function () {
                 var allSelected = $scope.loadMeta.allSchemasSelected;
 
@@ -589,7 +563,28 @@ controlCenterModule.controller('metadataController', [
                             });
 
                             if (idx >= 0) {
-                                setSelectedAndBackupItem($scope.metadatas[idx], restoredItem, sessionStorage.metadataBackupItemChanged);
+                                var meta = $scope.metadatas[idx];
+
+                                var restoredSelectedItem = angular.fromJson(sessionStorage.metadataSelectedItem);
+
+                                // Caches not changed by user. We should take caches from server as they could be changed on Caches screen.
+                                if (restoredSelectedItem && _.isEqual(restoredItem.caches, restoredSelectedItem.caches)) {
+                                    restoredItem.caches = [];
+
+                                    _.forEach(meta.caches, function (cache) {
+                                        restoredItem.caches.push(cache)
+                                    });
+                                }
+                                else {
+                                    // Caches changed by user. We need to remove deleted caches (if any).
+                                    restoredItem.caches = _.filter(restoredItem.caches, function (cacheId) {
+                                        return _.findIndex($scope.caches, function (scopeCache) {
+                                                return scopeCache.value == cacheId;
+                                            }) >= 0;
+                                    });
+                                }
+
+                                $scope.selectItem(meta, restoredItem, sessionStorage.metadataBackupItemChanged);
                             }
                             else {
                                 sessionStorage.removeItem('metadataBackupItem');
@@ -598,7 +593,7 @@ controlCenterModule.controller('metadataController', [
                             }
                         }
                         else
-                            setSelectedAndBackupItem(undefined, restoredItem, sessionStorage.metadataBackupItemChanged);
+                            $scope.selectItem(undefined, restoredItem, sessionStorage.metadataBackupItemChanged);
                     }
                     else
                         selectFirstItem();
@@ -638,8 +633,41 @@ controlCenterModule.controller('metadataController', [
                     $common.showError(errMsg);
                 });
 
-            $scope.selectItem = function (item) {
-                setSelectedAndBackupItem(item, angular.copy(item));
+            $scope.selectItem = function (item, backup, changed) {
+                function selectItem() {
+                    $table.tableReset();
+
+                    $scope.selectedItem = item;
+
+                    if (item)
+                        sessionStorage.metadataSelectedItem = angular.toJson(item);
+                    else
+                        sessionStorage.removeItem('metadataSelectedItem');
+
+                    _.forEach(previews, function(preview) {
+                        preview.attractAttention = false;
+                    });
+
+                    if (backup)
+                        $scope.backupItem = backup;
+                    else if (item)
+                        $scope.backupItem = angular.copy(item);
+                    else
+                        $scope.backupItem = undefined;
+
+                    $timeout(function () {
+                        if (changed)
+                            $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
+                        else
+                            $common.markPristine($scope.ui.inputForm, 'metadataBackupItemChanged');
+                    }, 50);
+                }
+
+                $common.confirmUnsavedChanges($confirm, $scope.ui.inputForm, selectItem);
+
+                $scope.ui.formTitle = $common.isDefined($scope.backupItem) && $scope.backupItem._id
+                    ? 'Selected metadata: ' + $scope.backupItem.name
+                    : 'New metadata';
             };
 
             // Add new metadata.
@@ -650,7 +678,7 @@ controlCenterModule.controller('metadataController', [
                     $common.ensureActivePanel($scope.panels, 'metadata', 'metadataName');
                 });
 
-                setSelectedAndBackupItem(undefined, {space: $scope.spaces[0]._id, caches: []});
+                $scope.selectItem(undefined, {space: $scope.spaces[0]._id, caches: []});
             };
 
             function queryConfigured(item) {

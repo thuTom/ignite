@@ -305,8 +305,8 @@ controlCenterModule.controller('cachesController', [
                                 if (restoredSelectedItem && _.isEqual(restoredItem.clusters, restoredSelectedItem.clusters)) {
                                     restoredItem.clusters = [];
 
-                                    _.forEach(cache.clusters, function (cache) {
-                                        restoredItem.clusters.push(cache)
+                                    _.forEach(cache.clusters, function (cluster) {
+                                        restoredItem.clusters.push(cluster)
                                     });
                                 }
                                 else {
@@ -314,6 +314,23 @@ controlCenterModule.controller('cachesController', [
                                     restoredItem.clusters = _.filter(restoredItem.clusters, function (clusterId) {
                                         return _.findIndex($scope.clusters, function (scopeCluster) {
                                                 return scopeCluster.value == clusterId;
+                                            }) >= 0;
+                                    });
+                                }
+
+                                // Metadatas not changed by user. We should take metadatas from server as they could be changed on Metadata screen.
+                                if (restoredSelectedItem && _.isEqual(restoredItem.metadatas, restoredSelectedItem.metadatas)) {
+                                    restoredItem.metadatas = [];
+
+                                    _.forEach(cache.metadatas, function (meta) {
+                                        restoredItem.metadatas.push(meta)
+                                    });
+                                }
+                                else {
+                                    // Metadatas changed by user. We need to remove deleted metadatas (if any).
+                                    restoredItem.metadatas = _.filter(restoredItem.metadatas, function (metaId) {
+                                        return _.findIndex($scope.metadatas, function (scopeMeta) {
+                                                return scopeMeta.value == metaId;
                                             }) >= 0;
                                     });
                                 }
