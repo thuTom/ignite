@@ -16,8 +16,8 @@
  */
 
 // Controller for SQL notebook screen.
-controlCenterModule.controller('sqlController', ['$scope', '$window','$controller', '$http', '$timeout', '$common', '$confirm',
-    function ($scope, $window, $controller, $http, $timeout, $common, $confirm) {
+controlCenterModule.controller('sqlController', ['$scope', '$window','$controller', '$http', '$timeout', '$common', '$confirm', '$interval',
+    function ($scope, $window, $controller, $http, $timeout, $common, $confirm, $interval) {
     // Initialize the super class and extend it.
     angular.extend(this, $controller('agent-download', {$scope: $scope}));
     $scope.agentGoal = 'execute sql statements';
@@ -36,9 +36,9 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     ];
 
     $scope.timeUnit = [
-        {value: 's', label: 'seconds'},
-        {value: 'm', label: 'minutes'},
-        {value: 'h', label: 'hours'}
+        {value: 1000, label: 'seconds', short: 's'},
+        {value: 60000, label: 'minutes', short: 'm'},
+        {value: 3600000, label: 'hours', short: 'h'}
     ];
 
     $scope.exportDropdown = [{ 'text': 'Export all', 'click': 'exportAll(paragraph)'}];
@@ -201,8 +201,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             disabledSystemColumns: false,
             rate: {
                 value: 1,
-                unit: 'm',
-                executed: false
+                unit: 60000,
+                installed: false
             }
         };
 
@@ -335,18 +335,36 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         }
     };
 
-    $scope.execute = function (paragraph) {
-        _saveNotebook();
-
-        $http.post('/agent/query', {query: paragraph.query, pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
+    var _executeRefresh = function (paragraph) {
+        $http.post('/agent/query', paragraph.queryArgs)
             .success(_processQueryResult(paragraph))
             .error(function (errMsg) {
                 paragraph.errMsg = errMsg;
             });
     };
 
+    $scope.execute = function (paragraph) {
+        _saveNotebook();
+
+        paragraph.queryArgs = { query: paragraph.query, pageSize: paragraph.pageSize, cacheName: paragraph.cache.name };
+
+        $http.post('/agent/query', paragraph.queryArgs)
+            .success(function (res) {
+                _processQueryResult(paragraph)(res);
+
+                _tryStartRefresh(paragraph);
+            })
+            .error(function (errMsg) {
+                paragraph.errMsg = errMsg;
+
+                $scope.stopRefresh(paragraph);
+            });
+    };
+
     $scope.explain = function (paragraph) {
         _saveNotebook();
+
+        _cancelRefresh();
 
         $http.post('/agent/query', {query: 'EXPLAIN ' + paragraph.query, pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
             .success(_processQueryResult(paragraph))
@@ -357,6 +375,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.scan = function (paragraph) {
         _saveNotebook();
+
+        _cancelRefresh();
 
         $http.post('/agent/scan', {pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
             .success(_processQueryResult(paragraph))
@@ -450,22 +470,64 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.rateAsString = function (paragraph) {
-        if (paragraph.rate && paragraph.rate.executed)
-            return  " " + paragraph.rate.value + paragraph.rate.unit;
+        if (paragraph.rate && paragraph.rate.installed) {
+            var idx = _.findIndex($scope.timeUnit, function (unit) {
+                return unit.value == paragraph.rate.unit;
+            });
+
+            if (idx >= 0)
+                return " " + paragraph.rate.value + $scope.timeUnit[idx].short;
+
+            paragraph.rate.installed = false;
+        }
 
         return "";
     };
 
-    $scope.startRefresh = function (paragraph, value, unit) {
-        paragraph.rate = { value: value, unit: unit, executed: true };
+    var _cancelRefresh = function (paragraph) {
+        if (paragraph.rate && paragraph.rate.stopTime) {
+            delete paragraph.queryArgs;
 
-        //TODO IGNITE-843 Start timer.
+            paragraph.rate.installed = false;
+
+            $interval.cancel(paragraph.rate.stopTime);
+
+            delete paragraph.rate.stopTime;
+        }
+    };
+
+    var _tryStopRefresh = function (paragraph) {
+        if (paragraph.rate && paragraph.rate.stopTime) {
+            $interval.cancel(paragraph.rate.stopTime);
+
+            delete paragraph.rate.stopTime;
+        }
+    };
+
+    var _tryStartRefresh = function (paragraph) {
+        _tryStopRefresh(paragraph);
+
+        if (paragraph.rate && paragraph.rate.installed && paragraph.queryArgs) {
+            _executeRefresh(paragraph);
+
+            var delay = paragraph.rate.value * paragraph.rate.unit;
+
+            paragraph.rate.stopTime = $interval(_executeRefresh, delay, 0, false, paragraph);
+        }
+    };
+
+    $scope.startRefresh = function (paragraph, value, unit) {
+        paragraph.rate.value = value;
+        paragraph.rate.unit = unit;
+        paragraph.rate.installed = true;
+
+        _tryStartRefresh(paragraph);
     };
 
     $scope.stopRefresh = function (paragraph) {
-        paragraph.rate.executed = false;
+        paragraph.rate.installed = false;
 
-        //TODO IGNITE-843 Stop timer.
+        _tryStopRefresh(paragraph);
     };
 
     $scope.getter = function (value) {

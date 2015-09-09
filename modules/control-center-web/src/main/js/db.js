@@ -358,7 +358,7 @@ var NotebookSchema = new Schema({
         },
         rate: {
             value: Number,
-            unit: {type: String, enum: ['s', 'm', 'h']}
+            unit: Number
         }
     }]
 });
