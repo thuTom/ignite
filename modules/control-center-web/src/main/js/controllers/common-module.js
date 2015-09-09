@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-var controlCenterModule = angular.module('ignite-web-control-center', ['ngAnimate', 'smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize', 'treeControl']);
+var controlCenterModule = angular.module('ignite-web-control-center', ['ngAnimate', 'smart-table', 'mgcrea.ngStrap', 'ui.ace', 'ngSanitize', 'treeControl', 'unsavedChanges']);
 
 // Modal popup configuration.
 controlCenterModule.config(function ($modalProvider) {
@@ -68,16 +68,22 @@ controlCenterModule.config(function ($alertProvider) {
     });
 });
 
-// Alerts configuration.
+// Modals configuration.
 controlCenterModule.config(function($modalProvider) {
     angular.extend($modalProvider.defaults, {
         animation: 'am-fade-and-scale'
     });
 });
 
+// Unsaved changes configuration.
+controlCenterModule.config(['unsavedWarningsConfigProvider', function(unsavedWarningsConfigProvider) {
+    unsavedWarningsConfigProvider.navigateMessage = 'You have unsaved changes.';
+    unsavedWarningsConfigProvider.reloadMessage = 'You have unsaved changes.';
+}]);
+
 // Common functions to be used in controllers.
 controlCenterModule.service('$common', [
-    '$alert', '$popover', '$timeout', '$focus', function ($alert, $popover, $timeout, $focus) {
+    '$alert', '$popover', '$timeout', '$focus', '$window', function ($alert, $popover, $timeout, $focus, $window) {
         function isDefined(v) {
             return !(v === undefined || v === null);
         }
@@ -673,12 +679,10 @@ controlCenterModule.service('$common', [
                 return isDefined(form) && form.$dirty;
             },
             confirmUnsavedChanges: function(confirm, form, selectFunc) {
-                if (formChanged(form))
-                    confirm.show('<span>You have unsaved changes.<br/><br/>Are you sure you want to discard them?</span>').then(
-                        function () {
-                            selectFunc();
-                        }
-                    );
+                if (formChanged(form)) {
+                    if ($window.confirm('You have unsaved changes.\n\nAre you sure you want to discard them?'))
+                        selectFunc();
+                }
                 else
                     selectFunc();
 
@@ -1133,6 +1137,11 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
 
                         newIx = newLen;
                         prevIx = prevLen;
+                    }
+
+                    if (start == end) {
+                        start = Math.max(0, start - 1);
+                        end = Math.min(newLen, end + 1)
                     }
 
                     if (start <= end) {
