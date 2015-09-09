@@ -434,6 +434,7 @@
               "fields": [
                 {
                   "label": "Data source bean",
+                  "id": "dataSourceBean",
                   "type": "text",
                   "path": "cacheStoreFactory.CacheJdbcPojoStoreFactory",
                   "model": "dataSourceBean",

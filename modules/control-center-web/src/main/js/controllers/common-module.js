@@ -599,6 +599,21 @@ controlCenterModule.service('$common', [
 
                 return true;
             },
+            metadataForQueryConfigured: function (meta) {
+                return meta
+                    && !(isEmptyArray(meta.queryFields)
+                    && isEmptyArray(meta.ascendingFields)
+                    && isEmptyArray(meta.descendingFields)
+                    && isEmptyArray(meta.textFields)
+                    && isEmptyArray(meta.groups))
+            },
+            metadataForStoreConfigured: function (meta) {
+                return meta
+                    && !(isEmptyString(meta.databaseSchema)
+                    && isEmptyString(meta.databaseTable)
+                    && isEmptyArray(meta.keyFields)
+                    && isEmptyArray(meta.valueFields))
+            },
             /**
              * Cut class name by width in pixel or width in symbol count.
              *

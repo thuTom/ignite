@@ -675,21 +675,6 @@ controlCenterModule.controller('metadataController', [
                 $scope.selectItem(undefined, {space: $scope.spaces[0]._id, caches: []});
             };
 
-            function queryConfigured(item) {
-                return !($common.isEmptyArray(item.queryFields)
-                    && $common.isEmptyArray(item.ascendingFields)
-                    && $common.isEmptyArray(item.descendingFields)
-                    && $common.isEmptyArray(item.textFields)
-                    && $common.isEmptyArray(item.groups))
-            }
-
-            function storeConfigured(item) {
-                return !($common.isEmptyString(item.databaseSchema)
-                    && $common.isEmptyString(item.databaseTable)
-                    && $common.isEmptyArray(item.keyFields)
-                    && $common.isEmptyArray(item.valueFields))
-            }
-
             // Check metadata logical consistency.
             function validate(item) {
                 if ($common.isEmptyString(item.name))
@@ -705,7 +690,7 @@ controlCenterModule.controller('metadataController', [
                 else if (!$common.isValidJavaClass('Value type', item.valueType, false, 'valueType'))
                     return false;
 
-                var qry = queryConfigured(item);
+                var qry = $common.metadataForQueryConfigured(item);
 
                 if (qry) {
                     var groups = item.groups;
@@ -725,7 +710,7 @@ controlCenterModule.controller('metadataController', [
                     }
                 }
 
-                var str = storeConfigured(item);
+                var str = $common.metadataForStoreConfigured(item);
 
                 if (str) {
                     if ($common.isEmptyString(item.databaseSchema))
@@ -749,8 +734,8 @@ controlCenterModule.controller('metadataController', [
 
             // Save cache type metadata into database.
             function save(item, quiet) {
-                var qry = queryConfigured(item);
-                var str = storeConfigured(item);
+                var qry = $common.metadataForQueryConfigured(item);
+                var str = $common.metadataForStoreConfigured(item);
 
                 item.kind = 'query';
 

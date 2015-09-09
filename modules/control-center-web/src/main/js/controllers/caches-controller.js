@@ -299,10 +299,14 @@ controlCenterModule.controller('cachesController', [
                     else if ($scope.caches.length > 0)
                         $scope.selectItem($scope.caches[0]);
 
+                    function isStoreFactoryDefined(cache) {
+                        return $common.isDefined(cache)
+                            && $common.isDefined(cache.cacheStoreFactory)
+                            && $common.isDefined(cache.cacheStoreFactory.kind);
+                    }
+
                     $scope.$watch('backupItem', function (val) {
                         if (val) {
-                            sessionStorage.cacheBackupItem = angular.toJson(val);
-
                             // Collect cache metadatas.
                             var cacheMetadatas = _.reduce($scope.metadatas, function(memo, meta){
                                 if (_.contains(val.metadatas, meta.value)) {
@@ -311,6 +315,25 @@ controlCenterModule.controller('cachesController', [
 
                                 return memo;
                             }, []);
+
+                            var prevVal = angular.fromJson(sessionStorage.cacheBackupItem);
+                            var prevCacheStore = isStoreFactoryDefined(prevVal);
+                            var newCacheStore = isStoreFactoryDefined(val);
+
+                            if (!prevCacheStore && !newCacheStore) {
+                                if (_.findIndex(cacheMetadatas, $common.metadataForStoreConfigured) >= 0) {
+                                    val.cacheStoreFactory.kind = 'CacheJdbcPojoStoreFactory';
+
+                                    if (!val.readThrough && !val.writeThrough) {
+                                        val.readThrough = true;
+                                        val.writeThrough = true;
+                                    }
+
+                                    $timeout(function () {
+                                        $common.ensureActivePanel($scope.panels, 'store', 'dataSourceBean');
+                                    });
+                                }
+                            }
 
                             var varName = 'cache';
 
@@ -345,6 +368,8 @@ controlCenterModule.controller('cachesController', [
                             $scope.preview.statistics.xml = $generatorXml.cacheStatistics(val).join('');
                             $scope.preview.statistics.java = $generatorJava.cacheStatistics(val, varName).join('');
                             $scope.preview.statistics.allDefaults = $common.isEmptyString($scope.preview.statistics.xml);
+
+                            sessionStorage.cacheBackupItem = angular.toJson(val);
 
                             $common.markChanged($scope.ui.inputForm, 'cacheBackupItemChanged');
                         }
