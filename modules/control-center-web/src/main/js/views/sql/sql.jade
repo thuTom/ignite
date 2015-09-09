@@ -61,7 +61,7 @@ block container
                                         +btn-toolbar('fa-remove', 'removeParagraph(paragraph)', 'Remove paragraph')
 
                                     .pull-right
-                                        a.chart-settings-link(ng-hide='paragraph.chart' ng-click='$event.stopPropagation()' bs-popover data-template-url='chart-settings' data-placement='bottom' data-auto-close='1' data-trigger='click') Chart settings
+                                        a.chart-settings-link(ng-show='paragraph.chart' ng-click='$event.stopPropagation()' bs-popover data-template-url='chart-settings' data-placement='bottom' data-auto-close='1' data-trigger='click') Chart settings
                                         .btn-group(ng-model='paragraph.result' ng-click='$event.stopPropagation()' style='float: right')
                                             +btn-toolbar-data('fa-table', 'table', 'Show data in tabular form.')
                                             +btn-toolbar-data('fa-bar-chart', 'bar', 'Show bar chart.<br/>By default first column - X values, second column - Y values.<br/>In case of one column it will be treated as Y values.')
@@ -134,7 +134,7 @@ block container
                                                 tbody
                                                     tr(ng-repeat='row in displayedResult track by $index')
                                                         td(ng-repeat='val in row track by $index' ng-if='paragraph.columnFilter(paragraph.meta[$index])') {{ val }}
-                                    div(ng-show='paragraph.rows && paragraph.result != "table" && paragraph.result != "none"')
+                                    div(ng-show='paragraph.rows && paragraph.chart')
                                         div(id='chart-{{paragraph.id}}')
                                             svg
                                     .sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"') Result set is empty.

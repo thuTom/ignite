@@ -197,6 +197,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             query: '',
             pageSize: $scope.pageSizes[0],
             result: 'none',
+            chart: false,
             hideSystemColumns: true,
             disabledSystemColumns: false,
             rate: {
@@ -217,12 +218,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     $scope.setResult = function (paragraph, new_result) {
         paragraph.result = paragraph.result === new_result ? 'none' : new_result;
 
-        if (paragraph.rows && paragraph.rows.length > 0) {
-            switch (new_result) {
-                case 'table':
-                case 'none':
-                    break;
+        paragraph.chart = new_result != 'table' && paragraph.result != 'none' && paragraph.rows && paragraph.rows.length > 0;
 
+        if (paragraph.chart) {
+            switch (new_result) {
                 case 'bar':
                     _barChart(paragraph);
                     break;
@@ -238,9 +237,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 case 'area':
                     _areaChart(paragraph);
                     break;
-
-                default:
-                    $common.showError('Unknown result: ' + new_result);
             }
         }
     };
@@ -582,12 +578,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     }
 
     $scope.applyChartSettings = function (paragraph) {
-        if (paragraph.rows && paragraph.rows.length > 0) {
+        if (paragraph.chart && paragraph.rows && paragraph.rows.length > 0) {
             switch (paragraph.result) {
-                case 'table':
-                case 'none':
-                    break;
-
                 case 'bar':
                     _barChart(paragraph);
                     break;
@@ -603,9 +595,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 case 'area':
                     _areaChart(paragraph);
                     break;
-
-                default:
-                    $common.showError('Unknown result: ' + new_result);
             }
         }
     };
