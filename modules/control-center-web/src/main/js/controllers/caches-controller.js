@@ -330,7 +330,7 @@ controlCenterModule.controller('cachesController', [
                                     }
 
                                     $timeout(function () {
-                                        $common.ensureActivePanel($scope.panels, 'store', 'dataSourceBean');
+                                        $common.ensureActivePanel($scope.panels, 'store');
                                     });
                                 }
                             }
