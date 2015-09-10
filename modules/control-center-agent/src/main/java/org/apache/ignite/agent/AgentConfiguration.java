@@ -69,6 +69,10 @@ public class AgentConfiguration {
     private Boolean sql;
 
     /** */
+    @Parameter(names = { "-v", "--verbose" }, description = "Show more verbose log output")
+    private Boolean verbose;
+
+    /** */
     @Parameter(names = { "-h", "--help" }, help = true, description = "Print this help message")
     private Boolean help;
 
@@ -161,6 +165,13 @@ public class AgentConfiguration {
      */
     public void testDriveSql(Boolean sql) {
         this.sql = sql;
+    }
+
+    /**
+     * @return {@code true} If agent should show more verbose log output.
+     */
+    public Boolean verbose() {
+        return verbose != null ? verbose : false;
     }
 
     /**

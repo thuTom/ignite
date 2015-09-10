@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.Handler;
 import org.apache.ignite.agent.handlers.RestExecutor;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -59,6 +60,10 @@ public class AgentLauncher {
 
             return;
         }
+
+        if (cmdCfg.verbose())
+            for(Handler h: Logger.getLogger("").getHandlers())
+                h.setLevel(Level.INFO);
 
         if (cmdCfg.testDriveSql() && cmdCfg.nodeUri() != null)
             log.log(Level.WARNING,
