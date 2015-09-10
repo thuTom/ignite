@@ -20,6 +20,7 @@ package org.apache.ignite.testsuites;
 import junit.framework.TestSuite;
 import org.apache.ignite.internal.processors.cache.GridCachePutAllFailoverSelfTest;
 import org.apache.ignite.internal.processors.cache.IgniteCacheAtomicPutAllFailoverSelfTest;
+import org.apache.ignite.internal.processors.cache.IgniteCacheCreateRestartSelfTest;
 import org.apache.ignite.internal.processors.cache.IgniteCachePutAllRestartTest;
 import org.apache.ignite.internal.processors.cache.distributed.IgniteCacheAtomicNodeRestartTest;
 import org.apache.ignite.internal.processors.cache.distributed.dht.GridCachePartitionedNearDisabledOptimisticTxNodeRestartTest;
@@ -49,6 +50,7 @@ public class IgniteCacheRestartTestSuite extends TestSuite {
 
         suite.addTestSuite(IgniteCacheAtomicPutAllFailoverSelfTest.class);
         suite.addTestSuite(IgniteCachePutAllRestartTest.class);
+        suite.addTestSuite(IgniteCacheCreateRestartSelfTest.class);
         suite.addTestSuite(GridCachePutAllFailoverSelfTest.class);
 
         return suite;
