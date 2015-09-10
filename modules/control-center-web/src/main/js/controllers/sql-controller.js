@@ -613,8 +613,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
             var values = _.map(paragraph.rows, function (row) {
                 return {
-                    label: _chartLabel(row, paragraph.chartColY, index++),
-                    value: _chartNumber(row, paragraph.chartColX, 0)
+                    label: _chartLabel(row, paragraph.chartColX, index++),
+                    value: _chartNumber(row, paragraph.chartColY, 0)
                 }
             });
 
@@ -631,7 +631,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                         return _chartLabel(row, paragraph.chartColX, index++);
                     })
                     .y(function (row) {
-                        return _chartNumber(row, paragraph.chartColX, 0);
+                        return _chartNumber(row, paragraph.chartColY, 0);
                     })
                 .showLabels(true)
                 .labelThreshold(.05)
