@@ -25,14 +25,6 @@
       ],
       "fields": [
         {
-          "label": "Name",
-          "id": "metadataName",
-          "type": "text",
-          "model": "name",
-          "required": true,
-          "placeholder": "Input name"
-        },
-        {
           "label": "Caches",
           "id": "caches",
           "type": "dropdown-multiple",

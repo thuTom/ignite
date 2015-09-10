@@ -62,6 +62,10 @@ $generatorCommon.builder = function () {
 
     res.datasources = [];
 
+    res.asString = function() {
+      return this.join('\n');
+    };
+
     res.append = function (s) {
         this.push((this.lineStart ? _.repeat('    ', this.deep) : '') + s);
 
@@ -71,14 +75,13 @@ $generatorCommon.builder = function () {
     res.line = function (s) {
         if (s) {
             if (this.needEmptyLine)
-                this.push('\n');
+                this.push('');
 
             this.append(s);
         }
 
         this.needEmptyLine = false;
 
-        this.push('\n');
         this.lineStart = true;
 
         return this;
@@ -88,7 +91,6 @@ $generatorCommon.builder = function () {
         if (s)
             this.append(s);
 
-        this.push('\n');
         this.lineStart = true;
         this.deep++;
 
@@ -101,7 +103,6 @@ $generatorCommon.builder = function () {
         if (s)
             this.append(s);
 
-        this.push('\n');
         this.lineStart = true;
 
         return this;
@@ -109,7 +110,7 @@ $generatorCommon.builder = function () {
 
     res.emptyLineIfNeeded = function () {
         if (this.needEmptyLine) {
-            this.push('\n');
+            this.push('');
             this.lineStart = true;
 
             this.needEmptyLine = false;

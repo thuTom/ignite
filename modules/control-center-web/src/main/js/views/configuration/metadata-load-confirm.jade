@@ -18,10 +18,15 @@
     .modal-dialog
         .modal-content
             .modal-header
-                button.close(type='button' ng-click='$hide()' aria-hidden='true') &times;
+                button.close(type='button' ng-click='cancel()' aria-hidden='true') &times;
                 h4.modal-title Confirmation
             .modal-body(ng-show='content')
                 p(ng-bind-html='content' style='text-align: center;')
             .modal-footer
-                button.btn.btn-default(id='confirm-btn-cancel' type='button' ng-click='$hide()') Cancel
-                button.btn.btn-primary(id='confirm-btn-confirm' type='button' ng-click='ok()') Confirm
+                .checkbox.labelField
+                    label
+                        input(type='checkbox' ng-model='ui.forAll')
+                        | Apply to all
+                button.btn.btn-default(id='confirm-btn-cancel' type='button' ng-click='cancel()') Cancel
+                button.btn.btn-default(id='confirm-btn-cancel' type='button' ng-click='skip()') Skip
+                button.btn.btn-primary(id='confirm-btn-confirm' type='button' ng-click='continue()') Overwrite
