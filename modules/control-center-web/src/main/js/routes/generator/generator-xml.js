@@ -530,6 +530,8 @@ $generatorXml.cacheGeneral = function(cache, res) {
     $generatorXml.property(res, cache, 'copyOnRead');
     $generatorXml.property(res, cache, 'invalidate');
 
+    res.needEmptyLine = true;
+
     return res;
 };
 
@@ -857,6 +859,8 @@ $generatorXml.metadataStore = function(meta, res) {
 $generatorXml.cacheMetadata = function(meta, res) {
     if (!res)
         res = $generatorCommon.builder();
+
+    res.emptyLineIfNeeded();
 
     res.startBlock('<bean class="org.apache.ignite.cache.CacheTypeMetadata">');
 
