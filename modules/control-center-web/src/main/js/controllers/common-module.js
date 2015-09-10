@@ -1179,7 +1179,7 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
                     _fadeOut(editor, selections);
 
                     editor.clearPromise = null;
-                }, 1000);
+                }, 2000);
 
                 editor.scrollToRow(scrollTo)
             }
