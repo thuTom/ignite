@@ -1131,11 +1131,11 @@ $generatorJava.cluster = function (cluster, javaClass, clientNearCfg) {
             res.endBlock('}');
             res.endBlock('}');
 
-            return res.generateImports() + '\n\n' + res.join('\n');
+            return res.generateImports() + '\n\n' + res.asString();
         }
     }
 
-    return res.join('\n');
+    return res.asString();
 };
 
 // For server side we should export Java code generation entry point.

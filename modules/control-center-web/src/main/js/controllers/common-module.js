@@ -797,7 +797,6 @@ controlCenterModule.service('$stepConfirm', function ($timeout, $modal, $rootSco
             while(nextElement())
                 stepProcessor(modelArray[curIx]);
         }
-        scope.cancelTitle = cancelTitle || dfltCancelTitle;
 
         if (!nextElement()) {
             deferred.resolve();
