@@ -480,7 +480,7 @@ mixin preview(preview, id)
 mixin save-remove-buttons(objectName)
     -var removeTip = '"Remove current ' + objectName + '"'
 
-    .panel-tip-container(ng-hide='backupItem._id')
+    .panel-tip-container(ng-hide='!backupItem || backupItem._id')
         a.btn.btn-primary(ng-disabled='!formChanged(ui.inputForm)' ng-click='formChanged(ui.inputForm) ? saveItem() : ""' bs-tooltip data-title='{{saveBtnTipText(ui.inputForm, "#{objectName}")}}' data-placement='bottom' data-trigger='hover') Save
     .btn-group.panel-tip-container(ng-show='backupItem._id')
         a.btn.btn-primary(id='save-item' ng-disabled='!formChanged(ui.inputForm)' ng-click='formChanged(ui.inputForm) ? saveItem() : ""' bs-tooltip data-title='{{saveBtnTipText(ui.inputForm, "#{objectName}")}}' data-placement='bottom' data-trigger='hover') Save

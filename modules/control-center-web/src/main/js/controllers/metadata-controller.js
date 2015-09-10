@@ -373,6 +373,43 @@ controlCenterModule.controller('metadataController', [
                 function saveImported() {
                     loadMetaModal.hide();
 
+                    var delayed = [];
+
+                    /**
+                     * Save the tied metadata by one on confirm variant selected only.
+                     *
+                     * @param ix Index of deleayed metadata to select.
+                     */
+                    function saveDelayed(ix) {
+                        if (ix < delayed.length) {
+                            var existMeta = delayed[ix][0];
+                            var meta = delayed[ix][1];
+
+                            $confirm.show(
+                                '<span>' +
+                                'Metadata with name &quot;' + meta.databaseTable + '&quot; already exist.<br/><br/>' +
+                                'Are you sure you want to overwrite it?' +
+                                '</span>', 'Skip').then(function () {
+                                    existMeta.databaseSchema = meta.databaseSchema;
+                                    existMeta.databaseTable = meta.databaseTable;
+                                    existMeta.keyType = meta.keyType;
+                                    existMeta.valueType = meta.valueType;
+                                    existMeta.queryFields = meta.queryFields;
+                                    existMeta.ascendingFields = meta.ascendingFields;
+                                    existMeta.descendingFields = meta.descendingFields;
+                                    existMeta.groups = meta.groups;
+                                    existMeta.keyFields = meta.keyFields;
+                                    existMeta.valueFields = meta.valueFields;
+
+                                    save(existMeta, true);
+
+                                    saveDelayed(ix + 1);
+                                }, function () {
+                                    saveDelayed(ix + 1);
+                                })
+                        }
+                    }
+
                     _.forEach($scope.loadMeta.tables, function (table) {
                         if (table.use) {
                             if (tables.indexOf(table.tbl) == -1) {
@@ -449,12 +486,11 @@ controlCenterModule.controller('metadataController', [
 
                                 var metaName = toProperCase(tableName);
 
-                                var meta = _.find($scope.metadatas, function (meta) {
+                                var metaFound = _.find($scope.metadatas, function (meta) {
                                     return meta.name == metaName;
                                 });
 
-                                if (!meta)
-                                    meta = {space: $scope.spaces[0], name: metaName};
+                                var meta = {space: $scope.spaces[0], name: metaName};
 
                                 meta.databaseSchema = table.schema;
                                 meta.databaseTable = tableName;
@@ -467,19 +503,8 @@ controlCenterModule.controller('metadataController', [
                                 meta.keyFields = keyFields;
                                 meta.valueFields = valFields;
 
-                                var idx = _.findIndex($scope.metadatas, function (metadata) {
-                                    return metadata.databaseTable == tableName;
-                                });
-
-                                if (idx >= 0) {
-                                    $confirm.show(
-                                        '<span>' +
-                                        'Metadata with name &quot;' + tableName + '&quot; already exist.<br/><br/>' +
-                                        'Are you sure you want to overwrite it?' +
-                                        '</span>').then(function () {
-                                            save(meta, true);
-                                        })
-                                }
+                                if ($common.isDefined(metaFound))
+                                    delayed.push([metaFound, meta]);
                                 else
                                     save(meta, true);
 
@@ -487,6 +512,9 @@ controlCenterModule.controller('metadataController', [
                             }
                         }
                     });
+
+                    // Process delayed metadata.
+                    saveDelayed(0);
 
                     $common.showInfo('Cache type metadata loaded from database.');
                 }

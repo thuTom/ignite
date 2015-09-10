@@ -717,8 +717,22 @@ controlCenterModule.service('$confirm', function ($modal, $rootScope, $q) {
 
     var deferred;
 
+    var dfltCancelTitle = 'Cancel';
+
+    // Configure title of cancel button.
+    scope.cancelTitle = dfltCancelTitle;
+
     scope.ok = function () {
         deferred.resolve();
+
+        confirmModal.hide();
+    };
+
+    /**
+     * Generate reject event on cancel for special event processing.
+     */
+    scope.cancel = function () {
+        deferred.reject('cancelled');
 
         confirmModal.hide();
     };
@@ -727,8 +741,10 @@ controlCenterModule.service('$confirm', function ($modal, $rootScope, $q) {
 
     var parentShow = confirmModal.show;
 
-    confirmModal.show = function (content) {
+    confirmModal.show = function (content, cancelTitle) {
         scope.content = content || 'Confirm deletion?';
+
+        scope.cancelTitle = cancelTitle || dfltCancelTitle;
 
         deferred = $q.defer();
 

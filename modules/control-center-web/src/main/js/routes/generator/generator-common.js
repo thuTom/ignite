@@ -17,6 +17,8 @@
 
 // For server side we should load required libraries.
 if (typeof window === 'undefined') {
+    _ = require('lodash');
+
     $dataStructures = require('../../helpers/data-structures');
 }
 
@@ -61,14 +63,7 @@ $generatorCommon.builder = function () {
     res.datasources = [];
 
     res.append = function (s) {
-        if (this.lineStart) {
-            for (var i = 0; i < this.deep; i++)
-                this.push('    ');
-
-            this.lineStart = false;
-        }
-
-        this.push(s);
+        this.push((this.lineStart ? _.repeat('    ', this.deep) : '') + s);
 
         return this;
     };
