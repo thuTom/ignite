@@ -211,7 +211,7 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
                     evicts.add(new IgniteBiTuple<>(kb, vb));
                 }
 
-                @Override public boolean removedEvicted() {
+                @Override public boolean removeEvicted() {
                     return false;
                 }
             };
@@ -222,7 +222,7 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
                     onOffheapEvict();
                 }
 
-                @Override public boolean removedEvicted() {
+                @Override public boolean removeEvicted() {
                     return true;
                 }
             };

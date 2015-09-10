@@ -3811,6 +3811,13 @@ public abstract class GridCacheMapEntry extends GridMetadataAwareAdapter impleme
         try {
             if (!hasReaders() && markObsolete0(obsoleteVer, false)) {
                 if (!isStartVersion() && hasValueUnlocked()) {
+                    if (cctx.offheapTiered() && hasOffHeapPointer()) {
+                        if (cctx.swap().offheapEvictionEnabled())
+                            cctx.swap().enableOffheapEviction(key(), partition());
+
+                        return null;
+                    }
+
                     IgniteUuid valClsLdrId = null;
                     IgniteUuid keyClsLdrId = null;
 
