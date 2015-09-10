@@ -31,8 +31,14 @@ public class AgentConfiguration {
     /** Default server URI. */
     private static final String DFLT_SERVER_URI = "wss://localhost:3001";
 
+    /** Default server port. */
+    public static final int DFLT_SERVER_PORT = 3001;
+
     /** Default Ignite node HTTP URI. */
     private static final String DFLT_NODE_URI = "http://localhost:8080";
+
+    /** Default Ignite node HTTP port. */
+    public static final int DFLT_NODE_PORT = 8080;
 
     /** */
     @Parameter(names = {"-t", "--token"}, description = "User's security token")
@@ -67,10 +73,6 @@ public class AgentConfiguration {
     @Parameter(names = { "-ts", "--test-drive-sql" },
         description = "Create cache and populate it with sample data for use in query.")
     private Boolean sql;
-
-    /** */
-    @Parameter(names = { "-v", "--verbose" }, description = "Show more verbose log output")
-    private Boolean verbose;
 
     /** */
     @Parameter(names = { "-h", "--help" }, help = true, description = "Print this help message")
@@ -168,13 +170,6 @@ public class AgentConfiguration {
     }
 
     /**
-     * @return {@code true} If agent should show more verbose log output.
-     */
-    public Boolean verbose() {
-        return verbose != null ? verbose : false;
-    }
-
-    /**
      * @return {@code true} If agent options usage should be printed.
      */
     public Boolean help() {
@@ -186,7 +181,6 @@ public class AgentConfiguration {
             driversFolder == null &&
             meta == null &&
             sql == null &&
-            verbose == null &&
             help == null;
 
         return noArgs || (help != null ? help : false);

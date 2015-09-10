@@ -83,7 +83,7 @@ public class AgentSocket implements WebSocketSender {
      */
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
-        log.log(Level.INFO, String.format("Connection closed: %d - %s.", statusCode, reason));
+        log.log(Level.WARNING, String.format("Connection closed: %d - %s.", statusCode, reason));
 
         if (remote != null)
             remote.close();
@@ -142,7 +142,7 @@ public class AgentSocket implements WebSocketSender {
     @OnWebSocketError
     public void onError(Session ses, Throwable error) {
         if (error instanceof ConnectException)
-            log.log(Level.INFO, error.getMessage());
+            log.log(Level.WARNING, error.getMessage());
         else
             log.log(Level.SEVERE, "Connection error.", error);
 
