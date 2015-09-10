@@ -29,11 +29,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.pageSizes = [50, 100, 200, 400, 800, 1000];
 
-    $scope.modes = [
-        {value: 'PARTITIONED', label: 'PARTITIONED'},
-        {value: 'REPLICATED', label: 'REPLICATED'},
-        {value: 'LOCAL', label: 'LOCAL'}
-    ];
+    $scope.modes = $common.mkOptions(['PARTITIONED', 'REPLICATED', 'LOCAL']);
 
     $scope.timeUnit = [
         {value: 1000, label: 'seconds', short: 's'},
@@ -335,8 +331,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
             paragraph.rows = res.rows;
 
-            if (paragraph.result = 'none')
+            if (paragraph.result == 'none')
                 paragraph.result = 'table';
+            else if (paragraph.chart)
+                $scope.applyChartSettings(paragraph);
         }
     };
 
