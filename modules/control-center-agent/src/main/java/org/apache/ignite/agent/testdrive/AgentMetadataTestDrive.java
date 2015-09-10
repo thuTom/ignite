@@ -42,7 +42,7 @@ public class AgentMetadataTestDrive {
      */
     public static void testDrive() {
         if (initLatch.compareAndSet(false, true)) {
-            log.log(Level.INFO, "TEST-DRIVE: Prepare in-memory H2 database...");
+            log.log(Level.FINE, "TEST-DRIVE: Prepare in-memory H2 database...");
 
             try {
                 Connection conn = DriverManager.getConnection("jdbc:h2:mem:test-drive-db;DB_CLOSE_DELAY=-1", "sa", "");
@@ -53,7 +53,7 @@ public class AgentMetadataTestDrive {
                     "test-drive.sql");
 
                 RunScript.execute(conn, new FileReader(sqlScript));
-                log.log(Level.INFO, "TEST-DRIVE: Sample tables created.");
+                log.log(Level.FINE, "TEST-DRIVE: Sample tables created.");
 
                 conn.close();
 

@@ -22,10 +22,11 @@ import java.io.File;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.Handler;
 import org.apache.ignite.agent.handlers.RestExecutor;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
+
+import static org.apache.ignite.agent.AgentConfiguration.DFLT_SERVER_PORT;
 
 /**
  * Control Center Agent launcher.
@@ -60,10 +61,6 @@ public class AgentLauncher {
 
             return;
         }
-
-        if (cmdCfg.verbose())
-            for(Handler h: Logger.getLogger("").getHandlers())
-                h.setLevel(Level.INFO);
 
         if (cmdCfg.testDriveSql() && cmdCfg.nodeUri() != null)
             log.log(Level.WARNING,
@@ -101,9 +98,14 @@ public class AgentLauncher {
                 while (!Thread.interrupted()) {
                     AgentSocket agentSock = new AgentSocket(cfg, restExecutor);
 
-                    log.log(Level.INFO, "Connecting to: " + cfg.serverUri());
+                    log.log(Level.FINE, "Connecting to: " + cfg.serverUri());
 
-                    client.connect(agentSock, URI.create(cfg.serverUri()));
+                    URI uri = URI.create(cfg.serverUri());
+
+                    if (uri.getPort() == -1)
+                        uri = URI.create(cfg.serverUri() + ":" + DFLT_SERVER_PORT);
+
+                    client.connect(agentSock, uri);
 
                     agentSock.waitForClose();
 

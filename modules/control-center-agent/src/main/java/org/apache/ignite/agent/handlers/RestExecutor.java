@@ -38,6 +38,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.ignite.agent.AgentConfiguration;
 import org.apache.ignite.agent.remote.Remote;
 
+import static org.apache.ignite.agent.AgentConfiguration.DFLT_NODE_PORT;
+
 /**
  * Executor for REST requests.
  */
@@ -81,6 +83,9 @@ public class RestExecutor {
     public RestResult executeRest(String path, Map<String, String> params, String mtd, Map<String, String> headers,
         String body) throws IOException, URISyntaxException {
         URIBuilder builder = new URIBuilder(cfg.nodeUri());
+
+        if (builder.getPort() == -1)
+            builder.setPort(DFLT_NODE_PORT);
 
         if (path != null) {
             if (!path.startsWith("/") && !cfg.nodeUri().endsWith("/"))

@@ -30,6 +30,7 @@ import org.apache.ignite.internal.IgniteEx;
 import org.apache.ignite.internal.IgniteNodeAttributes;
 import org.apache.ignite.internal.util.typedef.F;
 import org.apache.ignite.lang.IgniteBiTuple;
+import org.apache.ignite.logger.NullLogger;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 
@@ -269,7 +270,7 @@ public class AgentSqlTestDrive {
      * @param name Cache name.
      */
     private static void populateCacheEmployee(Ignite ignite, String name) {
-        log.log(Level.INFO, "TEST-DRIVE: Start population cache: '" + name + "' with data...");
+        log.log(Level.FINE, "TEST-DRIVE: Start population cache: '" + name + "' with data...");
 
         IgniteCache<CountryKey, Country> cacheCountry = ignite.cache(name);
 
@@ -304,7 +305,7 @@ public class AgentSqlTestDrive {
                     round(r * 5000, 2) , mgrId, rnd.nextInt(DEP_CNT)));
         }
 
-        log.log(Level.INFO, "TEST-DRIVE: Finished population cache: '" + name + "' with data.");
+        log.log(Level.FINE, "TEST-DRIVE: Finished population cache: '" + name + "' with data.");
     }
 
     /**
@@ -312,7 +313,7 @@ public class AgentSqlTestDrive {
      * @param name Cache name.
      */
     private static void populateCacheCar(Ignite ignite, String name) {
-        log.log(Level.INFO, "TEST-DRIVE: Start population cache: '" + name + "' with data...");
+        log.log(Level.FINE, "TEST-DRIVE: Start population cache: '" + name + "' with data...");
 
         IgniteCache<ParkingKey, Parking> cacheParking = ignite.cache(name);
 
@@ -325,7 +326,7 @@ public class AgentSqlTestDrive {
             cacheDepartment.put(new CarKey(i), new Car(i, rnd.nextInt(PARK_CNT), "Car " + (i + 1)));
 
 
-        log.log(Level.INFO, "TEST-DRIVE: Finished population cache: '" + name + "' with data.");
+        log.log(Level.FINE, "TEST-DRIVE: Finished population cache: '" + name + "' with data.");
     }
 
     /**
@@ -333,7 +334,7 @@ public class AgentSqlTestDrive {
      */
     public static void testDrive(AgentConfiguration acfg) {
         if (initLatch.compareAndSet(false, true)) {
-            log.log(Level.INFO, "TEST-DRIVE: Prepare node configuration...");
+            log.log(Level.FINE, "TEST-DRIVE: Prepare node configuration...");
 
             try {
                 IgniteConfiguration cfg = new IgniteConfiguration();
@@ -341,6 +342,8 @@ public class AgentSqlTestDrive {
                 cfg.setLocalHost("127.0.0.1");
 
                 cfg.setMetricsLogFrequency(0);
+
+                cfg.setGridLogger(new NullLogger());
 
                 // Configure discovery SPI.
                 TcpDiscoverySpi discoSpi = new TcpDiscoverySpi();
@@ -355,7 +358,7 @@ public class AgentSqlTestDrive {
 
                 cfg.setCacheConfiguration(cacheEmployee(EMPLOYEE_CACHE_NAME), cacheCar(CAR_CACHE_NAME));
 
-                log.log(Level.INFO, "TEST-DRIVE: Start embedded node with indexed enabled caches...");
+                log.log(Level.FINE, "TEST-DRIVE: Start embedded node with indexed enabled caches...");
 
                 IgniteEx ignite = (IgniteEx)Ignition.start(cfg);
 
