@@ -101,13 +101,12 @@ block container
                                         a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, true)' ng-click='actionAvailable(paragraph, true) ? execute(paragraph) : ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute", true)}}') Execute
                                         a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, false)' ng-click='actionAvailable(paragraph, false) ? scan(paragraph): ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute scan", false)}}') Scan
                                         .pull-right
+                                            labelHide Hide system columns:
+                                            button.btn.btn-default.fa.fa-columns.tipLabel(ng-class='{active: paragraph.hideSystemColumns}' ng-click='toggleSystemColumns(paragraph)' ng-disabled='paragraph.disabledSystemColumns')
                                             label Refresh rate:
                                             button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.installed}' bs-popover data-template-url='rate' data-placement='left' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
                                             button.btn.btn-default.base-control.tipLabel(ng-model='paragraph.pageSize' bs-options='item for item in pageSizes' bs-select style='margin-right: 0')
-                                            label(style='margin-left: 10px')
-                                                input(type='checkbox' ng-model='paragraph.hideSystemColumns' ng-click='applySystemColumns(paragraph)' ng-disabled='paragraph.disabledSystemColumns')
-                                                | Hide system columns
                                 .col-sm-12(ng-show='paragraph.errMsg')
                                     hr(style='margin-top: 0; margin-bottom: 10px')
                                     .sql-error-result(ng-show='paragraph.errMsg') Error: {{paragraph.errMsg}}

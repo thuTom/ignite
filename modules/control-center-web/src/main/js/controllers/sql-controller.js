@@ -27,7 +27,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     $scope.caches = [];
 
-    $scope.pageSizes = [10, 25, 50, 100];
+    $scope.pageSizes = [50, 100, 200, 400, 800, 1000];
 
     $scope.modes = [
         {value: 'PARTITIONED', label: 'PARTITIONED'},
@@ -268,7 +268,9 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         .success(function (nodes) {
             $scope.caches = [];
 
-            nodes[0].caches.map(function (cache) {
+            var caches = _.sortBy(nodes[0].caches, 'name');
+
+            caches.map(function (cache) {
                 $scope.caches.push({
                     "name" : cache.name,
                     meta: [
@@ -287,8 +289,14 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         });
 
 
-    $scope.applySystemColumns = function (paragraph) {
-        paragraph.columnFilter = !paragraph.disabledSystemColumns && paragraph.hideSystemColumns ? _hideColumn : _allColumn;
+    var _columnFilter = function(paragraph) {
+        return !paragraph.disabledSystemColumns && paragraph.hideSystemColumns ? _hideColumn : _allColumn;
+    };
+
+    $scope.toggleSystemColumns = function (paragraph) {
+        paragraph.hideSystemColumns = !paragraph.hideSystemColumns;
+
+        paragraph.columnFilter = _columnFilter(paragraph);
     };
 
     var _processQueryResult = function (paragraph) {
@@ -300,7 +308,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 paragraph.disabledSystemColumns = res.meta.length == 2 &&
                     res.meta[0].fieldName === "_KEY" && res.meta[1].fieldName === "_VAL";
 
-                $scope.applySystemColumns(paragraph);
+                paragraph.columnFilter = _columnFilter(paragraph);
 
                 paragraph.meta = res.meta;
 
@@ -327,7 +335,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
             paragraph.rows = res.rows;
 
-            paragraph.result = 'table';
+            if (paragraph.result = 'none')
+                paragraph.result = 'table';
         }
     };
 
