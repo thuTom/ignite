@@ -728,23 +728,12 @@ controlCenterModule.service('$confirm', function ($modal, $rootScope, $q) {
         confirmModal.hide();
     };
 
-    /**
-     * Generate reject event on cancel for special event processing.
-     */
-    scope.cancel = function () {
-        deferred.reject('cancelled');
-
-        confirmModal.hide();
-    };
-
     var confirmModal = $modal({templateUrl: '/confirm', scope: scope, placement: 'center', show: false});
 
     var parentShow = confirmModal.show;
 
-    confirmModal.show = function (content, cancelTitle) {
+    confirmModal.show = function (content) {
         scope.content = content || 'Confirm deletion?';
-
-        scope.cancelTitle = cancelTitle || dfltCancelTitle;
 
         deferred = $q.defer();
 
@@ -754,6 +743,103 @@ controlCenterModule.service('$confirm', function ($modal, $rootScope, $q) {
     };
 
     return confirmModal;
+});
+
+// Confirm by step popup service.
+controlCenterModule.service('$stepConfirm', function ($timeout, $modal, $rootScope, $q) {
+    var scope = $rootScope.$new();
+
+    var deferred;
+
+    scope.ui = {forAll: false};
+
+    var contentGenerator = function () {};
+
+    var stepProcessor = function () {};
+
+    var modelArray;
+
+    var curIx = -1;
+
+    function nextElement() {
+        curIx += 1;
+
+        if (curIx < modelArray.length) {
+            scope.content = contentGenerator(modelArray[curIx]);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate reject event on cancel for special event processing.
+     */
+    scope.cancel = function () {
+        deferred.reject('cancelled');
+
+        stepConfirmModal.hide();
+    };
+
+    scope.skip = function () {
+        if (scope.ui.forAll || !nextElement()) {
+            deferred.resolve();
+
+            stepConfirmModal.hide();
+        }
+    };
+
+    scope.continue = function () {
+        stepProcessor(modelArray[curIx]);
+
+        if (scope.ui.forAll) {
+            while(nextElement())
+                stepProcessor(modelArray[curIx]);
+        }
+        scope.cancelTitle = cancelTitle || dfltCancelTitle;
+
+        if (!nextElement()) {
+            deferred.resolve();
+
+            stepConfirmModal.hide();
+        }
+    };
+
+    var stepConfirmModal = $modal({templateUrl: 'metadata/metadata-load-confirm', scope: scope, placement: 'center', show: false});
+
+    var parentShow = stepConfirmModal.show;
+
+    /**
+     * Show confirm by steps dialog.
+     *
+     * @param generator Function to generate a confirm message. first argument is a confirmed element.
+     * @param processor Function to compute a confirmed element.
+     * @param model Array of element to process by confirm.
+     */
+    stepConfirmModal.show = function (generator, processor, model) {
+        $timeout(function () {
+            scope.content = contentGenerator(model[0]);
+        });
+
+        contentGenerator = generator;
+
+        stepProcessor = processor;
+
+        modelArray = model;
+
+        curIx = 0;
+
+        scope.ui.forAll = false;
+
+        deferred = $q.defer();
+
+        parentShow();
+
+        return deferred.promise;
+    };
+
+    return stepConfirmModal;
 });
 
 // 'Save as' popup service.
@@ -1554,7 +1640,7 @@ controlCenterModule.controller('agent-download', [
         $scope.showDownloadAgent = function () {
             _agentDownloadModal.$promise.then(_agentDownloadModal.show);
         };
-}]);
+    }]);
 
 // Navigation bar controller.
 controlCenterModule.controller('notebooks', ['$scope', '$modal', '$window', '$http', '$common',

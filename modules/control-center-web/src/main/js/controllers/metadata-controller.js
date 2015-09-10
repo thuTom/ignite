@@ -17,8 +17,8 @@
 
 // Controller for Metadata screen.
 controlCenterModule.controller('metadataController', [
-        '$scope', '$controller', '$http', '$modal', '$common', '$timeout', '$focus', '$confirm', '$copy', '$table', '$preview',
-        function ($scope, $controller, $http, $modal, $common, $timeout, $focus, $confirm, $copy, $table, $preview) {
+        '$scope', '$controller', '$http', '$modal', '$common', '$timeout', '$focus', '$confirm', '$copy', '$table', '$preview', '$stepConfirm',
+        function ($scope, $controller, $http, $modal, $common, $timeout, $focus, $confirm, $copy, $table, $preview, $stepConfirm) {
             // Initialize the super class and extend it.
             angular.extend(this, $controller('save-remove', {$scope: $scope}));
 
@@ -134,7 +134,7 @@ controlCenterModule.controller('metadataController', [
 
             function _findPreset(jdbcDriverJar) {
                 var idx = _.findIndex(jdbcDrivers, function (jdbcDriver) {
-                   return  jdbcDriver.jdbcDriverJar == jdbcDriverJar;
+                    return  jdbcDriver.jdbcDriverJar == jdbcDriverJar;
                 });
 
                 if (idx >= 0) {
@@ -296,8 +296,8 @@ controlCenterModule.controller('metadataController', [
                 $scope.preset.schemas = [];
 
                 _.forEach($scope.loadMeta.schemas, function (schema) {
-                   if (schema.use)
-                       $scope.preset.schemas.push(schema.name);
+                    if (schema.use)
+                        $scope.preset.schemas.push(schema.name);
                 });
 
                 $http.post('/agent/metadata', $scope.preset)
@@ -376,38 +376,39 @@ controlCenterModule.controller('metadataController', [
                     var delayed = [];
 
                     /**
-                     * Save the tied metadata by one on confirm variant selected only.
+                     * Save exist metadata function.
                      *
-                     * @param ix Index of deleayed metadata to select.
+                     * @param metadata Object to save. 0 index for exist element, 1 index for changed element.
                      */
-                    function saveDelayed(ix) {
-                        if (ix < delayed.length) {
-                            var existMeta = delayed[ix][0];
-                            var meta = delayed[ix][1];
+                    function saveDelayed(metadata) {
+                        var existMeta = metadata[0];
+                        var meta = metadata[1];
 
-                            $confirm.show(
-                                '<span>' +
-                                'Metadata with name &quot;' + meta.databaseTable + '&quot; already exist.<br/><br/>' +
-                                'Are you sure you want to overwrite it?' +
-                                '</span>', 'Skip').then(function () {
-                                    existMeta.databaseSchema = meta.databaseSchema;
-                                    existMeta.databaseTable = meta.databaseTable;
-                                    existMeta.keyType = meta.keyType;
-                                    existMeta.valueType = meta.valueType;
-                                    existMeta.queryFields = meta.queryFields;
-                                    existMeta.ascendingFields = meta.ascendingFields;
-                                    existMeta.descendingFields = meta.descendingFields;
-                                    existMeta.groups = meta.groups;
-                                    existMeta.keyFields = meta.keyFields;
-                                    existMeta.valueFields = meta.valueFields;
+                        existMeta.databaseSchema = meta.databaseSchema;
+                        existMeta.databaseTable = meta.databaseTable;
+                        existMeta.keyType = meta.keyType;
+                        existMeta.valueType = meta.valueType;
+                        existMeta.queryFields = meta.queryFields;
+                        existMeta.ascendingFields = meta.ascendingFields;
+                        existMeta.descendingFields = meta.descendingFields;
+                        existMeta.groups = meta.groups;
+                        existMeta.keyFields = meta.keyFields;
+                        existMeta.valueFields = meta.valueFields;
 
-                                    save(existMeta, true);
+                        save(existMeta, true);
+                    }
 
-                                    saveDelayed(ix + 1);
-                                }, function () {
-                                    saveDelayed(ix + 1);
-                                })
-                        }
+                    /**
+                     * Generate message to show on confirm dialog.
+                     *
+                     * @param metadata Object to confirm. 0 index for exist element, 1 index for changed element.
+                     * @returns {string} Generated message.
+                     */
+                    function overwriteMessage(metadata) {
+                        return '<span>' +
+                            'Metadata with name &quot;' + metadata[1].databaseTable + '&quot; already exist.<br/><br/>' +
+                            'Are you sure you want to overwrite it?' +
+                            '</span>'
                     }
 
                     _.forEach($scope.loadMeta.tables, function (table) {
@@ -514,9 +515,14 @@ controlCenterModule.controller('metadataController', [
                     });
 
                     // Process delayed metadata.
-                    saveDelayed(0);
-
-                    $common.showInfo('Cache type metadata loaded from database.');
+                    if (delayed.length > 0)
+                        $stepConfirm.show(overwriteMessage, saveDelayed, delayed).then(function () {
+                            $common.showInfo('Cache type metadata loaded from database.');
+                        }, function () {
+                            $common.showError('Cache type metadata loading interrupted by user.');
+                        });
+                    else
+                        $common.showInfo('Cache type metadata loaded from database.');
                 }
 
                 if (isIntersections)
@@ -980,7 +986,7 @@ controlCenterModule.controller('metadataController', [
                             return showPopoverMessage(null, null, $table.tableFieldId(index, 'JavaName' + dbFieldTable.id), 'Field with such java name already exists!');
 
                         if (index < 0) {
-                                model.push(dbFieldValue);
+                            model.push(dbFieldValue);
                         }
                         else {
                             var dbField = model[index];
