@@ -182,9 +182,11 @@ public abstract class GridH2AbstractKeyValueRow extends GridH2Row {
     /** {@inheritDoc} */
     @Override public Value getValue(int col) {
         if (col < DEFAULT_COLUMNS_COUNT) {
-            Value v = peekValue(col);
+            Value v;
 
             if (col == VAL_COL) {
+                v = syncValue(0);
+
                 long start = 0;
                 int attempt = 0;
 
@@ -205,14 +207,16 @@ public abstract class GridH2AbstractKeyValueRow extends GridH2Row {
                     try {
                         Object valObj = desc.readFromSwap(k);
 
-                        if (valObj != null) {
+                        // Even if we've found valObj in swap, it is may be some new value,
+                        // while the needed value was already unswapped, so we have to recheck it.
+                        if (valObj != null && (v = syncValue(0)) == null && (v = getOffheapValue(VAL_COL)) == null) {
                             Value upd = desc.wrap(valObj, desc.valueType());
 
                             v = updateWeakValue(upd);
 
                             return v == null ? upd : v;
                         }
-                        else {
+                        else if (v != null) {
                             // If nothing found in swap then we should be already unswapped.
                             v = syncValue(attempt);
                         }
@@ -230,18 +234,21 @@ public abstract class GridH2AbstractKeyValueRow extends GridH2Row {
                             ". This can happen due to a long GC pause.");
                 }
             }
-
-            if (v == null) {
+            else {
                 assert col == KEY_COL : col;
 
-                v = getOffheapValue(KEY_COL);
+                v = peekValue(KEY_COL);
 
-                assert v != null : v;
+                if (v == null) {
+                    v = getOffheapValue(KEY_COL);
 
-                setValue(KEY_COL, v);
+                    assert v != null : v;
 
-                if (peekValue(VAL_COL) == null)
-                    cache();
+                    setValue(KEY_COL, v);
+
+                    if (peekValue(VAL_COL) == null)
+                        cache();
+                }
             }
 
             assert !(v instanceof WeakValue) : v;
