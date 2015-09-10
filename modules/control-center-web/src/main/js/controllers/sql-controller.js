@@ -570,8 +570,25 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     function _insertChart(paragraph, datum, chart) {
         var chartId = 'chart-' + paragraph.id;
 
+        var xAxisLabel = 'X';
+        var yAxisLabel = 'Y';
+
+        _.forEach(paragraph.chartColumns, function (col) {
+            if (col.value == paragraph.chartColX)
+                xAxisLabel = col.label;
+
+            if (col.value == paragraph.chartColY)
+                yAxisLabel = col.label;
+        });
+
         $timeout(function() {
             chart.height(400);
+
+            if (chart.xAxis)
+                chart.xAxis.axisLabel(xAxisLabel);
+
+            if (chart.yAxis)
+                chart.yAxis.axisLabel(yAxisLabel);
 
             // Remove previous chart.
             d3.selectAll('#' + chartId + ' svg > *').remove();
@@ -613,12 +630,9 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
         nv.addGraph(function() {
             var chart = nv.models.discreteBarChart()
-                .x(function (d) {
-                    return d.label;
-                })
-                .y(function (d) {
-                    return d.value;
-                });
+                .x(function (d) { return d.label; })
+                .y(function (d) { return d.value;})
+                .margin({left: 70});
 
             var values = _.map(paragraph.rows, function (row) {
                 return {
@@ -664,7 +678,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.lineChart()
                 .x(_x)
-                .y(_y);
+                .y(_y)
+                .margin({left: 70});
 
             _insertChart(paragraph, _chartDatum('Line chart', paragraph), chart);
         });
@@ -674,7 +689,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.stackedAreaChart()
                 .x(_x)
-                .y(_y);
+                .y(_y)
+                .margin({left: 70});
 
             _insertChart(paragraph, _chartDatum('Area chart', paragraph), chart);
         });

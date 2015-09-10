@@ -20,7 +20,7 @@
     "node": ">=0.12.4"
   },
   "dependencies": {
-    "archiver": "^0.15.0",
+    "archiver": "^0.15.1",
     "body-parser": "~1.13.3",
     "bootstrap-sass": "^3.3.5",
     "compression": "1.5.2",
