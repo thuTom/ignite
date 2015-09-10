@@ -845,6 +845,8 @@ $generatorXml.metadataStore = function(meta, res) {
     $generatorXml.property(res, meta, 'databaseSchema');
     $generatorXml.property(res, meta, 'databaseTable');
 
+    res.needEmptyLine = true;
+
     if (!$dataStructures.isJavaBuildInClass(meta.keyType))
         $generatorXml.metadataDatabaseFields(res, meta, 'keyFields');
 
@@ -1048,10 +1050,10 @@ $generatorXml.cluster = function (cluster, clientNearCfg) {
         }
 
         // 3. Add main content.
-        xml += res.join('\n');
+        xml += res.asString();
 
         // 4. Add footer.
-        xml += '</beans>\n';
+        xml += '\n</beans>';
 
         return xml;
     }

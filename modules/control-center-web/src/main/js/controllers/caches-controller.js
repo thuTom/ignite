@@ -337,36 +337,36 @@ controlCenterModule.controller('cachesController', [
 
                             var varName = 'cache';
 
-                            $scope.preview.general.xml = $generatorXml.cacheMetadatas(cacheMetadatas, $generatorXml.cacheGeneral(val)).join('');
-                            $scope.preview.general.java = $generatorJava.cacheMetadatas(cacheMetadatas, varName, $generatorJava.cacheGeneral(val, varName)).join('');
+                            $scope.preview.general.xml = $generatorXml.cacheMetadatas(cacheMetadatas, $generatorXml.cacheGeneral(val)).asString();
+                            $scope.preview.general.java = $generatorJava.cacheMetadatas(cacheMetadatas, varName, $generatorJava.cacheGeneral(val, varName)).asString();
                             $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
 
-                            $scope.preview.memory.xml = $generatorXml.cacheMemory(val).join('');
-                            $scope.preview.memory.java = $generatorJava.cacheMemory(val, varName).join('');
+                            $scope.preview.memory.xml = $generatorXml.cacheMemory(val).asString();
+                            $scope.preview.memory.java = $generatorJava.cacheMemory(val, varName).asString();
                             $scope.preview.memory.allDefaults = $common.isEmptyString($scope.preview.memory.xml);
 
-                            $scope.preview.query.xml = $generatorXml.cacheQuery(val).join('');
-                            $scope.preview.query.java = $generatorJava.cacheQuery(val, varName).join('');
+                            $scope.preview.query.xml = $generatorXml.cacheQuery(val).asString();
+                            $scope.preview.query.java = $generatorJava.cacheQuery(val, varName).asString();
                             $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
 
-                            $scope.preview.store.xml = $generatorXml.cacheStore(val).join('');
-                            $scope.preview.store.java = $generatorJava.cacheStore(val, varName).join('');
+                            $scope.preview.store.xml = $generatorXml.cacheStore(val).asString();
+                            $scope.preview.store.java = $generatorJava.cacheStore(val, varName).asString();
                             $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
 
-                            $scope.preview.concurrency.xml = $generatorXml.cacheConcurrency(val).join('');
-                            $scope.preview.concurrency.java = $generatorJava.cacheConcurrency(val, varName).join('');
+                            $scope.preview.concurrency.xml = $generatorXml.cacheConcurrency(val).asString();
+                            $scope.preview.concurrency.java = $generatorJava.cacheConcurrency(val, varName).asString();
                             $scope.preview.concurrency.allDefaults = $common.isEmptyString($scope.preview.concurrency.xml);
 
-                            $scope.preview.rebalance.xml = $generatorXml.cacheRebalance(val).join('');
-                            $scope.preview.rebalance.java = $generatorJava.cacheRebalance(val, varName).join('');
+                            $scope.preview.rebalance.xml = $generatorXml.cacheRebalance(val).asString();
+                            $scope.preview.rebalance.java = $generatorJava.cacheRebalance(val, varName).asString();
                             $scope.preview.rebalance.allDefaults = $common.isEmptyString($scope.preview.rebalance.xml);
 
-                            $scope.preview.serverNearCache.xml = $generatorXml.cacheServerNearCache(val).join('');
-                            $scope.preview.serverNearCache.java = $generatorJava.cacheServerNearCache(val, varName).join('');
+                            $scope.preview.serverNearCache.xml = $generatorXml.cacheServerNearCache(val).asString();
+                            $scope.preview.serverNearCache.java = $generatorJava.cacheServerNearCache(val, varName).asString();
                             $scope.preview.serverNearCache.allDefaults = $common.isEmptyString($scope.preview.serverNearCache.xml);
 
-                            $scope.preview.statistics.xml = $generatorXml.cacheStatistics(val).join('');
-                            $scope.preview.statistics.java = $generatorJava.cacheStatistics(val, varName).join('');
+                            $scope.preview.statistics.xml = $generatorXml.cacheStatistics(val).asString();
+                            $scope.preview.statistics.java = $generatorJava.cacheStatistics(val, varName).asString();
                             $scope.preview.statistics.allDefaults = $common.isEmptyString($scope.preview.statistics.xml);
 
                             sessionStorage.cacheBackupItem = angular.toJson(val);

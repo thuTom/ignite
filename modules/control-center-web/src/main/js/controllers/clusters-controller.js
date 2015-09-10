@@ -221,52 +221,52 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                             return caches;
                         }, []);
 
-                        $scope.preview.general.xml = $generatorXml.clusterCaches(clusterCaches, $generatorXml.clusterGeneral(val)).join('');
-                        $scope.preview.general.java = $generatorJava.clusterCaches(clusterCaches, $generatorJava.clusterGeneral(val)).join('');
+                        $scope.preview.general.xml = $generatorXml.clusterCaches(clusterCaches, $generatorXml.clusterGeneral(val)).asString();
+                        $scope.preview.general.java = $generatorJava.clusterCaches(clusterCaches, $generatorJava.clusterGeneral(val)).asString();
                         $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
 
-                        $scope.preview.atomics.xml = $generatorXml.clusterAtomics(val).join('');
-                        $scope.preview.atomics.java = $generatorJava.clusterAtomics(val).join('');
+                        $scope.preview.atomics.xml = $generatorXml.clusterAtomics(val).asString();
+                        $scope.preview.atomics.java = $generatorJava.clusterAtomics(val).asString();
                         $scope.preview.atomics.allDefaults = $common.isEmptyString($scope.preview.atomics.xml);
 
-                        $scope.preview.communication.xml = $generatorXml.clusterCommunication(val).join('');
-                        $scope.preview.communication.java = $generatorJava.clusterCommunication(val).join('');
+                        $scope.preview.communication.xml = $generatorXml.clusterCommunication(val).asString();
+                        $scope.preview.communication.java = $generatorJava.clusterCommunication(val).asString();
                         $scope.preview.communication.allDefaults = $common.isEmptyString($scope.preview.communication.xml);
 
-                        $scope.preview.deployment.xml = $generatorXml.clusterDeployment(val).join('');
-                        $scope.preview.deployment.java = $generatorJava.clusterDeployment(val).join('');
+                        $scope.preview.deployment.xml = $generatorXml.clusterDeployment(val).asString();
+                        $scope.preview.deployment.java = $generatorJava.clusterDeployment(val).asString();
                         $scope.preview.deployment.allDefaults = $common.isEmptyString($scope.preview.deployment.xml);
 
-                        $scope.preview.events.xml = $generatorXml.clusterEvents(val).join('');
-                        $scope.preview.events.java = $generatorJava.clusterEvents(val).join('');
+                        $scope.preview.events.xml = $generatorXml.clusterEvents(val).asString();
+                        $scope.preview.events.java = $generatorJava.clusterEvents(val).asString();
                         $scope.preview.events.allDefaults = $common.isEmptyString($scope.preview.events.xml);
 
-                        $scope.preview.marshaller.xml = $generatorXml.clusterMarshaller(val).join('');
-                        $scope.preview.marshaller.java = $generatorJava.clusterMarshaller(val).join('');
+                        $scope.preview.marshaller.xml = $generatorXml.clusterMarshaller(val).asString();
+                        $scope.preview.marshaller.java = $generatorJava.clusterMarshaller(val).asString();
                         $scope.preview.marshaller.allDefaults = $common.isEmptyString($scope.preview.marshaller.xml);
 
-                        $scope.preview.metrics.xml = $generatorXml.clusterMetrics(val).join('');
-                        $scope.preview.metrics.java = $generatorJava.clusterMetrics(val).join('');
+                        $scope.preview.metrics.xml = $generatorXml.clusterMetrics(val).asString();
+                        $scope.preview.metrics.java = $generatorJava.clusterMetrics(val).asString();
                         $scope.preview.metrics.allDefaults = $common.isEmptyString($scope.preview.metrics.xml);
 
-                        $scope.preview.p2p.xml = $generatorXml.clusterP2p(val).join('');
-                        $scope.preview.p2p.java = $generatorJava.clusterP2p(val).join('');
+                        $scope.preview.p2p.xml = $generatorXml.clusterP2p(val).asString();
+                        $scope.preview.p2p.java = $generatorJava.clusterP2p(val).asString();
                         $scope.preview.p2p.allDefaults = $common.isEmptyString($scope.preview.p2p.xml);
 
-                        $scope.preview.swap.xml = $generatorXml.clusterSwap(val).join('');
-                        $scope.preview.swap.java = $generatorJava.clusterSwap(val).join('');
+                        $scope.preview.swap.xml = $generatorXml.clusterSwap(val).asString();
+                        $scope.preview.swap.java = $generatorJava.clusterSwap(val).asString();
                         $scope.preview.swap.allDefaults = $common.isEmptyString($scope.preview.swap.xml);
 
-                        $scope.preview.time.xml = $generatorXml.clusterTime(val).join('');
-                        $scope.preview.time.java = $generatorJava.clusterTime(val).join('');
+                        $scope.preview.time.xml = $generatorXml.clusterTime(val).asString();
+                        $scope.preview.time.java = $generatorJava.clusterTime(val).asString();
                         $scope.preview.time.allDefaults = $common.isEmptyString($scope.preview.time.xml);
 
-                        $scope.preview.pools.xml = $generatorXml.clusterPools(val).join('');
-                        $scope.preview.pools.java = $generatorJava.clusterPools(val).join('');
+                        $scope.preview.pools.xml = $generatorXml.clusterPools(val).asString();
+                        $scope.preview.pools.java = $generatorJava.clusterPools(val).asString();
                         $scope.preview.pools.allDefaults = $common.isEmptyString($scope.preview.pools.xml);
 
-                        $scope.preview.transactions.xml = $generatorXml.clusterTransactions(val).join('');
-                        $scope.preview.transactions.java = $generatorJava.clusterTransactions(val).join('');
+                        $scope.preview.transactions.xml = $generatorXml.clusterTransactions(val).asString();
+                        $scope.preview.transactions.java = $generatorJava.clusterTransactions(val).asString();
                         $scope.preview.transactions.allDefaults = $common.isEmptyString($scope.preview.transactions.xml);
 
                         $common.markChanged($scope.ui.inputForm, 'clusterBackupItemChanged');

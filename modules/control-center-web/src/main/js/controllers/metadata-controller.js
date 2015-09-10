@@ -628,16 +628,16 @@ controlCenterModule.controller('metadataController', [
                         if (val) {
                             sessionStorage.metadataBackupItem = angular.toJson(val);
 
-                            $scope.preview.general.xml = $generatorXml.metadataGeneral(val).join('');
-                            $scope.preview.general.java = $generatorJava.metadataGeneral(val).join('');
+                            $scope.preview.general.xml = $generatorXml.metadataGeneral(val).asString();
+                            $scope.preview.general.java = $generatorJava.metadataGeneral(val).asString();
                             $scope.preview.general.allDefaults = $common.isEmptyString($scope.preview.general.xml);
 
-                            $scope.preview.query.xml = $generatorXml.metadataQuery(val).join('');
-                            $scope.preview.query.java = $generatorJava.metadataQuery(val).join('');
+                            $scope.preview.query.xml = $generatorXml.metadataQuery(val).asString();
+                            $scope.preview.query.java = $generatorJava.metadataQuery(val).asString();
                             $scope.preview.query.allDefaults = $common.isEmptyString($scope.preview.query.xml);
 
-                            $scope.preview.store.xml = $generatorXml.metadataStore(val).join('');
-                            $scope.preview.store.java = $generatorJava.metadataStore(val).join('');
+                            $scope.preview.store.xml = $generatorXml.metadataStore(val).asString();
+                            $scope.preview.store.java = $generatorJava.metadataStore(val).asString();
                             $scope.preview.store.allDefaults = $common.isEmptyString($scope.preview.store.xml);
 
                             $common.markChanged($scope.ui.inputForm, 'metadataBackupItemChanged');
