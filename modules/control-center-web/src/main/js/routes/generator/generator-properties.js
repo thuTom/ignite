@@ -58,7 +58,7 @@ $generatorProperties.dataSourcesProperties = function (cluster) {
     }
 
     if (datasources.length > 0)
-        return '# ' + mainComment() + '\n\n' + res.join('');
+        return '# ' + mainComment() + '\n\n' + res.join('\n');
 
     return undefined;
 };

@@ -289,6 +289,16 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: 0;
 }
 
+.modal-footer {
+    .checkbox {
+        margin: 0;
+
+        label {
+            vertical-align: middle;
+        }
+    }
+}
+
 .modal-body {
     margin-left: 20px;
     margin-right: 20px;

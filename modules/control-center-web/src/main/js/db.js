@@ -72,7 +72,6 @@ exports.Space = mongoose.model('Space', new Schema({
 // Define Cache type metadata schema.
 var CacheTypeMetadataSchema = new Schema({
     space: {type: ObjectId, ref: 'Space'},
-    name: String,
     caches: [{type: ObjectId, ref: 'Cache'}],
     kind: {type: String, enum: ['query', 'store', 'both']},
     databaseSchema: String,

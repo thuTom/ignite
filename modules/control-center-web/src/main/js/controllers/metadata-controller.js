@@ -701,7 +701,7 @@ controlCenterModule.controller('metadataController', [
                 $table.tableReset();
 
                 $timeout(function () {
-                    $common.ensureActivePanel($scope.panels, 'metadata', 'metadataName');
+                    $common.ensureActivePanel($scope.panels, 'metadata', 'keyType');
                 });
 
                 $scope.selectItem(undefined, {space: $scope.spaces[0]._id, caches: []});
@@ -709,9 +709,6 @@ controlCenterModule.controller('metadataController', [
 
             // Check metadata logical consistency.
             function validate(item) {
-                if ($common.isEmptyString(item.name))
-                    return showPopoverMessage($scope.panels, 'general', 'metadataName', 'Name should not be empty');
-
                 if ($common.isEmptyString(item.keyType))
                     return showPopoverMessage($scope.panels, 'general', 'keyType', 'Key type should not be empty');
                 else if (!$common.isValidJavaClass('Key type', item.keyType, true, 'keyType'))

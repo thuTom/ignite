@@ -1048,7 +1048,7 @@ $generatorXml.cluster = function (cluster, clientNearCfg) {
         }
 
         // 3. Add main content.
-        xml += res.join('');
+        xml += res.join('\n');
 
         // 4. Add footer.
         xml += '</beans>\n';
