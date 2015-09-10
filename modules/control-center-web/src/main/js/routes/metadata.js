@@ -53,7 +53,7 @@ router.post('/list', function (req, res) {
             db.Cache.find({space: {$in: space_ids}}).sort('name').exec(function (err, caches) {
                 if (db.processed(err, res)) {
                     // Get all metadata for spaces.
-                    db.CacheTypeMetadata.find({space: {$in: space_ids}}).sort('name').exec(function (err, metadatas) {
+                    db.CacheTypeMetadata.find({space: {$in: space_ids}}).sort('valueType').exec(function (err, metadatas) {
                         if (db.processed(err, res)) {
                             // Remove deleted caches.
                             _.forEach(metadatas, function (meta) {
@@ -99,10 +99,10 @@ router.post('/save', function (req, res) {
                 });
         });
     else {
-        db.CacheTypeMetadata.findOne({space: req.body.space, name: req.body.name}, function (err, metadata) {
+        db.CacheTypeMetadata.findOne({space: req.body.space, valueType: req.body.valueType}, function (err, metadata) {
             if (db.processed(err, res)) {
                 if (metadata)
-                    return res.status(500).send('Cache type metadata with name: "' + metadata.name + '" already exist.');
+                    return res.status(500).send('Cache type metadata with value type: "' + metadata.valueType + '" already exist.');
 
                 (new db.CacheTypeMetadata(req.body)).save(function (err, metadata) {
                     if (db.processed(err, res)) {
