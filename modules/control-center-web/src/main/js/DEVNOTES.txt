@@ -1,4 +1,4 @@
-Ignite Web Control Center Instructions
+Ignite Web Console Instructions
 ======================================
 
 How to deploy:

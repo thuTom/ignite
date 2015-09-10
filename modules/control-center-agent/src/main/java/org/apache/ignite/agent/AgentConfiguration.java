@@ -39,8 +39,8 @@ public class AgentConfiguration {
     private String token;
 
     /** */
-    @Parameter(names = {"-s", "--server-uri"}, description = "URI for connect to Ignite Web Control Center via " +
-        "web-socket protocol, for example: wss://control-center.my-company.com:3001")
+    @Parameter(names = {"-s", "--server-uri"}, description = "URI for connect to Ignite Web Console via " +
+        "web-socket protocol, for example: wss://webconsole.my-company.com:3001")
     private String srvUri;
 
     /** */

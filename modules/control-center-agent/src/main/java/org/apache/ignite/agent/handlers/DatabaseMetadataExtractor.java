@@ -124,7 +124,7 @@ public class DatabaseMetadataExtractor {
     }
 
     /**
-     * Wrapper class for later to be transformed to JSON and send to Web Control Center.
+     * Wrapper class for later to be transformed to JSON and send to Web Console.
      */
     private static class JdbcDriver {
         /** */
