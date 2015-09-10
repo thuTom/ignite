@@ -110,8 +110,9 @@ block container
                                 .col-sm-12(ng-show='paragraph.errMsg')
                                     hr(style='margin-top: 0; margin-bottom: 10px')
                                     .sql-error-result(ng-show='paragraph.errMsg') Error: {{paragraph.errMsg}}
-                                .col-sm-12(ng-show='!paragraph.errMsg')
-                                    hr(ng-show='paragraph.result != "none"' style='margin-top: 0; margin-bottom: 10px')
+                                .col-sm-12(ng-show='!paragraph.errMsg && paragraph.result != "none"')
+                                    hr(style='margin-top: 0; margin-bottom: 10px')
+                                    .sql-empty-result(ng-show='!paragraph.rows') Result set is empty.
                                     div(ng-show='paragraph.rows && paragraph.result === "table"')
                                         .sql-table-total(ng-show='paragraph.rows && paragraph.result === "table"')
                                             label Page #:&nbsp;
@@ -119,7 +120,6 @@ block container
                                             label Results:&nbsp;
                                             b {{paragraph.rows.length + paragraph.total}}
                                             .pull-right
-                                                button.btn.btn-primary(ng-click='nextPage(paragraph)' ng-disabled='!paragraph.queryId') Next page
                                                 .btn-group
                                                     button.btn.btn-primary.fieldButton(ng-click='exportPage(paragraph)' ) Export
                                                     button.btn.btn-primary(id='export-item-dropdown' data-toggle='dropdown' data-container='body' bs-dropdown='exportDropdown' data-placement='bottom-right')
@@ -136,4 +136,7 @@ block container
                                         a.chart-settings-link(ng-show='paragraph.chart' ng-click='$event.stopPropagation()' bs-popover data-template-url='chart-settings' data-placement='bottom' data-auto-close='1' data-trigger='click') Chart settings
                                         div(id='chart-{{paragraph.id}}')
                                             svg
-                                    .sql-empty-result(ng-show='!paragraph.rows && paragraph.result != "none"') Result set is empty.
+                                    div(ng-show='paragraph.queryId')
+                                        hr(style='margin-top: 0; margin-bottom: 5px')
+                                        a(style='float: right; margin-bottom: 5px;margin-right: 10px;' ng-click='nextPage(paragraph)') Next page
+                                        i.fa.fa-chevron-circle-right(style='float: right' ng-click='nextPage(paragraph)')

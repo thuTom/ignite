@@ -317,8 +317,11 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                         paragraph.chartColumns.push(col);
                 });
 
-                paragraph.chartColX = paragraph.chartColumns.length > 0 ? paragraph.chartColumns[0].value : null;
-                paragraph.chartColY = paragraph.chartColumns.length > 1 ? paragraph.chartColumns[1].value : null;
+                paragraph.chartColX = paragraph.chartColumns.length > 0 &&
+                    paragraph.chartColumns.indexOf(paragraph.chartColX) == -1 ? paragraph.chartColumns[0] : null;
+
+                paragraph.chartColY = paragraph.chartColumns.length > 1 &&
+                    paragraph.chartColumns.indexOf(paragraph.chartColY) == -1 ? paragraph.chartColumns[1] : null;
             }
 
             paragraph.page = 1;
@@ -401,7 +404,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                     delete item.queryId;
             })
             .error(function (errMsg) {
-                $common.showError(errMsg);
+                paragraph.errMsg = errMsg;
             });
     };
 
@@ -559,7 +562,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         var index = 0;
 
         var values = _.map(paragraph.rows, function (row) {
-            return {x: _chartNumber(row, paragraph.chartColX, index++), y: _chartNumber(row, paragraph.chartColY, 0)}
+            return {
+                x: _chartNumber(row, paragraph.chartColX.value, index++),
+                y: _chartNumber(row, paragraph.chartColY.value, 0)
+            }
         });
 
         return [{key: key, values: values}];
@@ -572,10 +578,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         var yAxisLabel = 'Y';
 
         _.forEach(paragraph.chartColumns, function (col) {
-            if (col.value == paragraph.chartColX)
+            if (col == paragraph.chartColX)
                 xAxisLabel = col.label;
 
-            if (col.value == paragraph.chartColY)
+            if (col == paragraph.chartColY)
                 yAxisLabel = col.label;
         });
 
@@ -634,8 +640,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
             var values = _.map(paragraph.rows, function (row) {
                 return {
-                    label: _chartLabel(row, paragraph.chartColX, index++),
-                    value: _chartNumber(row, paragraph.chartColY, 0)
+                    label: _chartLabel(row, paragraph.chartColX.value, index++),
+                    value: _chartNumber(row, paragraph.chartColY.value, 0)
                 }
             });
 
@@ -649,10 +655,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         nv.addGraph(function() {
             var chart = nv.models.pieChart()
                     .x(function (row) {
-                        return _chartLabel(row, paragraph.chartColX, index++);
+                        return _chartLabel(row, paragraph.chartColX.value, index++);
                     })
                     .y(function (row) {
-                        return _chartNumber(row, paragraph.chartColY, 0);
+                        return _chartNumber(row, paragraph.chartColY.value, 0);
                     })
                 .showLabels(true)
                 .labelThreshold(.05)

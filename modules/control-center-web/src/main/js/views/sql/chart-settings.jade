@@ -25,12 +25,12 @@
                     .col-sm-2
                         label X:
                     .col-sm-10
-                        button.form-control(id='chart-settings-X' ng-model='paragraph.chartColX' data-placeholder='Col X' bs-select bs-options='item.value as item.label for item in paragraph.chartColumns' data-container='false' tabindex='0')
+                        button.form-control(id='chart-settings-X' ng-model='paragraph.chartColX' data-placeholder='Col X' bs-select bs-options='item as item.label for item in paragraph.chartColumns' data-container='false' tabindex='0')
                 .settings-row
                     .col-sm-2
                         label Y:
                     .col-sm-10
-                        button.form-control(id='chart-settings-Y' ng-model='paragraph.chartColY' data-placeholder='Col Y' bs-select bs-options='item.value as item.label for item in paragraph.chartColumns' data-container='false' tabindex='1')
+                        button.form-control(id='chart-settings-Y' ng-model='paragraph.chartColY' data-placeholder='Col Y' bs-select bs-options='item as item.label for item in paragraph.chartColumns' data-container='false' tabindex='1')
             .form-actions
                 button.btn.btn-primary(id='chart-settings-apply' ng-disabled='chartSettingsForm.$invalid' type='button' ng-click='applyChartSettings(paragraph); $hide()') Apply
                 button.btn.btn-primary(id='chart-settings-cancel' type='button' ng-click='$hide()') Cancel
