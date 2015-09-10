@@ -438,6 +438,10 @@ h3 {
         .ace_cursor {
             opacity: 1;
         }
+
+        .ace_gutter-cell, .ace_folding-enabled > .ace_gutter-cell {
+            padding-right: 5px;
+        }
     }
 
     .sql-table-total {
@@ -1244,7 +1248,6 @@ a {
 
     .ace_gutter-cell, .ace_folding-enabled > .ace_gutter-cell {
         padding-left: 0.65em;
-        padding-right: 0.9em;
     }
 }
 
