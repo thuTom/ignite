@@ -369,7 +369,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     $scope.explain = function (paragraph) {
         _saveNotebook();
 
-        _cancelRefresh();
+        _cancelRefresh(paragraph);
 
         $http.post('/agent/query', {query: 'EXPLAIN ' + paragraph.query, pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
             .success(_processQueryResult(paragraph))
@@ -381,7 +381,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     $scope.scan = function (paragraph) {
         _saveNotebook();
 
-        _cancelRefresh();
+        _cancelRefresh(paragraph);
 
         $http.post('/agent/scan', {pageSize: paragraph.pageSize, cacheName: paragraph.cache.name})
             .success(_processQueryResult(paragraph))
