@@ -178,7 +178,18 @@ public class AgentConfiguration {
      * @return {@code true} If agent options usage should be printed.
      */
     public Boolean help() {
-        return help != null ? help : false;
+        boolean noArgs =
+            token == null &&
+            srvUri == null &&
+            nodeUri == null &&
+            cfgPath == null &&
+            driversFolder == null &&
+            meta == null &&
+            sql == null &&
+            verbose == null &&
+            help == null;
+
+        return noArgs || (help != null ? help : false);
     }
 
     /**
