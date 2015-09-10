@@ -68,7 +68,7 @@ mixin table-pair-edit(prefix, keyPlaceholder, valPlaceholder, keyJavaBuildInType
         label.fieldSep /
         .input-tip
             if keyJavaBuildInTypes
-                input.form-control(id=keyFocusId enter-focus-next=valFocusId type='text' ng-model=keyModel placeholder=keyPlaceholder bs-typeahead retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses' on-escape='tableReset()')
+                input.form-control(id=keyFocusId enter-focus-next=valFocusId type='text' ng-model=keyModel placeholder=keyPlaceholder bs-typeahead container='body' retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses' on-escape='tableReset()')
             else
                 input.form-control(id=keyFocusId enter-focus-next=valFocusId type='text' ng-model=keyModel placeholder=keyPlaceholder on-escape='tableReset()')
     .col-xs-6.col-sm-6.col-md-6
@@ -80,7 +80,7 @@ mixin table-pair-edit(prefix, keyPlaceholder, valPlaceholder, keyJavaBuildInType
         +btn-save(btnVisible, btnSave)
         .input-tip
             if valueJavaBuildInTypes
-                input.form-control(id=valFocusId type='text' ng-model=valModel placeholder=valPlaceholder bs-typeahead retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses' on-enter=btnVisibleAndSave on-escape='tableReset()')
+                input.form-control(id=valFocusId type='text' ng-model=valModel placeholder=valPlaceholder bs-typeahead container='body' retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses' on-enter=btnVisibleAndSave on-escape='tableReset()')
             else
                 input.form-control(id=valFocusId type='text' ng-model=valModel placeholder=valPlaceholder on-enter=btnVisibleAndSave on-escape='tableReset()')
 
@@ -238,7 +238,7 @@ mixin table-group-item-edit(prefix, index)
     .col-xs-5.col-sm-5.col-md-5
         label.fieldSep /
         .input-tip
-            input.form-control(id=className enter-focus-next=direction type='text' ng-model=classNameModel placeholder='Class name' bs-typeahead retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses' on-escape='tableReset()')
+            input.form-control(id=className enter-focus-next=direction type='text' ng-model=classNameModel placeholder='Class name' bs-typeahead container='body' retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses' on-escape='tableReset()')
     .col-xs-3.col-sm-3.col-md-3
         +btn-save(btnVisible, btnSave)
         .input-tip
@@ -273,7 +273,7 @@ mixin form-row-custom(lblClasses, fieldClasses, dataSource)
             div(class=fieldClasses)
                 +tipField('field.tip')
                 .input-tip
-                    input.form-control(id='{{::field.id}}' type='text' placeholder='{{::field.placeholder}}' ng-focus='tableReset()' bs-typeahead retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses')&attributes(fieldCommon)
+                    input.form-control(id='{{::field.id}}' type='text' placeholder='{{::field.placeholder}}' ng-focus='tableReset()' bs-typeahead container='body' retain-selection data-min-length='1' bs-options='javaClass for javaClass in javaBuildInClasses')&attributes(fieldCommon)
         div(ng-switch-when='password' ng-hide=fieldHide)
             label(class=lblClasses ng-class=fieldRequiredClass) {{::field.label}}:
             div(class=fieldClasses)
