@@ -599,6 +599,8 @@ controlCenterModule.controller('metadataController', [
 
                     $timeout(function () {
                         $scope.$apply();
+                        
+                        $scope.ui.markPristineHard();
                     });
 
                     $scope.$watch('backupItem', function (val) {

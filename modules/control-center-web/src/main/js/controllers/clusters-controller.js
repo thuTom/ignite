@@ -189,6 +189,10 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 else
                     selectFirstItem();
 
+                $timeout(function() {
+                    $scope.ui.markPristineHard();
+                });
+
                 $scope.$watch('backupItem', function (val) {
                     if (val) {
                         var clusterCaches = _.reduce($scope.caches, function(caches, cache){

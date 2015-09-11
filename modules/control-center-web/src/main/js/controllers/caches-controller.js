@@ -267,6 +267,10 @@ controlCenterModule.controller('cachesController', [
                     else
                         selectFirstItem();
 
+                    $timeout(function() {
+                        $scope.ui.markPristineHard();
+                    });
+
                     $scope.$watch('backupItem', function (val) {
                         if (val) {
                             var metas = cacheMetadatas(val);

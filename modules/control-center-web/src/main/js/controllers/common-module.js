@@ -770,6 +770,10 @@ controlCenterModule.service('$common', [
                                 markPristine(this.inputForm);
                         }
                     },
+                    markPristineHard: function() {
+                        if (isDefined(this.inputForm))
+                            markPristine(this.inputForm);
+                    },
                     markPristine: function (dirtyCnt) {
                         this.dirty = dirtyCnt;
 
