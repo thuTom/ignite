@@ -19,6 +19,7 @@ package org.apache.ignite.agent;
 
 import com.beust.jcommander.JCommander;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,6 +74,14 @@ public class AgentLauncher {
 
         if (cmdCfg.configPath() != null)
             cfg.load(new File(cmdCfg.configPath()).toURI().toURL());
+        else {
+            try {
+                cfg.load(new File("./default.properties").toURI().toURL());
+            }
+            catch (IOException ignore) {
+                // No-op.
+            }
+        }
 
         cfg.merge(cmdCfg);
 
