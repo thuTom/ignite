@@ -103,7 +103,7 @@ block container
                                         a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, false)' ng-click='actionAvailable(paragraph, false) ? scan(paragraph): ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute scan", false)}}') Scan
                                         .pull-right
                                             labelHide Hide system columns:
-                                            button.btn.btn-default.fa.fa-columns.tipLabel(ng-class='{"btn-info": paragraph.hideSystemColumns}' ng-click='toggleSystemColumns(paragraph)' ng-disabled='paragraph.disabledSystemColumns')
+                                            a.btn.btn-default.fa.fa-columns.tipLabel(ng-class='{"btn-info": paragraph.hideSystemColumns}' ng-click='toggleSystemColumns(paragraph)' ng-disabled='paragraph.disabledSystemColumns')
                                             label.tipLabel Refresh rate:
                                             button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.installed}' bs-popover data-template-url='rate' data-placement='left' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
@@ -116,7 +116,7 @@ block container
                                     .sql-empty-result(ng-show='!paragraph.rows') Result set is empty.
                                     div(ng-show='paragraph.rows && paragraph.result === "table"')
                                         .sql-table-total(ng-show='paragraph.rows && paragraph.result === "table"')
-                                            label Page #:&nbsp;
+                                            label Page #&nbsp;
                                             b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
                                             label Results so far:&nbsp;
                                             b {{paragraph.rows.length + paragraph.total}}
@@ -141,5 +141,5 @@ block container
                                             svg
                                     div(ng-show='paragraph.queryId')
                                         hr(style='margin-top: 0; margin-bottom: 5px')
-                                        a(style='float: right; margin-bottom: 5px;margin-right: 10px;' ng-click='nextPage(paragraph)') Next page
-                                        i.fa.fa-chevron-circle-right(style='float: right' ng-click='nextPage(paragraph)')
+                                        i.fa.fa-chevron-circle-right(style='float: right;margin-right: 10px;' ng-click='nextPage(paragraph)')
+                                        a(style='float: right; margin-bottom: 5px;margin-right: 5px;' ng-click='nextPage(paragraph)') Next
