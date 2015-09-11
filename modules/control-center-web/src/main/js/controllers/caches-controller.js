@@ -232,7 +232,7 @@ controlCenterModule.controller('cachesController', [
                     $scope.clusters = data.clusters;
 
                     $scope.metadatas = _.map(data.metadatas, function (meta) {
-                        return {value: meta._id, label: meta.name, kind: meta.kind, meta: meta}
+                        return {value: meta._id, label: meta.valueType, kind: meta.kind, meta: meta}
                     });
 
                     var restoredItem = angular.fromJson(sessionStorage.cacheBackupItem);
