@@ -415,15 +415,8 @@ controlCenterModule.controller('cachesController', [
                     'Selected cache: ' + $scope.backupItem.name : 'New cache';
             };
 
-            // Add new cache.
-            $scope.createItem = function () {
-                $table.tableReset();
-
-                $timeout(function () {
-                    $common.ensureActivePanel($scope.panels, 'general', 'cacheName');
-                });
-
-                var newItem = {
+            function prepareNewItem() {
+                return {
                     space: $scope.spaces[0]._id,
                     cacheMode: 'PARTITIONED',
                     atomicityMode: 'ATOMIC',
@@ -432,8 +425,17 @@ controlCenterModule.controller('cachesController', [
                     clusters: [],
                     metadatas: []
                 };
+            }
 
-                $scope.selectItem(undefined, newItem);
+            // Add new cache.
+            $scope.createItem = function () {
+                $table.tableReset();
+
+                $timeout(function () {
+                    $common.ensureActivePanel($scope.panels, 'general', 'cacheName');
+                });
+
+                $scope.selectItem(undefined, prepareNewItem());
             };
 
             // Check cache logical consistency.
@@ -596,5 +598,15 @@ controlCenterModule.controller('cachesController', [
                     }
                 );
             };
+
+            $scope.resetItem = function (group) {
+                var resetTo = $scope.selectedItem;
+
+                if (!$common.isDefined(resetTo))
+                    resetTo = prepareNewItem();
+
+                $common.resetItem($scope.backupItem, resetTo, $scope.general, group);
+                $common.resetItem($scope.backupItem, resetTo, $scope.advanced, group);
+            }
         }]
 );

@@ -313,14 +313,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 'Selected cluster: ' + $scope.backupItem.name : 'New cluster';
         };
 
-        // Add new cluster.
-        $scope.createItem = function () {
-            $table.tableReset();
-
-            $timeout(function () {
-                $common.ensureActivePanel($scope.panels, "general", 'clusterName');
-            });
-
+        function prepareNewItem() {
             var newItem = {
                 discovery: {kind: 'Multicast', Vm: {addresses: ['127.0.0.1:47500..47510']}, Multicast: {}},
                 deploymentMode: 'SHARED'
@@ -329,7 +322,18 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
             newItem.caches = [];
             newItem.space = $scope.spaces[0]._id;
 
-            $scope.selectItem(undefined, newItem);
+            return newItem;
+        }
+
+        // Add new cluster.
+        $scope.createItem = function () {
+            $table.tableReset();
+
+            $timeout(function () {
+                $common.ensureActivePanel($scope.panels, "general", 'clusterName');
+            });
+
+            $scope.selectItem(undefined, prepareNewItem());
         };
 
         $scope.indexOfCache = function (cacheId) {
@@ -503,5 +507,15 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 }
             );
         };
+
+        $scope.resetItem = function (group) {
+            var resetTo = $scope.selectedItem;
+
+            if (!$common.isDefined(resetTo))
+                resetTo = prepareNewItem();
+
+            $common.resetItem($scope.backupItem, resetTo, $scope.general, group);
+            $common.resetItem($scope.backupItem, resetTo, $scope.advanced, group);
+        }
     }]
 );

@@ -702,6 +702,10 @@ controlCenterModule.controller('metadataController', [
                     : 'New metadata';
             };
 
+            function prepareNewItem() {
+                return {space: $scope.spaces[0]._id, caches: []};
+            }
+
             // Add new metadata.
             $scope.createItem = function () {
                 $table.tableReset();
@@ -710,7 +714,7 @@ controlCenterModule.controller('metadataController', [
                     $common.ensureActivePanel($scope.panels, 'metadata', 'keyType');
                 });
 
-                $scope.selectItem(undefined, {space: $scope.spaces[0]._id, caches: []});
+                $scope.selectItem(undefined, prepareNewItem());
             };
 
             // Check metadata logical consistency.
@@ -1179,5 +1183,14 @@ controlCenterModule.controller('metadataController', [
                 // Dirty state do not change automatically.
                 $scope.ui.inputForm.$dirty = true;
             };
+
+            $scope.resetItem = function (group) {
+                var resetTo = $scope.selectedItem;
+
+                if (!$common.isDefined(resetTo))
+                    resetTo = prepareNewItem();
+
+                $common.resetItem($scope.backupItem, resetTo, $scope.metadata, group);
+            }
         }]
 );

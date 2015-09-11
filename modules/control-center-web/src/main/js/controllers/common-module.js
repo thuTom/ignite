@@ -500,30 +500,32 @@ controlCenterModule.service('$common', [
             return isDefined(form) && form.$dirty;
         }
 
+        function getModel(obj, field) {
+            var path = field.path;
+
+            if (!isDefined(path))
+                return obj;
+
+            path = path.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+            path = path.replace(/^\./, '');           // strip a leading dot
+
+            var segs = path.split('.');
+            var root = obj;
+
+            while (segs.length > 0) {
+                var pathStep = segs.shift();
+
+                if (typeof root[pathStep] === 'undefined')
+                    root[pathStep] = {};
+
+                root = root[pathStep];
+            }
+
+            return root;
+        }
+
         return {
-            getModel: function (obj, field) {
-                var path = field.path;
-
-                if (!isDefined(path))
-                    return obj;
-
-                path = path.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
-                path = path.replace(/^\./, '');           // strip a leading dot
-
-                var segs = path.split('.');
-                var root = obj;
-
-                while (segs.length > 0) {
-                    var pathStep = segs.shift();
-
-                    if (typeof root[pathStep] === 'undefined')
-                        root[pathStep] = {};
-
-                    root = root[pathStep];
-                }
-
-                return root;
-            },
+            getModel: getModel,
             joinTip: function (arr) {
                 if (!arr) {
                     return arr;
@@ -707,6 +709,57 @@ controlCenterModule.service('$common', [
                 file.click();
 
                 document.body.removeChild(file);
+            },
+            resetItem: function (backupItem, selectedItem, groups, group) {
+                function restoreFields(fields) {
+                    // Reset fields by one.
+                    for (var fldIx = 0; fldIx < fields.length; fldIx ++) {
+                        var field = fields[fldIx];
+
+                        var destMdl = getModel(backupItem, field);
+
+                        if (isDefined(destMdl)) {
+                            if (isDefined(selectedItem)) {
+                                var srcMdl = getModel(selectedItem, field);
+
+                                if (isDefined(srcMdl)) {
+                                    // For array create copy.
+                                    if ($.isArray(srcMdl[field.model]))
+                                        destMdl[field.model] = srcMdl[field.model].slice();
+                                    else
+                                        destMdl[field.model] = srcMdl[field.model];
+                                }
+                                else
+                                    destMdl[field.model] = undefined;
+                            }
+                            else
+                                destMdl[field.model] = undefined;
+
+                            // For kind field restore kind value and all configured kinds.
+                            if (field.model == 'kind') {
+                                var kind = getModel(backupItem, field)[field.model];
+
+                                var details = field.details;
+
+                                var keys = Object.keys(details);
+
+                                for (var detIx = 0; detIx < keys.length; detIx++)
+                                    restoreFields(details[keys[detIx]].fields);
+                            }
+                        }
+                    }
+                }
+
+                // Find group metadata to reset group values.
+                for (var grpIx = 0; grpIx < groups.length; grpIx ++) {
+                    if (groups[grpIx].group == group) {
+                        var fields = groups[grpIx].fields;
+
+                        restoreFields(fields);
+
+                        break;
+                    }
+                }
             }
         }
     }]);
