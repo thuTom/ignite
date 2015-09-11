@@ -662,7 +662,7 @@ controlCenterModule.controller('metadataController', [
                     else
                         $scope.backupItem = undefined;
 
-                    $scope.ui.markPristine();
+                    $scope.ui.markPristine(1);
                 }
 
                 $common.confirmUnsavedChanges($scope.ui.isDirty(), selectItem);
@@ -755,7 +755,7 @@ controlCenterModule.controller('metadataController', [
 
                 $http.post('metadata/save', item)
                     .success(function (_id) {
-                        $scope.ui.markPristine();
+                        $scope.ui.markPristine(0);
 
                         var idx = _.findIndex($scope.metadatas, function (metadata) {
                             return metadata._id == _id;
@@ -770,6 +770,7 @@ controlCenterModule.controller('metadataController', [
                         }
 
                         $scope.selectItem(item);
+                        $scope.ui.markPristine(0);
 
                         if (!quiet)
                             $common.showInfo('Cache type metadata"' + item.name + '" saved.');
@@ -816,7 +817,7 @@ controlCenterModule.controller('metadataController', [
 
                         $http.post('metadata/remove', {_id: _id})
                             .success(function () {
-                                $scope.ui.markPristine();
+                                $scope.ui.markPristine(0);
 
                                 $common.showInfo('Cache type metadata has been removed: ' + selectedItem.name);
 
@@ -831,10 +832,8 @@ controlCenterModule.controller('metadataController', [
 
                                     if (metadatas.length > 0)
                                         $scope.selectItem(metadatas[0]);
-                                    else {
-                                        $scope.selectedItem = undefined;
-                                        $scope.backupItem = undefined;
-                                    }
+                                    else
+                                        $scope.selectItem(undefined, undefined);
                                 }
                             })
                             .error(function (errMsg) {
@@ -849,7 +848,7 @@ controlCenterModule.controller('metadataController', [
 
                 $confirm.show('Are you sure you want to remove all metadata?').then(
                     function () {
-                        $scope.ui.markPristine();
+                        $scope.ui.markPristine(0);
 
                         $http.post('metadata/remove/all')
                             .success(function () {

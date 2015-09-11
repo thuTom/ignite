@@ -277,7 +277,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 else
                     $scope.backupItem = undefined;
 
-                $scope.ui.markPristine();
+                $scope.ui.markPristine(2);
             }
 
             $common.confirmUnsavedChanges($scope.ui.isDirty(), selectItem);
@@ -372,7 +372,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
         function save(item) {
             $http.post('clusters/save', item)
                 .success(function (_id) {
-                    $scope.ui.markPristine();
+                    $scope.ui.markPristine(0);
 
                     var idx = _.findIndex($scope.clusters, function (cluster) {
                         return cluster._id == _id;
@@ -387,6 +387,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                     }
 
                     $scope.selectItem(item);
+                    $scope.ui.markPristine(0);
 
                     $common.showInfo('Cluster "' + item.name + '" saved.');
                 })
@@ -428,7 +429,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
 
             $confirm.show('Are you sure you want to remove cluster: "' + selectedItem.name + '"?').then(
                 function () {
-                    $scope.ui.markPristine();
+                    $scope.ui.markPristine(0);
 
                     var _id = selectedItem._id;
 
@@ -464,7 +465,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
 
             $confirm.show('Are you sure you want to remove all clusters?').then(
                 function () {
-                    $scope.ui.markPristine();
+                    $scope.ui.markPristine(0);
 
                     $http.post('clusters/remove/all')
                         .success(function () {

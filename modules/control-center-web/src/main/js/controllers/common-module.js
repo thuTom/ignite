@@ -753,10 +753,10 @@ controlCenterModule.service('$common', [
                     }
                 }
             },
-            formUI: function (dirtyCnt) {
+            formUI: function (initialDirtyCnt) {
                 return {
                     expanded: false,
-                    dirty: dirtyCnt,
+                    dirty: initialDirtyCnt,
                     isDirty: function () {
                         return this.dirty < 0;
                     },
@@ -770,7 +770,7 @@ controlCenterModule.service('$common', [
                                 markPristine(this.inputForm);
                         }
                     },
-                    markPristine: function () {
+                    markPristine: function (dirtyCnt) {
                         this.dirty = dirtyCnt;
 
                         if (isDefined(this.inputForm))
@@ -819,7 +819,7 @@ controlCenterModule.service('$confirm', function ($modal, $rootScope, $q) {
     return confirmModal;
 });
 
-// Confirm by step popup service.
+// Service for confirm or skip several steps.
 controlCenterModule.service('$stepConfirm', function ($timeout, $modal, $rootScope, $q) {
     var scope = $rootScope.$new();
 

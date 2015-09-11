@@ -267,9 +267,9 @@ controlCenterModule.controller('cachesController', [
                     else
                         selectFirstItem();
 
-                    $scope.$watch('backupItem', function (val, old) {
+                    $scope.$watch('backupItem', function (val) {
                         if (val) {
-                            var metas = cacheMetadatas();
+                            var metas = cacheMetadatas(val);
                             var varName = 'cache';
 
                             $scope.preview.general.xml = $generatorXml.cacheMetadatas(metas, $generatorXml.cacheGeneral(val)).asString();
@@ -357,7 +357,7 @@ controlCenterModule.controller('cachesController', [
                     else
                         $scope.backupItem = undefined;
 
-                    $scope.ui.markPristine();
+                    $scope.ui.markPristine(2);
                 }
 
                 $common.confirmUnsavedChanges($scope.ui.isDirty(), selectItem);
@@ -453,7 +453,7 @@ controlCenterModule.controller('cachesController', [
             function save(item) {
                 $http.post('caches/save', item)
                     .success(function (_id) {
-                        $scope.ui.markPristine();
+                        $scope.ui.markPristine(0);
 
                         var idx = _.findIndex($scope.caches, function (cache) {
                             return cache._id == _id;
@@ -468,6 +468,7 @@ controlCenterModule.controller('cachesController', [
                         }
 
                         $scope.selectItem(item);
+                        $scope.ui.markPristine(0);
 
                         $common.showInfo('Cache "' + item.name + '" saved.');
                     })
@@ -509,7 +510,7 @@ controlCenterModule.controller('cachesController', [
 
                 $confirm.show('Are you sure you want to remove cache: "' + selectedItem.name + '"?').then(
                     function () {
-                        $scope.ui.markPristine();
+                        $scope.ui.markPristine(0);
 
                         var _id = selectedItem._id;
 
@@ -545,7 +546,7 @@ controlCenterModule.controller('cachesController', [
 
                 $confirm.show('Are you sure you want to remove all caches?').then(
                     function () {
-                        $scope.ui.markPristine();
+                        $scope.ui.markPristine(0);
 
                         $http.post('caches/remove/all')
                             .success(function () {
