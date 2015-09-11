@@ -129,13 +129,18 @@ ul.navbar-nav, .sidebar-nav {
     text-decoration: none;
 }
 
-.theme-line .select,
-.theme-line .typeahead {
-    li a {
-        color: $ignite-header-color;
-        background-color: transparent;
+.theme-line .select {
+    li a.active {
+        color: $dropdown-link-active-color;
     }
 
+    li a:hover {
+        color: $dropdown-link-hover-color;
+    }
+}
+
+.theme-line .select,
+.theme-line .typeahead {
     .active {
         font-size: 1em;
         background-color: $ignite-background-dark-color;
@@ -1275,7 +1280,7 @@ a {
 }
 
 .ace_editor {
-    margin: 0.85em 0 0.85em 0;
+    margin: 5px 5px 5px 0;
 
     .ace_gutter {
         background: transparent !important;
@@ -1357,7 +1362,7 @@ a {
     border-radius: 5px;
     border: thin dotted lightgrey;
 
-    padding: 0 3px;
+    padding: 0;
 }
 
 .preview-legend {
