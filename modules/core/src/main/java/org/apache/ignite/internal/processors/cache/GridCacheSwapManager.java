@@ -34,6 +34,7 @@ import org.apache.ignite.IgniteCheckedException;
 import org.apache.ignite.IgniteException;
 import org.apache.ignite.internal.managers.swapspace.GridSwapSpaceManager;
 import org.apache.ignite.internal.processors.affinity.AffinityTopologyVersion;
+import org.apache.ignite.internal.processors.cache.distributed.dht.GridDhtInvalidPartitionException;
 import org.apache.ignite.internal.processors.cache.query.GridCacheQueryManager;
 import org.apache.ignite.internal.processors.cache.version.GridCacheVersion;
 import org.apache.ignite.internal.processors.cache.version.GridCacheVersionAware;
@@ -167,6 +168,9 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
                         }
                     }
                 }
+                catch (GridDhtInvalidPartitionException e) {
+                    // Skip entry.
+                }
                 catch (IgniteCheckedException e) {
                     U.error(log, "Failed to unmarshal off-heap entry", e);
                 }
@@ -238,7 +242,7 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
         if (cctx.config().isStatisticsEnabled())
             cctx.cache().metrics0().onOffHeapEvict();
 
-        if (!firstEvictWarn)
+        if (firstEvictWarn)
             return;
 
         synchronized (this) {
