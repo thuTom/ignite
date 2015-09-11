@@ -348,6 +348,10 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     var _executeRefresh = function (paragraph) {
+        // TODO IGNITE-843 Temporary disable charts refresh by timer
+        if (paragraph.rate.installed && paragraph.chart())
+            return;
+
         $http.post('/agent/query', paragraph.queryArgs)
             .success(_processQueryResult(paragraph))
             .error(function (errMsg) {
