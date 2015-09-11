@@ -472,7 +472,7 @@ h3 {
         overflow: auto;
         position: relative;
 
-        height: 300px;
+        max-height: 300px;
 
         padding: 0;
     }
@@ -1373,7 +1373,7 @@ a {
 .chart-settings-link {
     font-size: $font-size-base;
     color: $link-color !important;
-    margin-left: 10px;
+    margin-left: 20px;
 }
 
 .chart-settings {
