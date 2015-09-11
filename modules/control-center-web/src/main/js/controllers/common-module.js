@@ -491,7 +491,7 @@ controlCenterModule.service('$common', [
                 popover = newPopover;
             }, 100);
 
-            $timeout(function () { newPopover.hide() }, 3000);
+            $timeout(function () { newPopover.hide() }, 5000);
 
             return false;
         }
@@ -614,7 +614,7 @@ controlCenterModule.service('$common', [
                 return true;
             },
             metadataForQueryConfigured: function (meta) {
-                return meta
+                return isDefined(meta)
                     && !(isEmptyArray(meta.queryFields)
                     && isEmptyArray(meta.ascendingFields)
                     && isEmptyArray(meta.descendingFields)
@@ -622,7 +622,7 @@ controlCenterModule.service('$common', [
                     && isEmptyArray(meta.groups))
             },
             metadataForStoreConfigured: function (meta) {
-                return meta
+                return isDefined(meta)
                     && !(isEmptyString(meta.databaseSchema)
                     && isEmptyString(meta.databaseTable)
                     && isEmptyArray(meta.keyFields)
