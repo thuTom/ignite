@@ -56,6 +56,10 @@ public class AgentLauncher {
 
         JCommander jCommander = new JCommander(cmdCfg, args);
 
+        String osName = System.getProperty("os.name").toLowerCase();
+
+        jCommander.setProgramName("ignite-web-agent." + (osName.contains("win") ? "bat" : "sh"));
+
         if (cmdCfg.help()) {
             jCommander.usage();
 
