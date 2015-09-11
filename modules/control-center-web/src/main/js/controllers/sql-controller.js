@@ -72,6 +72,16 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
     var paragraphId = 0;
 
+    function enhanceParagraph(paragraph) {
+        paragraph.chart = function () {
+            return this.result != 'table' && this.result != 'none';
+        };
+
+        paragraph.nonEmpty = function () {
+            return this.rows && this.rows.length > 0;
+        };
+    }
+
     $scope.aceInit = function (editor) {
         editor.setAutoScrollEditorIntoView(true);
         editor.$blockScrolling = Infinity;
@@ -96,6 +106,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
                 _.forEach(notebook.paragraphs, function (paragraph) {
                     paragraph.id = paragraphId++;
+
+                    enhanceParagraph(paragraph);
                 });
 
                 if (!notebook.paragraphs || notebook.paragraphs.length == 0)
@@ -193,7 +205,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             query: '',
             pageSize: $scope.pageSizes[0],
             result: 'none',
-            chart: false,
             hideSystemColumns: true,
             disabledSystemColumns: false,
             rate: {
@@ -202,6 +213,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                 installed: false
             }
         };
+
+        enhanceParagraph(paragraph);
 
         if ($scope.caches && $scope.caches.length > 0)
             paragraph.cache = $scope.caches[0];
@@ -212,29 +225,12 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     };
 
     $scope.setResult = function (paragraph, new_result) {
+        var changed = paragraph.result != new_result;
+
         paragraph.result = paragraph.result === new_result ? 'none' : new_result;
 
-        paragraph.chart = new_result != 'table' && paragraph.result != 'none' && paragraph.rows && paragraph.rows.length > 0;
-
-        if (paragraph.chart) {
-            switch (new_result) {
-                case 'bar':
-                    _barChart(paragraph);
-                    break;
-
-                case 'pie':
-                    _pieChart(paragraph);
-                    break;
-
-                case 'line':
-                    _lineChart(paragraph);
-                    break;
-
-                case 'area':
-                    _areaChart(paragraph);
-                    break;
-            }
-        }
+        if (changed && paragraph.chart())
+            $scope.applyChartSettings(paragraph);
     };
 
     $scope.resultEq = function(paragraph, result) {
@@ -346,7 +342,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
             if (paragraph.result == 'none')
                 paragraph.result = 'table';
-            else if (paragraph.chart)
+            else if (paragraph.chart())
                 $scope.applyChartSettings(paragraph);
         }
     };
@@ -618,7 +614,7 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
     }
 
     $scope.applyChartSettings = function (paragraph) {
-        if (paragraph.chart && paragraph.rows && paragraph.rows.length > 0) {
+        if (paragraph.chart() && paragraph.nonEmpty()) {
             switch (paragraph.result) {
                 case 'bar':
                     _barChart(paragraph);

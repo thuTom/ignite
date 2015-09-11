@@ -133,7 +133,7 @@ block container
                                                 tbody
                                                     tr(ng-repeat='row in displayedResult track by $index')
                                                         td(ng-repeat='val in row track by $index' ng-if='paragraph.columnFilter(paragraph.meta[$index])') {{ val }}
-                                    div(ng-show='paragraph.rows && paragraph.chart')
+                                    div(ng-show='paragraph.chart() && paragraph.nonEmpty()')
                                         .chart-settings-link
                                             i.fa.fa-chevron-circle-down
                                             a(ng-show='paragraph.chart' ng-click='$event.stopPropagation()' bs-popover data-template-url='chart-settings' data-placement='bottom' data-auto-close='1' data-trigger='click') Chart settings
