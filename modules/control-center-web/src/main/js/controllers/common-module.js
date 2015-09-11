@@ -77,8 +77,8 @@ controlCenterModule.config(function($modalProvider) {
 
 // Unsaved changes configuration.
 controlCenterModule.config(['unsavedWarningsConfigProvider', function(unsavedWarningsConfigProvider) {
-    unsavedWarningsConfigProvider.navigateMessage = 'You have unsaved changes.';
-    unsavedWarningsConfigProvider.reloadMessage = 'You have unsaved changes.';
+    unsavedWarningsConfigProvider.navigateMessage = 'Unsaved changes will be discarded.';
+    unsavedWarningsConfigProvider.reloadMessage = 'Unsaved changes will be discarded.';
 }]);
 
 // Common functions to be used in controllers.
@@ -496,8 +496,14 @@ controlCenterModule.service('$common', [
             return false;
         }
 
-        function formChanged (form) {
-            return isDefined(form) && form.$dirty;
+        function markDirty (form) {
+            if (isDefined(form))
+                form.$setDirty();
+        }
+
+        function markPristine (form) {
+            if (isDefined(form))
+                form.$setPristine();
         }
 
         function getModel(obj, field) {
@@ -666,22 +672,8 @@ controlCenterModule.service('$common', [
                 if (popover)
                     popover.hide();
             },
-            markChanged: function (form, item) {
-                sessionStorage.setItem(item, 'true');
-
-                form.$setDirty();
-            },
-            markPristine: function (form, item) {
-                if (isDefined(form))
-                    form.$setPristine();
-
-                sessionStorage.removeItem(item);
-            },
-            formChanged: function (form) {
-                return isDefined(form) && form.$dirty;
-            },
-            confirmUnsavedChanges: function(confirm, form, selectFunc) {
-                if (formChanged(form)) {
+            confirmUnsavedChanges: function(dirty, selectFunc) {
+                if (dirty) {
                     if ($window.confirm('You have unsaved changes.\n\nAre you sure you want to discard them?'))
                         selectFunc();
                 }
@@ -689,8 +681,8 @@ controlCenterModule.service('$common', [
                     selectFunc();
 
             },
-            saveBtnTipText: function (form, objectName) {
-                if (formChanged(form))
+            saveBtnTipText: function (dirty, objectName) {
+                if (dirty)
                     return 'Save ' + objectName;
 
                 return 'Nothing to save';
@@ -760,6 +752,37 @@ controlCenterModule.service('$common', [
                         break;
                     }
                 }
+            },
+            formUI: function (dirtyCnt) {
+                return {
+                    expanded: false,
+                    dirty: dirtyCnt,
+                    isDirty: function () {
+                        return this.dirty < 0;
+                    },
+                    markDirty: function () {
+                        this.dirty--;
+
+                        if (isDefined(this.inputForm)) {
+                            if (this.dirty < 0)
+                                markDirty(this.inputForm);
+                            else
+                                markPristine(this.inputForm);
+                        }
+                    },
+                    markPristine: function () {
+                        this.dirty = dirtyCnt;
+
+                        if (isDefined(this.inputForm))
+                            markPristine(this.inputForm);
+                    },
+                    noSubmit: function() {
+                        if (this.dirty < 0)
+                            markDirty(this.inputForm);
+                        else
+                            markPristine(this.inputForm);
+                    }
+                };
             }
         }
     }]);
@@ -770,10 +793,8 @@ controlCenterModule.service('$confirm', function ($modal, $rootScope, $q) {
 
     var deferred;
 
-    var dfltCancelTitle = 'Cancel';
-
     // Configure title of cancel button.
-    scope.cancelTitle = dfltCancelTitle;
+    scope.cancelTitle = 'Cancel';
 
     scope.ok = function () {
         deferred.resolve();
