@@ -21,6 +21,8 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
         // Initialize the super class and extend it.
         angular.extend(this, $controller('save-remove', {$scope: $scope}));
 
+        $scope.ui = $common.formUI(2);
+
         $scope.joinTip = $common.joinTip;
         $scope.getModel = $common.getModel;
         $scope.compactJavaName = $common.compactJavaName;
@@ -34,7 +36,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
         $scope.tableRemove = function (item, field, index) {
             $table.tableRemove(item, field, index);
 
-            $common.markChanged($scope.ui.inputForm, 'clusterBackupItemChanged');
+            $scope.ui.markDirty();
         };
 
         $scope.tableSimpleSave = $table.tableSimpleSave;
@@ -52,8 +54,6 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
         };
 
         $scope.previewChanged = $preview.previewChanged;
-
-        $scope.formChanged = $common.formChanged;
 
         $scope.hidePopover = $common.hidePopover;
 
@@ -109,8 +109,6 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
 
         $scope.marshallers = $common.mkOptions(['OptimizedMarshaller', 'JdkMarshaller']);
 
-        $scope.ui = {expanded: false};
-
         $scope.toggleExpanded = function () {
             $scope.ui.expanded = !$scope.ui.expanded;
 
@@ -159,6 +157,11 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 $common.showError(errMsg);
             });
 
+        function selectFirstItem() {
+            if ($scope.clusters.length > 0)
+                $scope.selectItem($scope.clusters[0]);
+        }
+
         // When landing on the page, get clusters and show them.
         $http.post('clusters/list')
             .success(function (data) {
@@ -168,51 +171,26 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                     return {value: cache._id, label: cache.name, cache: cache};
                 });
 
-                var restoredItem = angular.fromJson(sessionStorage.clusterBackupItem);
+                var lastSelectedCluster = angular.fromJson(sessionStorage.lastSelectedCluster);
 
-                if (restoredItem) {
-                    if (restoredItem._id) {
-                        var idx = _.findIndex($scope.clusters, function (cluster) {
-                            return cluster._id == restoredItem._id;
-                        });
+                if (lastSelectedCluster) {
+                    var idx = _.findIndex($scope.clusters, function (cluster) {
+                        return cluster._id == lastSelectedCluster;
+                    });
 
-                        if (idx >= 0) {
-                            var cluster = $scope.clusters[idx];
+                    if (idx >= 0)
+                        $scope.selectItem($scope.clusters[idx]);
+                    else {
+                        sessionStorage.removeItem('lastSelectedCluster');
 
-                            var restoredSelectedItem = angular.fromJson(sessionStorage.clusterSelectedItem);
-
-                            // Caches not changed by user. We should take caches from server as they could be changed on Caches screen.
-                            if (restoredSelectedItem && _.isEqual(restoredItem.caches, restoredSelectedItem.caches)) {
-                                restoredItem.caches = [];
-
-                                _.forEach(cluster.caches, function (cache) {
-                                    restoredItem.caches.push(cache)
-                                });
-                            }
-                            else {
-                                // Caches changed by user. We need to remove deleted caches (if any).
-                                restoredItem.caches = _.filter(restoredItem.caches, function (cacheId) {
-                                    return _.findIndex($scope.caches, function (scopeCache) {
-                                            return scopeCache.value == cacheId;
-                                        }) >= 0;
-                                });
-                            }
-
-                            $scope.selectItem(cluster, restoredItem, sessionStorage.clusterBackupItemChanged);
-                        }
-                        else
-                            sessionStorage.removeItem('clusterBackupItem');
+                        selectFirstItem();
                     }
-                    else
-                        $scope.selectItem(undefined, restoredItem, sessionStorage.clusterBackupItemChanged);
                 }
-                else if ($scope.clusters.length > 0)
-                    $scope.selectItem($scope.clusters[0]);
+                else
+                    selectFirstItem();
 
                 $scope.$watch('backupItem', function (val) {
                     if (val) {
-                        sessionStorage.clusterBackupItem = angular.toJson(val);
-
                         var clusterCaches = _.reduce($scope.caches, function(caches, cache){
                             if (_.contains(val.caches, cache.value)) {
                                 caches.push(cache.cache);
@@ -269,7 +247,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                         $scope.preview.transactions.java = $generatorJava.clusterTransactions(val).asString();
                         $scope.preview.transactions.allDefaults = $common.isEmptyString($scope.preview.transactions.xml);
 
-                        $common.markChanged($scope.ui.inputForm, 'clusterBackupItemChanged');
+                        $scope.ui.markDirty();
                     }
                 }, true);
             })
@@ -277,16 +255,16 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 $common.showError(errMsg);
             });
 
-        $scope.selectItem = function (item, backup, changed) {
+        $scope.selectItem = function (item, backup) {
             function selectItem() {
                 $table.tableReset();
 
                 $scope.selectedItem = item;
 
-                if (item)
-                    sessionStorage.clusterSelectedItem = angular.toJson(item);
+                if (item && item._id)
+                    sessionStorage.lastSelectedCluster = angular.toJson(item._id);
                 else
-                    sessionStorage.removeItem('clusterSelectedItem');
+                    sessionStorage.removeItem('lastSelectedCluster');
 
                 _.forEach(previews, function(preview) {
                     preview.attractAttention = false;
@@ -299,15 +277,10 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                 else
                     $scope.backupItem = undefined;
 
-                $timeout(function () {
-                    if (changed)
-                        $common.markChanged($scope.ui.inputForm, 'clusterBackupItemChanged');
-                    else
-                        $common.markPristine($scope.ui.inputForm, 'clusterBackupItemChanged');
-                }, 50);
+                $scope.ui.markPristine();
             }
 
-            $common.confirmUnsavedChanges($confirm, $scope.ui.inputForm, selectItem);
+            $common.confirmUnsavedChanges($scope.ui.isDirty(), selectItem);
 
             $scope.ui.formTitle = $common.isDefined($scope.backupItem) && $scope.backupItem._id ?
                 'Selected cluster: ' + $scope.backupItem.name : 'New cluster';
@@ -399,7 +372,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
         function save(item) {
             $http.post('clusters/save', item)
                 .success(function (_id) {
-                    $common.markPristine($scope.ui.inputForm, 'clusterBackupItemChanged');
+                    $scope.ui.markPristine();
 
                     var idx = _.findIndex($scope.clusters, function (cluster) {
                         return cluster._id == _id;
@@ -455,7 +428,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
 
             $confirm.show('Are you sure you want to remove cluster: "' + selectedItem.name + '"?').then(
                 function () {
-                    $common.markPristine($scope.ui.inputForm, 'clusterBackupItemChanged');
+                    $scope.ui.markPristine();
 
                     var _id = selectedItem._id;
 
@@ -491,7 +464,7 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
 
             $confirm.show('Are you sure you want to remove all clusters?').then(
                 function () {
-                    $common.markPristine($scope.ui.inputForm, 'clusterBackupItemChanged');
+                    $scope.ui.markPristine();
 
                     $http.post('clusters/remove/all')
                         .success(function () {
