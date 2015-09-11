@@ -34,18 +34,19 @@ block container
     .row
         .col-sm-12(ng-init='noteId = "#{noteId}"')
             .docs-content(ng-controller='sqlController' )
-                .docs-header.notebook-header
-                    h1.col-sm-6(ng-hide='notebook.edit')
-                        label {{notebook.name}}
-                        .btn-group
-                            +btn-toolbar('fa-pencil', 'notebook.edit = true;notebook.edit_name = notebook.name', 'Rename notebook')
-                            +btn-toolbar('fa-trash', 'removeNotebook()', 'Remove notebook')
-                    h1.col-sm-6(ng-show='notebook.edit')
-                        input.sql-name-input(ng-model='notebook.edit_name' required on-enter='renameNotebook(notebook.edit_name)' on-escape='notebook.edit = false;')
-                        i.tipLabel.fa.fa-floppy-o(ng-show='notebook.edit_name' ng-click='renameNotebook(notebook.edit_name)' bs-tooltip data-title='Save notebook name' data-trigger='hover')
-                    .pull-right
-                        +btn-toolbar('fa-plus', 'addParagraph()', 'Add new query')
-                hr
+                div(bs-affix)
+                    .docs-header.notebook-header
+                        h1.col-sm-6(ng-hide='notebook.edit')
+                            label {{notebook.name}}
+                            .btn-group
+                                +btn-toolbar('fa-pencil', 'notebook.edit = true;notebook.edit_name = notebook.name', 'Rename notebook')
+                                +btn-toolbar('fa-trash', 'removeNotebook()', 'Remove notebook')
+                        h1.col-sm-6(ng-show='notebook.edit')
+                            input.sql-name-input(ng-model='notebook.edit_name' required on-enter='renameNotebook(notebook.edit_name)' on-escape='notebook.edit = false;')
+                            i.tipLabel.fa.fa-floppy-o(ng-show='notebook.edit_name' ng-click='renameNotebook(notebook.edit_name)' bs-tooltip data-title='Save notebook name' data-trigger='hover')
+                        .pull-right
+                            +btn-toolbar('fa-plus', 'addParagraph()', 'Add new query')
+                    hr
                 .docs-body.paragraphs
                     .panel-group(bs-collapse ng-model='notebook.expandedParagraphs' data-allow-multiple='true' data-start-collapsed='false')
                         .panel.panel-default(ng-repeat='paragraph in notebook.paragraphs')

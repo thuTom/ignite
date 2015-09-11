@@ -782,11 +782,18 @@ h3 {
     }
 }
 
-div.affix.padding-top-dflt {
+.affix {
     z-index: 910;
     background-color: white;
+
     hr {
-        margin-bottom: 0;
+        margin: 0;
+    }
+}
+
+.affix.padding-top-dflt {
+    hr {
+        margin-top: 10px;
     }
 }
 
