@@ -295,6 +295,19 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         paragraph.columnFilter = _columnFilter(paragraph);
     };
 
+    var _selectAxis = function (cols, col) {
+        if (col) {
+            idx = _.findIndex(cols, function (col) {
+                return col.label == col.label;
+            });
+
+            if (idx >= 0)
+                return col;
+        }
+
+        return cols.length > 0 ? cols[0] : null;
+    };
+
     var _processQueryResult = function (paragraph) {
         return function (res) {
             paragraph.meta = [];
@@ -317,11 +330,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                         paragraph.chartColumns.push(col);
                 });
 
-                paragraph.chartColX = paragraph.chartColumns.length > 0 &&
-                    paragraph.chartColumns.indexOf(paragraph.chartColX) == -1 ? paragraph.chartColumns[0] : null;
-
-                paragraph.chartColY = paragraph.chartColumns.length > 1 &&
-                    paragraph.chartColumns.indexOf(paragraph.chartColY) == -1 ? paragraph.chartColumns[1] : null;
+                paragraph.chartColX = _selectAxis(paragraph.chartColumns, paragraph.chartColX);
+                paragraph.chartColY = _selectAxis(paragraph.chartColumns, paragraph.chartColY);
             }
 
             paragraph.page = 1;

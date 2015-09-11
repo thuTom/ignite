@@ -27,5 +27,5 @@
                     button.form-control(id='paragraph-unit' ng-init='unit = paragraph.rate.unit' ng-model='unit' required placeholder='Time unit' bs-select bs-options='item.value as item.label for item in timeUnit' data-container='false' tabindex='0')
             .form-actions(style='margin-top: 30px; padding: 5px')
                 button.btn.btn-primary(id='paragraph-rate-start' ng-disabled='popoverForm.$invalid' type='button' ng-click='startRefresh(paragraph, value, unit); $hide()') Start
-                button.btn.btn-primary.btn-default(id='paragraph-rate-stop' type='button' ng-click='stopRefresh(paragraph); $hide()') Stop
+                button.btn.btn-primary.btn-default(id='paragraph-rate-stop' type='button' ng-click='stopRefresh(paragraph); $hide()' ng-disabled='!paragraph.rate.installed') Stop
 
