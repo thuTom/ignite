@@ -525,16 +525,15 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
 
     /**
      * @param key Key to check.
+     * @param part Partition.
      * @return {@code True} if key is contained.
      * @throws IgniteCheckedException If failed.
      */
-    public boolean containsKey(KeyCacheObject key) throws IgniteCheckedException {
+    public boolean containsKey(KeyCacheObject key, int part) throws IgniteCheckedException {
         if (!offheapEnabled && !swapEnabled)
             return false;
 
         checkIteratorQueue();
-
-        int part = cctx.affinity().partition(key);
 
         // First check off-heap store.
         if (offheapEnabled) {
