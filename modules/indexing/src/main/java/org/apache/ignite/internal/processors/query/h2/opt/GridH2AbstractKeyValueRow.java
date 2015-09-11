@@ -207,16 +207,18 @@ public abstract class GridH2AbstractKeyValueRow extends GridH2Row {
                     try {
                         Object valObj = desc.readFromSwap(k);
 
-                        // Even if we've found valObj in swap, it is may be some new value,
-                        // while the needed value was already unswapped, so we have to recheck it.
-                        if (valObj != null && (v = syncValue(0)) == null && (v = getOffheapValue(VAL_COL)) == null) {
-                            Value upd = desc.wrap(valObj, desc.valueType());
+                        if (valObj != null) {
+                            // Even if we've found valObj in swap, it is may be some new value,
+                            // while the needed value was already unswapped, so we have to recheck it.
+                            if ((v = WeakValue.unwrap(syncValue(0))) == null && (v = getOffheapValue(VAL_COL)) == null) {
+                                Value upd = desc.wrap(valObj, desc.valueType());
 
-                            v = updateWeakValue(upd);
+                                v = updateWeakValue(upd);
 
-                            return v == null ? upd : v;
+                                return v == null ? upd : v;
+                            }
                         }
-                        else if (v != null) {
+                        else {
                             // If nothing found in swap then we should be already unswapped.
                             v = syncValue(attempt);
                         }
@@ -242,7 +244,7 @@ public abstract class GridH2AbstractKeyValueRow extends GridH2Row {
                 if (v == null) {
                     v = getOffheapValue(KEY_COL);
 
-                    assert v != null : v;
+                    assert v != null;
 
                     setValue(KEY_COL, v);
 

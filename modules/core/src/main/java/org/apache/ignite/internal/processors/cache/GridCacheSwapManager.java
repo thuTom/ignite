@@ -1048,18 +1048,19 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
 
     /**
      * @param key Key to remove.
+     * @param entry Serialized swap entry.
      * @param part Partition.
      * @param ver Expected version.
      * @return {@code True} if removed.
      * @throws IgniteCheckedException If failed.
      */
-    boolean removeOffheap(final KeyCacheObject key, int part, final GridCacheVersion ver)
+    boolean offheapSwapEvict(final KeyCacheObject key, byte[] entry, int part, final GridCacheVersion ver)
         throws IgniteCheckedException {
         assert offheapEnabled;
 
         checkIteratorQueue();
 
-        return offheap.removex(spaceName, part, key, key.valueBytes(cctx.cacheObjectContext()),
+        boolean rmv = offheap.removex(spaceName, part, key, key.valueBytes(cctx.cacheObjectContext()),
             new IgniteBiPredicate<Long, Integer>() {
                 @Override public boolean apply(Long ptr, Integer len) {
                     GridCacheVersion ver0 = GridCacheOffheapSwapEntry.version(ptr);
@@ -1068,6 +1069,21 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
                 }
             }
         );
+
+        if (rmv) {
+            Collection<GridCacheSwapListener> lsnrs = offheapLsnrs.get(part);
+
+            if (lsnrs != null) {
+                GridCacheSwapEntry e = swapEntry(GridCacheSwapEntryImpl.unmarshal(entry));
+
+                for (GridCacheSwapListener lsnr : lsnrs)
+                    lsnr.onEntryUnswapped(part, key, e);
+            }
+
+            cctx.swap().writeToSwap(part, key, entry);
+        }
+
+        return rmv;
     }
 
     /**
