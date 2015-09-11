@@ -114,7 +114,7 @@ block container
                                 .col-sm-12(ng-show='!paragraph.errMsg && paragraph.result != "none"')
                                     hr(style='margin-top: 0; margin-bottom: 10px')
                                     .sql-empty-result(ng-show='!paragraph.rows') Result set is empty.
-                                    div(ng-show='paragraph.rows && paragraph.result === "table"')
+                                    div(ng-if='paragraph.rows && paragraph.result === "table"')
                                         .sql-table-total(ng-show='paragraph.rows && paragraph.result === "table"')
                                             label Page #&nbsp;
                                             b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
