@@ -103,7 +103,7 @@ block container
                                         a.btn.btn-primary(ng-disabled='!actionAvailable(paragraph, false)' ng-click='actionAvailable(paragraph, false) ? scan(paragraph): ""' data-placement='bottom' bs-tooltip data-title='{{actionTooltip(paragraph, "execute scan", false)}}') Scan
                                         .pull-right
                                             labelHide Hide system columns:
-                                            button.btn.btn-default.fa.fa-columns.tipLabel(ng-class='{active: paragraph.hideSystemColumns}' ng-click='toggleSystemColumns(paragraph)' ng-disabled='paragraph.disabledSystemColumns')
+                                            button.btn.btn-default.fa.fa-columns.tipLabel(ng-class='{"btn-info": paragraph.hideSystemColumns}' ng-click='toggleSystemColumns(paragraph)' ng-disabled='paragraph.disabledSystemColumns')
                                             label.tipLabel Refresh rate:
                                             button.btn.btn-default.fa.fa-clock-o.tipLabel(ng-class='{"btn-info": paragraph.rate && paragraph.rate.installed}' bs-popover data-template-url='rate' data-placement='left' data-auto-close='1' data-trigger='click') {{rateAsString(paragraph)}}
                                             label.tipLabel Page size:
@@ -118,7 +118,7 @@ block container
                                         .sql-table-total(ng-show='paragraph.rows && paragraph.result === "table"')
                                             label Page #:&nbsp;
                                             b {{paragraph.page}}&nbsp;&nbsp;&nbsp;
-                                            label Results:&nbsp;
+                                            label Results so far:&nbsp;
                                             b {{paragraph.rows.length + paragraph.total}}
                                             .pull-right
                                                 .btn-group

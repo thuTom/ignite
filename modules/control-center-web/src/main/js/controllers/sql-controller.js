@@ -291,17 +291,17 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
         paragraph.columnFilter = _columnFilter(paragraph);
     };
 
-    var _selectAxis = function (cols, col) {
+    var _selectAxis = function (cols, col, dfltIdx) {
         if (col) {
-            idx = _.findIndex(cols, function (col) {
-                return col.label == col.label;
+            var idx = _.findIndex(cols, function (item) {
+                return item.label == col.label;
             });
 
             if (idx >= 0)
-                return col;
+                return cols[idx];
         }
 
-        return cols.length > 0 ? cols[0] : null;
+        return cols.length >= dfltIdx ? cols[dfltIdx] : null;
     };
 
     var _processQueryResult = function (paragraph) {
@@ -326,8 +326,8 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
                         paragraph.chartColumns.push(col);
                 });
 
-                paragraph.chartColX = _selectAxis(paragraph.chartColumns, paragraph.chartColX);
-                paragraph.chartColY = _selectAxis(paragraph.chartColumns, paragraph.chartColY);
+                paragraph.chartColX = _selectAxis(paragraph.chartColumns, paragraph.chartColX, 0);
+                paragraph.chartColY = _selectAxis(paragraph.chartColumns, paragraph.chartColY, 1);
             }
 
             paragraph.page = 1;
