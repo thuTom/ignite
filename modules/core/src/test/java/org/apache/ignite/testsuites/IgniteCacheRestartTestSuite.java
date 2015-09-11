@@ -29,7 +29,7 @@ import org.apache.ignite.internal.processors.cache.distributed.replicated.GridCa
 import org.apache.ignite.internal.processors.cache.distributed.replicated.IgniteCacheAtomicReplicatedNodeRestartSelfTest;
 
 /**
- * In-Memory Data Grid stability test suite on changing topology.
+ * Cache stability test suite on changing topology.
  */
 public class IgniteCacheRestartTestSuite extends TestSuite {
     /**
