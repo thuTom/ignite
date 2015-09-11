@@ -43,9 +43,8 @@ block content
     .docs-body(ng-controller='summaryController')
         +block-callout('{{screenTip.workflowTitle}}', 'joinTip(screenTip.workflowContent)', '{{screenTip.whatsNextTitle}}', 'joinTip(screenTip.whatsNextContent)')
         .padding-dflt(ng-if='clusters.length == 0')
-            | No cluster configured. You can&nbsp;
-            a(href='clusters') configure
-            | &nbsp;it.
+            | You have no clusters configured. Please configure them &nbsp;
+            a(href='clusters') here.
         +main-table('Clusters:', 'clusters', 'clusterName', 'selectItem(row)', '{{$index + 1}}) {{row.name}}')
         div(ng-show='selectedItem' role='tab' method='post' action='summary/download')
             .padding-dflt(bs-collapse data-start-collapsed='false')
