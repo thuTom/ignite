@@ -32,22 +32,36 @@ import javax.cache.CacheException;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteCheckedException;
+import org.apache.ignite.cache.CacheAtomicWriteOrderMode;
+import org.apache.ignite.cache.CacheAtomicityMode;
+import org.apache.ignite.cache.CacheMode;
+import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.configuration.NearCacheConfiguration;
 import org.apache.ignite.internal.IgniteInternalFuture;
 import org.apache.ignite.internal.util.lang.GridTuple;
 import org.apache.ignite.internal.util.typedef.F;
 import org.apache.ignite.internal.util.typedef.T2;
 import org.apache.ignite.internal.util.typedef.internal.U;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
+import org.apache.ignite.spi.discovery.tcp.ipfinder.TcpDiscoveryIpFinder;
+import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
+import org.apache.ignite.spi.swapspace.file.FileSwapSpaceSpi;
 import org.apache.ignite.testframework.GridTestUtils;
+import org.apache.ignite.testframework.junits.common.GridCommonAbstractTest;
 import org.jsr166.ConcurrentHashMap8;
 
 import static org.apache.ignite.IgniteSystemProperties.IGNITE_ATOMIC_CACHE_DELETE_HISTORY_SIZE;
+import static org.apache.ignite.cache.CacheMode.PARTITIONED;
+import static org.apache.ignite.cache.CacheWriteSynchronizationMode.FULL_SYNC;
 
 /**
  * Tests that removes are not lost when topology changes.
  */
-public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstractSelfTest {
+public abstract class GridCacheAbstractRemoveFailureTest extends GridCommonAbstractTest {
+    /** IP finder. */
+    private static final TcpDiscoveryIpFinder IP_FINDER = new TcpDiscoveryVmIpFinder(true);
+
     /** */
     private static final int GRID_CNT = 3;
 
@@ -85,17 +99,14 @@ public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstra
     @Override protected IgniteConfiguration getConfiguration(String gridName) throws Exception {
         IgniteConfiguration cfg = super.getConfiguration(gridName);
 
-        ((TcpDiscoverySpi)cfg.getDiscoverySpi()).setForceServerMode(true);
+        ((TcpDiscoverySpi)cfg.getDiscoverySpi()).setIpFinder(IP_FINDER).setForceServerMode(true);
 
         if (testClientNode() && getTestGridName(0).equals(gridName))
             cfg.setClientMode(true);
 
-        return cfg;
-    }
+        cfg.setSwapSpaceSpi(new FileSwapSpaceSpi());
 
-    /** {@inheritDoc} */
-    @Override protected int gridCount() {
-        return GRID_CNT;
+        return cfg;
     }
 
     /** {@inheritDoc} */
@@ -104,6 +115,8 @@ public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstra
         sizePropVal = System.getProperty(IGNITE_ATOMIC_CACHE_DELETE_HISTORY_SIZE);
 
         System.setProperty(IGNITE_ATOMIC_CACHE_DELETE_HISTORY_SIZE, "100000");
+
+        startGrids(GRID_CNT);
     }
 
     /** {@inheritDoc} */
@@ -111,21 +124,35 @@ public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstra
         super.afterTestsStopped();
 
         System.setProperty(IGNITE_ATOMIC_CACHE_DELETE_HISTORY_SIZE, sizePropVal != null ? sizePropVal : "");
-    }
 
-    /** {@inheritDoc} */
-    @Override protected void beforeTest() throws Exception {
-        startGrids(gridCount());
-    }
-
-    /** {@inheritDoc} */
-    @Override protected void afterTest() throws Exception {
         stopAllGrids();
     }
 
     /** {@inheritDoc} */
     @Override protected long getTestTimeout() {
         return DUR + 60_000;
+    }
+
+    /**
+     * @return Cache mode.
+     */
+    protected abstract CacheMode cacheMode();
+
+    /**
+     * @return Cache atomicity mode.
+     */
+    protected abstract CacheAtomicityMode atomicityMode();
+
+    /**
+     * @return Near cache configuration.
+     */
+    protected abstract NearCacheConfiguration nearCache();
+
+    /**
+     * @return Atomic cache write order mode.
+     */
+    protected CacheAtomicWriteOrderMode atomicWriteOrderMode() {
+        return null;
     }
 
     /**
@@ -139,9 +166,35 @@ public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstra
      * @throws Exception If failed.
      */
     public void testPutAndRemove() throws Exception {
-        assertEquals(testClientNode(), (boolean)grid(0).configuration().isClientMode());
+        putAndRemove(DUR, GridTestUtils.TestMemoryMode.HEAP);
+    }
 
-        final IgniteCache<Integer, Integer> sndCache0 = grid(0).cache(null);
+    /**
+     * @param duration Test duration.
+     * @param memMode Memory mode.
+     * @throws Exception If failed.
+     */
+    private void putAndRemove(long duration, GridTestUtils.TestMemoryMode memMode) throws Exception {
+        assertEquals(testClientNode(), (boolean) grid(0).configuration().isClientMode());
+
+        grid(0).destroyCache(null);
+
+        CacheConfiguration ccfg = new CacheConfiguration();
+
+        ccfg.setWriteSynchronizationMode(FULL_SYNC);
+
+        ccfg.setCacheMode(cacheMode());
+
+        if (cacheMode() == PARTITIONED)
+            ccfg.setBackups(1);
+
+        ccfg.setAtomicityMode(atomicityMode());
+        ccfg.setAtomicWriteOrderMode(atomicWriteOrderMode());
+        ccfg.setNearConfiguration(nearCache());
+
+        GridTestUtils.setMemoryMode(null, ccfg, memMode, 100, 1024);
+
+        final IgniteCache<Integer, Integer> sndCache0 = grid(0).createCache(ccfg);
 
         final AtomicBoolean stop = new AtomicBoolean();
 
@@ -221,7 +274,7 @@ public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstra
         });
 
         try {
-            long stopTime = DUR + U.currentTimeMillis() ;
+            long stopTime = duration + U.currentTimeMillis() ;
 
             long nextAssert = U.currentTimeMillis() + ASSERT_FREQ;
 
@@ -278,7 +331,6 @@ public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstra
         updateFut.get();
 
         log.info("Test finished. Update errors: " + errCntr.get());
-
     }
 
     /**
@@ -289,7 +341,7 @@ public abstract class GridCacheAbstractRemoveFailureTest extends GridCacheAbstra
         if (stop.get())
             return;
 
-        int idx = random(1, gridCount() + 1);
+        int idx = random(1, GRID_CNT + 1);
 
         log.info("Killing node " + idx);
 

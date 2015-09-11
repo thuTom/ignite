@@ -1602,7 +1602,6 @@ public final class GridTestUtils {
         int maxHeapCnt,
         long maxOffheapSize) {
         assert testMode != null;
-        assert cfg != null;
         assert ccfg != null;
 
         CacheMemoryMode memMode;
@@ -1669,7 +1668,7 @@ public final class GridTestUtils {
         ccfg.setMemoryMode(memMode);
         ccfg.setSwapEnabled(swap);
 
-        if (swap)
+        if (swap && cfg != null)
             cfg.setSwapSpaceSpi(new FileSwapSpaceSpi());
 
         if (evictionPlc) {
