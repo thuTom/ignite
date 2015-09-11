@@ -767,10 +767,9 @@ controlCenterModule.controller('metadataController', [
                             item._id = _id;
 
                             $scope.metadatas.push(item);
+                            $scope.selectItem(item);
+                            $scope.ui.markPristine(1);
                         }
-
-                        $scope.selectItem(item);
-                        $scope.ui.markPristine(0);
 
                         if (!quiet)
                             $common.showInfo('Cache type metadata"' + item.name + '" saved.');

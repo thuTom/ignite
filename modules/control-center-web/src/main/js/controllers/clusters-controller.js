@@ -384,10 +384,9 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
                         item._id = _id;
 
                         $scope.clusters.push(item);
+                        $scope.selectItem(item);
+                        $scope.ui.markPristine(1);
                     }
-
-                    $scope.selectItem(item);
-                    $scope.ui.markPristine(0);
 
                     $common.showInfo('Cluster "' + item.name + '" saved.');
                 })
