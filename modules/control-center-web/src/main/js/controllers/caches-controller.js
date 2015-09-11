@@ -227,6 +227,16 @@ controlCenterModule.controller('cachesController', [
                     $scope.selectItem($scope.caches[0]);
             }
 
+            function cacheMetadatas(item) {
+                return _.reduce($scope.metadatas, function (memo, meta) {
+                    if (item && _.contains(item.metadatas, meta.value)) {
+                        memo.push(meta.meta);
+                    }
+
+                    return memo;
+                }, []);
+            }
+
             // When landing on the page, get caches and show them.
             $http.post('caches/list')
                 .success(function (data) {
@@ -256,16 +266,6 @@ controlCenterModule.controller('cachesController', [
                     }
                     else
                         selectFirstItem();
-
-                    function cacheMetadatas(item) {
-                        return _.reduce($scope.metadatas, function (memo, meta) {
-                            if (item && _.contains(item.metadatas, meta.value)) {
-                                memo.push(meta.meta);
-                            }
-
-                            return memo;
-                        }, []);
-                    }
 
                     $scope.$watch('backupItem', function (val, old) {
                         if (val) {
@@ -430,9 +430,21 @@ controlCenterModule.controller('cachesController', [
                     return showPopoverMessage($scope.panels, 'store', 'cacheStoreFactory',
                         'Write behind enabled but store is not configured!');
 
-                if (cacheStoreFactorySelected && !(item.readThrough || item.writeThrough))
-                    return showPopoverMessage($scope.panels, 'store', 'readThrough',
-                        'Store is configured but read/write through are not enabled!');
+                if (cacheStoreFactorySelected) {
+                    if (!item.readThrough && !item.writeThrough)
+                        return showPopoverMessage($scope.panels, 'store', 'readThrough',
+                            'Store is configured but read/write through are not enabled!');
+
+                    if (item.cacheStoreFactory.kind == 'CacheJdbcPojoStoreFactory') {
+                        if ($common.isDefined(item.metadatas)) {
+                            var metadatas = cacheMetadatas($scope.backupItem);
+
+                            if (_.findIndex(metadatas, $common.metadataForStoreConfigured) < 0)
+                                return showPopoverMessage($scope.panels, 'general', 'metadata',
+                                    'Cache with configured JDBC POJO store factory should contain at least one metadata with store configuration');
+                        }
+                    }
+                }
 
                 return true;
             }
