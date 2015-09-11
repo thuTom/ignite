@@ -251,14 +251,18 @@ controlCenterModule.controller('metadataController', [
 
                             $scope.preset.jdbcDriverJar = drivers[0].jdbcDriverJar;
 
-                            loadMetaModal.$promise.then(function () {
-                                $scope.loadMeta.action = 'connect';
-                                $scope.loadMeta.tables = [];
+                            function openLoadMetadataModal() {
+                                loadMetaModal.$promise.then(function () {
+                                    $scope.loadMeta.action = 'connect';
+                                    $scope.loadMeta.tables = [];
 
-                                $common.confirmUnsavedChanges($scope.ui.isDirty(), selectItem);
+                                    loadMetaModal.show();
 
-                                $focus('jdbcUrl');
-                            });
+                                    $focus('jdbcUrl');
+                                });
+                            }
+
+                            $common.confirmUnsavedChanges($scope.ui.isDirty(), openLoadMetadataModal);
                         }
                         else
                             $common.showError('JDBC drivers not found!');

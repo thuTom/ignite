@@ -261,7 +261,7 @@ mixin form-row-custom(lblClasses, fieldClasses, dataSource)
             label(id='{{::field.id}}')
                 input(type='checkbox' ng-disabled=fieldDisabled)&attributes(fieldCommon)
                 | {{::field.label}}
-                +tipLabel('field.tip')
+            +tipLabel('field.tip')
         div(ng-switch-when='text' ng-hide=fieldHide)
             label(class=lblClasses ng-class=fieldRequiredClass) {{::field.label}}:
             div(class=fieldClasses)
