@@ -276,7 +276,7 @@ public class GridDhtPartitionDemander {
             if (assigns.isEmpty()) {
                 fut.checkIsDone();
 
-                if (fut.assigns.topologyVersion().topologyVersion() > 1)// First node.
+                if (fut.assigns.topologyVersion().topologyVersion() > 1)// Not a First node.
                     U.log(log, "Rebalancing is not required [cache=" + cctx.name() +
                         ", topology=" + fut.assigns.topologyVersion() + "]");
 
@@ -774,19 +774,16 @@ public class GridDhtPartitionDemander {
         private final IgniteLogger log;
 
         /** Remaining. */
-        private ConcurrentHashMap8<UUID, Collection<Integer>> remaining = new ConcurrentHashMap8<>();
+        private final ConcurrentHashMap8<UUID, Collection<Integer>> remaining = new ConcurrentHashMap8<>();
 
         /** Missed. */
-        private ConcurrentHashMap8<UUID, Collection<Integer>> missed = new ConcurrentHashMap8<>();
+        private final ConcurrentHashMap8<UUID, Collection<Integer>> missed = new ConcurrentHashMap8<>();
 
-        /** Started. */
-        private ConcurrentHashMap8<UUID, Long> started = new ConcurrentHashMap8<>();
+        /** Started time. */
+        private final ConcurrentHashMap8<UUID, Long> started = new ConcurrentHashMap8<>();
 
         /** Lock. */
-        private Lock lock = new ReentrantLock();
-
-        /** Listener. */
-        private volatile GridLocalEventListener lsnr;
+        private final Lock lock = new ReentrantLock();
 
         /** Assignments. */
         private volatile GridDhtPreloaderAssignments assigns;
@@ -794,7 +791,7 @@ public class GridDhtPartitionDemander {
         /** Completed. */
         private volatile boolean completed = true;
 
-        private volatile boolean sendStopEvnt = false;
+        private final boolean sendStopEvnt;
 
         /**
          * @param assigns Assigns.
@@ -1020,9 +1017,6 @@ public class GridDhtPartitionDemander {
 
                 if (cctx.events().isRecordable(EVT_CACHE_REBALANCE_STOPPED) && (!cctx.isReplicated() || sendStopEvnt))
                     preloadEvent(EVT_CACHE_REBALANCE_STOPPED, assigns.exchangeFuture().discoveryEvent());
-
-                if (lsnr != null)
-                    cctx.events().removeListener(lsnr);
 
                 onDone(completed);
             }
