@@ -1118,11 +1118,13 @@ public abstract class IgniteTxLocalAdapter extends IgniteTxAdapter
 
             state(commit ? COMMITTED : ROLLED_BACK);
 
-            boolean needsCompletedVersions = needsCompletedVersions();
+            if (commit) {
+                boolean needsCompletedVersions = needsCompletedVersions();
 
-            assert !needsCompletedVersions || completedBase != null;
-            assert !needsCompletedVersions || committedVers != null;
-            assert !needsCompletedVersions || rolledbackVers != null;
+                assert !needsCompletedVersions || completedBase != null : "Missing completed base for transaction: " + this;
+                assert !needsCompletedVersions || committedVers != null : "Missing committed versions for transaction: " + this;
+                assert !needsCompletedVersions || rolledbackVers != null : "Missing rolledback versions for transaction: " + this;
+            }
         }
     }
 
@@ -2893,11 +2895,17 @@ public abstract class IgniteTxLocalAdapter extends IgniteTxAdapter
                     }
 
                     return nonInterruptable(commitAsync().chain(new CX1<IgniteInternalFuture<IgniteInternalTx>, GridCacheReturn>() {
-                        @Override
-                        public GridCacheReturn applyx(IgniteInternalFuture<IgniteInternalTx> txFut) throws IgniteCheckedException {
-                            txFut.get();
+                        @Override public GridCacheReturn applyx(IgniteInternalFuture<IgniteInternalTx> txFut) throws IgniteCheckedException {
+                            try {
+                                txFut.get();
 
-                            return implicitRes;
+                                return implicitRes;
+                            }
+                            catch (IgniteCheckedException | RuntimeException e) {
+                                rollbackAsync();
+
+                                throw e;
+                            }
                         }
                     }));
                 }
@@ -3116,9 +3124,16 @@ public abstract class IgniteTxLocalAdapter extends IgniteTxAdapter
                     return nonInterruptable(commitAsync().chain(new CX1<IgniteInternalFuture<IgniteInternalTx>, GridCacheReturn>() {
                         @Override public GridCacheReturn applyx(IgniteInternalFuture<IgniteInternalTx> txFut)
                             throws IgniteCheckedException {
-                            txFut.get();
+                            try {
+                                txFut.get();
 
-                            return implicitRes;
+                                return implicitRes;
+                            }
+                            catch (IgniteCheckedException | RuntimeException e) {
+                                rollbackAsync();
+
+                                throw e;
+                            }
                         }
                     }));
                 }
