@@ -1369,7 +1369,6 @@ controlCenterModule.service('$preview', ['$timeout', '$interval', function ($tim
             renderer.setHighlightGutterLine(false);
             renderer.setShowPrintMargin(false);
             renderer.setOption('fontSize', '10px');
-            renderer.setOption('minLines', '1');
             renderer.setOption('maxLines', '50');
 
             preview.setTheme('ace/theme/chrome');

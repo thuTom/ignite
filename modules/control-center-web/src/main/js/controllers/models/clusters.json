@@ -450,6 +450,7 @@
     {
       "label": "Deployment",
       "group": "deployment",
+      "previewMinLines": 1,
       "tip": [
         "Task and resources deployment in cluster."
       ],
