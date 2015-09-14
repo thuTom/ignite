@@ -366,7 +366,7 @@ button, a.btn {
 
     :focus {
         outline: none;
-        border: 1px solid #ccc;
+        border: 1px solid $btn-default-border;
     }
 }
 
