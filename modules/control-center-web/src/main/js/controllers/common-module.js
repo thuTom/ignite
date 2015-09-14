@@ -490,13 +490,14 @@ controlCenterModule.service('$common', [
 
             $timeout(function () {
                 var cont = newPopover.$options.container;
+                var tipContainer;
 
                 console.log('0: ' + cont);
 
                 if (cont === 'self') {
                     console.log('1: ' + cont);
 
-                    tipContainer = element;
+                    tipContainer = el;
                 } else if (angular.isElement(cont)) {
                     console.log('2: ' + cont);
                     tipContainer = cont;
@@ -507,6 +508,8 @@ controlCenterModule.service('$common', [
                 else {
                     console.log('4: ' + cont);
                 }
+
+                console.log('5: ' + tipContainer);
 
                 if (isDefined(newPopover.$options.container)) {
                     newPopover.show();
