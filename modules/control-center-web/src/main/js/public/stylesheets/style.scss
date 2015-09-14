@@ -615,6 +615,13 @@ button.form-control {
         line-height: $input-height;
     }
 
+    label.placeholder {
+        font-size: 0.8em;
+        line-height: 0.8em;
+        color: $ignite-placeholder-color;
+        width: 100%;
+    }
+
     td {
         padding-left: 0;
     }
@@ -858,14 +865,12 @@ button.form-control {
 }
 
 .group-legend {
-    top: -10px;
-    margin-left: 10px;
-    margin-right: 5px;
+    margin: -10px 5px 0 10px;
     overflow: visible;
     position: relative;
 
     label {
-        padding: 0 5px 0 5px;
+        padding: 0 5px;
         background: white;
     }
 }
@@ -878,15 +883,14 @@ button.form-control {
 }
 
 .group-content {
-    margin: 0 10px 10px 10px;
+    margin: -10px 10px 10px 10px;
 }
 
 .group-content-empty {
     color: $input-color-placeholder;
 
-    padding-top: 5px;
+    padding: 10px 0;
     position: relative;
-    top: -10px;
 
     text-align: center;
 }
