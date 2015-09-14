@@ -362,6 +362,11 @@ button, a.btn {
 
 .btn {
     padding: 3px 6px;
+
+    :focus {
+        outline: none;
+        border: 1px solid #ccc;
+    }
 }
 
 .btn-group {
@@ -407,6 +412,12 @@ h3 {
     button {
         text-align: left;
     }
+}
+
+button.form-control {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .theme-line .notebook-header {
@@ -1367,7 +1378,7 @@ a {
 
 .preview-legend {
     top: 0;
-    right: 0;
+    right: 15px;
     margin-right: 10px;
     position: absolute;
     z-index: 900;
@@ -1471,11 +1482,11 @@ button.dropdown-toggle {
 }
 
 ::-webkit-scrollbar:vertical {
-    width: 11px;
+    width: 10px;
 }
 
 ::-webkit-scrollbar:horizontal {
-    height: 11px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -1485,11 +1496,6 @@ button.dropdown-toggle {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: #fff;
+    background-color: white;
     border-radius: 8px;
-}
-
-.btn:focus {
-    outline: none;
-    border: 1px solid #ccc;
 }
