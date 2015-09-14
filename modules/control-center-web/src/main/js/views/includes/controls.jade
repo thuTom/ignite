@@ -368,7 +368,7 @@ mixin form-row-custom(lblClasses, fieldClasses, dataSource)
                     +group-tip('field.tip')
                     +group-btn-add('tableNewItem(field)', 'field.addTip')
                 .group-content-empty(ng-show='!((#{fieldMdl} && #{fieldMdl}.length > 0) || tableNewItemActive(field))') Not defined
-                .group-content(ng-show='(#{fieldMdl} && #{fieldMdl}.length > 0) || tableNewItemActive(field)')
+                .group-content(ng-show='(#{fieldMdl} && #{fieldMdl}.length > 0) || tableNewItemActive(field)' style='margin-top: 0')
                     table.links-edit(st-table=fieldMdl)
                         tbody
                             tr(ng-repeat='item in #{fieldMdl}')
