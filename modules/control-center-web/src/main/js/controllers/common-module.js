@@ -472,7 +472,11 @@ controlCenterModule.service('$common', [
             }
         }
 
+        var popoverShown = false;
+
         function showPopoverMessage(panels, panelId, id, message) {
+            popoverShown = false;
+
             ensureActivePanel(panels, panelId, id);
 
             var el = $('body').find('#' + id);
@@ -482,13 +486,21 @@ controlCenterModule.service('$common', [
 
             var newPopover = $popover(el, {content: message});
 
-            $timeout(function () {
-                if (isDefined(newPopover.$options.container)) {
-                    newPopover.show();
+            function _showPopover() {
+                if (!popoverShown)
+                    $timeout(function () {
+                        if (isDefined(newPopover.$options.container)) {
+                            newPopover.show();
 
-                    popover = newPopover;
-                }
-            }, 100);
+                            popover = newPopover;
+
+                            popoverShown = true;
+                        }
+                        else _showPopover();
+                    }, 100);
+            }
+
+            _showPopover();
 
             $timeout(function () { newPopover.hide() }, 5000);
 
