@@ -483,12 +483,11 @@ controlCenterModule.service('$common', [
             var newPopover = $popover(el, {content: message});
 
             $timeout(function () {
-                // Workaround for FireFox browser.
-                newPopover.$options.container;
+                if (isDefined(newPopover.$options.container)) {
+                    newPopover.show();
 
-                newPopover.show();
-
-                popover = newPopover;
+                    popover = newPopover;
+                }
             }, 100);
 
             $timeout(function () { newPopover.hide() }, 5000);
@@ -703,6 +702,44 @@ controlCenterModule.service('$common', [
                 file.click();
 
                 document.body.removeChild(file);
+            },
+            resetItemVisible: function (group, curItem, srcItem) {
+                function _compareField(field) {
+                    var curModel = getModel(curItem, field);
+                    var srcModel = getModel(srcItem, field);
+
+                    if (field.model == 'kind' && isDefined(curModel.kind)) {
+                        if (curModel.kind != srcModel.kind)
+                            return true;
+
+                        if (_compareFields(field.details[curModel.kind].fields))
+                            return true;
+                    }
+
+                    var curValue = curModel[field.model];
+                    var srcValue = srcModel[field.model];
+
+                    var isCur = isDefined(curValue);
+                    var isSrc = isDefined(srcValue);
+
+                    if ((isCur && !isSrc) || (!isCur && isSrc) || (isCur && isSrc && !_.isEqual(curValue, srcValue)))
+                        return true;
+
+                    return false;
+                }
+
+                function _compareFields(fields) {
+                    for (var fldIx = 0; fldIx < fields.length; fldIx++) {
+                        var field = fields[fldIx];
+
+                        if (_compareField(field))
+                            return true;
+                    }
+
+                    return false;
+                }
+
+                return _compareFields(group.fields);
             },
             resetItem: function (backupItem, selectedItem, groups, group) {
                 function restoreFields(fields) {

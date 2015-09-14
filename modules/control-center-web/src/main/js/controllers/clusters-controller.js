@@ -485,6 +485,15 @@ controlCenterModule.controller('clustersController', ['$scope', '$controller', '
             );
         };
 
+        $scope.resetItemVisible = function (group) {
+            var resetTo = $scope.selectedItem;
+
+            if (!$common.isDefined(resetTo))
+                resetTo = prepareNewItem();
+
+            return $common.resetItemVisible(group, $scope.backupItem, resetTo);
+        };
+
         $scope.resetItem = function (group) {
             var resetTo = $scope.selectedItem;
 
