@@ -66,7 +66,9 @@
     {
       "label": "Metadata for SQL query",
       "group": "query",
-      "tip": [],
+      "tip": [
+        "Metadata properties for fields queries."
+      ],
       "fields": [
         {
           "label": "Not indexed fields",
@@ -147,7 +149,9 @@
     {
       "label": "Metadata for cache store",
       "group": "store",
-      "tip": [],
+      "tip": [
+        "Metadata properties for binding database with cache via POJO cache store."
+      ],
       "fields": [
         {
           "label": "Database schema",
