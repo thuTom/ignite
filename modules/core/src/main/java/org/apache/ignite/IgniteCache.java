@@ -18,12 +18,9 @@
 package org.apache.ignite;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import javax.cache.Cache;
@@ -55,7 +52,6 @@ import org.apache.ignite.lang.IgniteAsyncSupported;
 import org.apache.ignite.lang.IgniteBiInClosure;
 import org.apache.ignite.lang.IgniteBiPredicate;
 import org.apache.ignite.lang.IgniteFuture;
-import org.apache.ignite.internal.portable.api.PortableMarshaller;
 import org.apache.ignite.mxbean.CacheMetricsMXBean;
 import org.jetbrains.annotations.Nullable;
 
