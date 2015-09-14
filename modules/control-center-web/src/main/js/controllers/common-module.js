@@ -472,8 +472,6 @@ controlCenterModule.service('$common', [
             }
         }
 
-        var popoverShown = false;
-
         function showPopoverMessage(panels, panelId, id, message) {
             popoverShown = false;
 
@@ -486,21 +484,30 @@ controlCenterModule.service('$common', [
 
             var newPopover = $popover(el, {content: message});
 
-            function _showPopover() {
-                if (!popoverShown)
-                    $timeout(function () {
-                        if (isDefined(newPopover.$options.container)) {
-                            newPopover.show();
-
-                            popover = newPopover;
-
-                            popoverShown = true;
-                        }
-                        else _showPopover();
-                    }, 100);
+            function findElement(query, element) {
+                return angular.element((element || document).querySelectorAll(query));
             }
 
-            _showPopover();
+            $timeout(function () {
+                var cont = newPopover.$options.container;
+
+                if (cont === 'self') {
+                    tipContainer = element;
+                } else if (angular.isElement(cont)) {
+                    tipContainer = cont;
+                } else if (cont) {
+                    tipContainer = findElement(cont);
+                }
+                else {
+                    console.log('AHTUNG: ' + cont);
+                }
+
+                if (isDefined(newPopover.$options.container)) {
+                    newPopover.show();
+
+                    popover = newPopover;
+                }
+            }, 100);
 
             $timeout(function () { newPopover.hide() }, 5000);
 
