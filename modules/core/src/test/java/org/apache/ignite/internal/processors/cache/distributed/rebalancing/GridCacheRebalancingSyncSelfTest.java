@@ -72,11 +72,6 @@ public class GridCacheRebalancingSyncSelfTest extends GridCommonAbstractTest {
     }
 
     /** {@inheritDoc} */
-    @Override protected long getTestTimeout() {
-        return Long.MAX_VALUE;
-    }
-
-    /** {@inheritDoc} */
     @Override protected IgniteConfiguration getConfiguration(String gridName) throws Exception {
         IgniteConfiguration iCfg = super.getConfiguration(gridName);
 
@@ -110,14 +105,12 @@ public class GridCacheRebalancingSyncSelfTest extends GridCommonAbstractTest {
         cacheRCfg.setName(CACHE_NAME_DHT_REPLICATED);
         cacheRCfg.setCacheMode(CacheMode.REPLICATED);
         cacheRCfg.setRebalanceMode(CacheRebalanceMode.SYNC);
-        cacheRCfg.setBackups(1);
 
         CacheConfiguration<Integer, Integer> cacheRCfg2 = new CacheConfiguration<>();
 
         cacheRCfg2.setName(CACHE_NAME_DHT_REPLICATED_2);
         cacheRCfg2.setCacheMode(CacheMode.REPLICATED);
         cacheRCfg2.setRebalanceMode(CacheRebalanceMode.SYNC);
-        cacheRCfg2.setBackups(1);
 
         iCfg.setRebalanceThreadPoolSize(4);
         iCfg.setCacheConfiguration(cachePCfg, cachePCfg2, cacheRCfg, cacheRCfg2);
