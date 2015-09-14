@@ -24,6 +24,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.cache.Cache;
+import javax.cache.configuration.Factory;
+import javax.cache.integration.CacheLoaderException;
+import javax.cache.integration.CacheWriterException;
 import javax.cache.processor.EntryProcessorResult;
 import javax.cache.processor.MutableEntry;
 import org.apache.ignite.IgniteCache;
@@ -31,6 +35,8 @@ import org.apache.ignite.cache.CacheAtomicWriteOrderMode;
 import org.apache.ignite.cache.CacheAtomicityMode;
 import org.apache.ignite.cache.CacheEntryProcessor;
 import org.apache.ignite.cache.CachePartialUpdateException;
+import org.apache.ignite.cache.store.CacheStore;
+import org.apache.ignite.cache.store.CacheStoreAdapter;
 import org.apache.ignite.configuration.AtomicConfiguration;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
@@ -86,6 +92,8 @@ public abstract class IgniteCachePutRetryAbstractSelfTest extends GridCommonAbst
         cfg.setAtomicWriteOrderMode(writeOrderMode());
         cfg.setBackups(1);
         cfg.setRebalanceMode(SYNC);
+        cfg.setCacheStoreFactory(new TestStoreFactory());
+        cfg.setWriteThrough(true);
 
         GridTestUtils.setMemoryMode(null, cfg, memMode, 100, 1024);
 
@@ -385,6 +393,8 @@ public abstract class IgniteCachePutRetryAbstractSelfTest extends GridCommonAbst
      * @throws Exception If failed.
      */
     private void checkFailsWithNoRetries(boolean async) throws Exception {
+        ignite(0).createCache(cacheConfiguration(TestMemoryMode.HEAP));
+
         final AtomicBoolean finished = new AtomicBoolean();
 
         IgniteInternalFuture<Object> fut = runAsync(new Callable<Object>() {
@@ -495,6 +505,28 @@ public abstract class IgniteCachePutRetryAbstractSelfTest extends GridCommonAbst
             e.setValue(val);
 
             return old == null ? 0 : old;
+        }
+    }
+
+    /**
+     *
+     */
+    private static class TestStoreFactory implements Factory<CacheStore> {
+        /** {@inheritDoc} */
+        @Override public CacheStore create() {
+            return new CacheStoreAdapter() {
+                @Override public Object load(Object key) throws CacheLoaderException {
+                    return null;
+                }
+
+                @Override public void write(Cache.Entry entry) throws CacheWriterException {
+                    // No-op.
+                }
+
+                @Override public void delete(Object key) throws CacheWriterException {
+                    // No-op.
+                }
+            };
         }
     }
 }
