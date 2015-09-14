@@ -111,6 +111,9 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
     /** Values to be evicted from offheap to swap. */
     private ThreadLocal<Collection<IgniteBiTuple<byte[], byte[]>>> offheapEvicts = new ThreadLocal<>();
 
+    /** First offheap eviction warning flag. */
+    private volatile boolean firstEvictWarn;
+
     /**
      * @param enabled Flag to indicate if swap is enabled.
      */
@@ -179,9 +182,6 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
             offheapEvicts.set(null);
         }
     }
-
-    /** First offheap eviction warning flag. */
-    private volatile boolean firstEvictWarn;
 
     /**
      * Initializes off-heap space.
@@ -564,6 +564,7 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
 
     /**
      * @param key Key to read.
+     * @param keyBytes Key bytes.
      * @param part Key partition.
      * @param entryLocked {@code True} if cache entry is locked.
      * @param readOffheap Read offheap flag.
@@ -1050,10 +1051,10 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
     }
 
     /**
-     * @param key Key to remove.
+     * @param key Key to move from offheap to swap.
      * @param entry Serialized swap entry.
      * @param part Partition.
-     * @param ver Expected version.
+     * @param ver Expected entry version.
      * @return {@code True} if removed.
      * @throws IgniteCheckedException If failed.
      */
@@ -1347,9 +1348,7 @@ public class GridCacheSwapManager extends GridCacheManagerAdapter {
      * @param entry Entry bytes.
      * @throws IgniteCheckedException If failed.
      */
-    public void writeToSwap(int part, KeyCacheObject key, byte[] entry) throws IgniteCheckedException {
-        assert swapEnabled;
-
+    private void writeToSwap(int part, KeyCacheObject key, byte[] entry) throws IgniteCheckedException {
         checkIteratorQueue();
 
         swapMgr.write(spaceName,
