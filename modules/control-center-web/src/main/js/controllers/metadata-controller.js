@@ -683,7 +683,8 @@ controlCenterModule.controller('metadataController', [
                 $table.tableReset();
 
                 $timeout(function () {
-                    $common.ensureActivePanel($scope.panels, 'metadata', 'keyType');
+                    $common.ensureActivePanel($scope.panels, 'query');
+                    $common.ensureActivePanel($scope.panels, 'general', 'keyType');
                 });
 
                 $scope.selectItem(undefined, prepareNewItem());

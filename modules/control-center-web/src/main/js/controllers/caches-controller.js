@@ -211,12 +211,12 @@ controlCenterModule.controller('cachesController', [
 
                 if ($common.isDefined(model)) {
                     var idx = _.findIndex(model, function (pair) {
-                        return pair.keyClass == pairValue.key
+                        return pair.keyClass == pairValue.key && pair.valueClass == pairValue.value;
                     });
 
                     // Found duplicate.
                     if (idx >= 0 && idx != index)
-                        return showPopoverMessage(null, null, $table.tableFieldId(index, 'KeyIndexedType'), 'Indexed type with such key class already exists!');
+                        return showPopoverMessage(null, null, $table.tableFieldId(index, 'ValueIndexedType'), 'Indexed type with such key and value classes already exists!');
                 }
 
                 return true;
