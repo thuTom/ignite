@@ -92,7 +92,7 @@ public class IgniteCachePutRetryTransactionalSelfTest extends IgniteCachePutRetr
      * @throws Exception If failed.
      */
     public void testExplicitTransactionRetries() throws Exception {
-     explicitTransactionRetries(TestMemoryMode.HEAP);
+        explicitTransactionRetries(TestMemoryMode.HEAP);
     }
 
     /**
