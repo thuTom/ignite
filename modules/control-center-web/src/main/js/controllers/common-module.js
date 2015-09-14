@@ -139,9 +139,26 @@ controlCenterModule.service('$common', [
         }
 
         var SUPPORTED_JDBC_TYPES = [
-            'BIT', 'BOOLEAN', 'TINYINT', 'SMALLINT', 'INTEGER', 'BIGINT', 'REAL', 'FLOAT', 'DOUBLE',
-            'NUMERIC', 'DECIMAL', 'CHAR', 'VARCHAR', 'LONGVARCHAR', 'NCHAR', 'NVARCHAR', 'LONGNVARCHAR',
-            'DATE', 'TIME', 'TIMESTAMP'
+            'BIGINT',
+            'BIT',
+            'BOOLEAN',
+            'CHAR',
+            'DATE',
+            'DECIMAL',
+            'DOUBLE',
+            'FLOAT',
+            'INTEGER',
+            'LONGNVARCHAR',
+            'LONGVARCHAR',
+            'NCHAR',
+            'NUMERIC',
+            'NVARCHAR',
+            'REAL',
+            'SMALLINT',
+            'TIME',
+            'TIMESTAMP',
+            'TINYINT',
+            'VARCHAR'
         ];
 
         var ALL_JDBC_TYPES = [

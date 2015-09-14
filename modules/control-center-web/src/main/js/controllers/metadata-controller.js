@@ -483,24 +483,24 @@ controlCenterModule.controller('metadataController', [
                                     });
                                 }
 
-                                var metaName = toProperCase(tableName);
-
                                 var metaFound = _.find($scope.metadatas, function (meta) {
-                                    return meta.name == metaName;
+                                    return meta.valueType == valType;
                                 });
 
-                                var meta = {space: $scope.spaces[0], name: metaName};
-
-                                meta.databaseSchema = table.schema;
-                                meta.databaseTable = tableName;
-                                meta.keyType = valType + 'Key';
-                                meta.valueType = valType;
-                                meta.queryFields = qryFields;
-                                meta.ascendingFields = ascFields;
-                                meta.descendingFields = descFields;
-                                meta.groups = groups;
-                                meta.keyFields = keyFields;
-                                meta.valueFields = valFields;
+                                var meta = {
+                                    space: $scope.spaces[0],
+                                    caches: [],
+                                    keyType: valType + 'Key',
+                                    valueType: valType,
+                                    databaseSchema: table.schema,
+                                    databaseTable: tableName,
+                                    queryFields: qryFields,
+                                    ascendingFields: ascFields,
+                                    descendingFields: descFields,
+                                    groups: groups,
+                                    keyFields: keyFields,
+                                    valueFields: valFields
+                                };
 
                                 if ($common.isDefined(metaFound))
                                     delayed.push([metaFound, meta]);
@@ -670,7 +670,7 @@ controlCenterModule.controller('metadataController', [
                 $common.confirmUnsavedChanges($scope.ui.isDirty(), selectItem);
 
                 $scope.ui.formTitle = $common.isDefined($scope.backupItem) && $scope.backupItem._id
-                    ? 'Selected metadata: ' + $scope.backupItem.name
+                    ? 'Selected metadata: ' + $scope.backupItem.valueType
                     : 'New metadata';
             };
 
@@ -775,7 +775,7 @@ controlCenterModule.controller('metadataController', [
                         }
 
                         if (!quiet)
-                            $common.showInfo('Cache type metadata"' + item.name + '" saved.');
+                            $common.showInfo('Cache type metadata"' + item.valueType + '" saved.');
                     })
                     .error(function (errMsg) {
                         $common.showError(errMsg);
@@ -797,11 +797,11 @@ controlCenterModule.controller('metadataController', [
                 $table.tableReset();
 
                 if (validate($scope.backupItem))
-                    $copy.show($scope.backupItem.name).then(function (newName) {
+                    $copy.show($scope.backupItem.valueType).then(function (newName) {
                         var item = angular.copy($scope.backupItem);
 
                         item._id = undefined;
-                        item.name = newName;
+                        item.valueType = newName;
 
                         save(item);
                     });
@@ -813,7 +813,7 @@ controlCenterModule.controller('metadataController', [
 
                 var selectedItem = $scope.selectedItem;
 
-                $confirm.show('Are you sure you want to remove cache type metadata: "' + selectedItem.name + '"?').then(
+                $confirm.show('Are you sure you want to remove cache type metadata: "' + selectedItem.valueType + '"?').then(
                     function () {
                         var _id = selectedItem._id;
 
@@ -821,7 +821,7 @@ controlCenterModule.controller('metadataController', [
                             .success(function () {
                                 $scope.ui.markPristine(0);
 
-                                $common.showInfo('Cache type metadata has been removed: ' + selectedItem.name);
+                                $common.showInfo('Cache type metadata has been removed: ' + selectedItem.valueType);
 
                                 var metadatas = $scope.metadatas;
 
