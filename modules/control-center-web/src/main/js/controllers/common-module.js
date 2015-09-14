@@ -484,39 +484,9 @@ controlCenterModule.service('$common', [
 
             var newPopover = $popover(el, {content: message});
 
-            function findElement(query, element) {
-                return angular.element((element || document).querySelectorAll(query));
-            }
+            popover = newPopover;
 
-            $timeout(function () {
-                var cont = newPopover.$options.container;
-                var tipContainer;
-
-                console.log('0: ' + cont);
-
-                if (cont === 'self') {
-                    console.log('1: ' + cont);
-
-                    tipContainer = el;
-                } else if (angular.isElement(cont)) {
-                    console.log('2: ' + cont);
-                    tipContainer = cont;
-                } else if (cont) {
-                    console.log('3: ' + cont);
-                    tipContainer = findElement(cont);
-                }
-                else {
-                    console.log('4: ' + cont);
-                }
-
-                console.log('5: ' + JSON.stringify(tipContainer));
-
-                if (isDefined(newPopover.$options.container)) {
-                    newPopover.show();
-
-                    popover = newPopover;
-                }
-            }, 100);
+            newPopover.$promise.then(newPopover.show);
 
             $timeout(function () { newPopover.hide() }, 5000);
 
