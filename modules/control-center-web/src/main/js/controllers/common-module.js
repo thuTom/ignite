@@ -509,7 +509,7 @@ controlCenterModule.service('$common', [
                     console.log('4: ' + cont);
                 }
 
-                console.log('5: ' + tipContainer);
+                console.log('5: ' + JSON.stringify(tipContainer));
 
                 if (isDefined(newPopover.$options.container)) {
                     newPopover.show();
