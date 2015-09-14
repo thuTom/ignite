@@ -26,6 +26,7 @@ $ignite-block-callout-right-background: #f3f8f3;
 $ignite-block-callout-gradient-to: #ffffff;
 $ignite-placeholder-color: #999999;
 $ignite-border-color: #ddd;
+$ignite-darck-border-color: #aaa;
 $ignite-border-bottom-color: $brand-primary;
 $ignite-background-color: #fff;
 $ignite-background-dark-color: #eee;
@@ -538,7 +539,7 @@ h3 {
         padding: 4px 6px;
 
         border-radius: 5px;
-        border: thin dotted $ignite-border-color;
+        border: thin dotted $ignite-darck-border-color;
     }
 }
 
