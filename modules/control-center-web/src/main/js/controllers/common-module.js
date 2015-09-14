@@ -614,19 +614,21 @@ controlCenterModule.service('$common', [
                 return true;
             },
             metadataForQueryConfigured: function (meta) {
-                return isDefined(meta)
-                    && !(isEmptyArray(meta.queryFields)
+                var isEmpty = !isDefined(meta) || (isEmptyArray(meta.queryFields)
                     && isEmptyArray(meta.ascendingFields)
                     && isEmptyArray(meta.descendingFields)
                     && isEmptyArray(meta.textFields)
-                    && isEmptyArray(meta.groups))
+                    && isEmptyArray(meta.groups));
+
+                return !isEmpty;
             },
             metadataForStoreConfigured: function (meta) {
-                return isDefined(meta)
-                    && !(isEmptyString(meta.databaseSchema)
+                var isEmpty = !isDefined(meta) || (isEmptyString(meta.databaseSchema)
                     && isEmptyString(meta.databaseTable)
                     && isEmptyArray(meta.keyFields)
-                    && isEmptyArray(meta.valueFields))
+                    && isEmptyArray(meta.valueFields));
+
+                return !isEmpty;
             },
             /**
              * Cut class name by width in pixel or width in symbol count.
