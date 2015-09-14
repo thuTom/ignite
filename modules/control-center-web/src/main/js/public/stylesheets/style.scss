@@ -148,6 +148,10 @@ ul.navbar-nav, .sidebar-nav {
     }
 }
 
+.theme-line button.form-control.placeholder {
+    color: $input-color-placeholder;
+}
+
 .theme-line .dropdown-menu {
     min-width: 75px;
     max-height: 20em;
@@ -594,6 +598,13 @@ button.form-control {
     tfoot > tr > td {
         padding: 0;
 
+        label.placeholder {
+            font-size: 0.8em;
+            line-height: 0.8em;
+            color: $ignite-placeholder-color;
+            width: 100%;
+        }
+
         .pagination {
             margin: 10px 0;
 
@@ -613,13 +624,6 @@ button.form-control {
 
     label {
         line-height: $input-height;
-    }
-
-    label.placeholder {
-        font-size: 0.8em;
-        line-height: 0.8em;
-        color: $ignite-placeholder-color;
-        width: 100%;
     }
 
     td {
@@ -883,7 +887,7 @@ button.form-control {
 }
 
 .group-content {
-    margin: 10px;
+    margin: 0 10px 10px 10px;
 }
 
 .group-content-empty {
