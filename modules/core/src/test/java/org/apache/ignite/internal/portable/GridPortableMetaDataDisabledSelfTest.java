@@ -17,15 +17,15 @@
 package org.apache.ignite.internal.portable;
 
 import java.util.Arrays;
-import org.apache.ignite.IgnitePortables;
+import org.apache.ignite.internal.portable.api.IgnitePortables;
 import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.marshaller.portable.PortableMarshaller;
-import org.apache.ignite.portable.PortableBuilder;
-import org.apache.ignite.portable.PortableException;
-import org.apache.ignite.portable.PortableMarshalAware;
-import org.apache.ignite.portable.PortableReader;
-import org.apache.ignite.portable.PortableTypeConfiguration;
-import org.apache.ignite.portable.PortableWriter;
+import org.apache.ignite.internal.portable.api.PortableMarshaller;
+import org.apache.ignite.internal.portable.api.PortableBuilder;
+import org.apache.ignite.internal.portable.api.PortableException;
+import org.apache.ignite.internal.portable.api.PortableMarshalAware;
+import org.apache.ignite.internal.portable.api.PortableReader;
+import org.apache.ignite.internal.portable.api.PortableTypeConfiguration;
+import org.apache.ignite.internal.portable.api.PortableWriter;
 import org.apache.ignite.testframework.junits.common.GridCommonAbstractTest;
 
 /**
