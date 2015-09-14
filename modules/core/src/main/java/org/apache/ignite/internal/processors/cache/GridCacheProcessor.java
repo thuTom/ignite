@@ -2877,8 +2877,12 @@ public class GridCacheProcessor extends GridProcessorAdapter {
     /**
      * @return Marshaller system cache.
      */
-    public GridCacheAdapter<Integer, String> marshallerCache() {
-        return internalCache(CU.MARSH_CACHE_NAME);
+    public IgniteInternalCache<Integer, String> marshallerCache() {
+        IgniteCacheProxy cache = jCacheProxies.get(CU.MARSH_CACHE_NAME);
+
+        assert cache != null : jCacheProxies;
+
+        return cache.internalProxy();
     }
 
     /**

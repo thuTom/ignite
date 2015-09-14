@@ -326,14 +326,7 @@ public class GridCacheMvccManager extends GridCacheSharedManagerAdapter {
      * Cancels all client futures.
      */
     public void cancelClientFutures() {
-        cancelClientFutures(stopError());
-    }
-
-    /**
-     * @return Local node stop error.
-     */
-    private IgniteCheckedException stopError() {
-        return new IgniteCheckedException("Operation has been cancelled (node is stopping).");
+        cancelClientFutures(new IgniteCheckedException("Operation has been cancelled (node is stopping)."));
     }
 
     /** {@inheritDoc} */
@@ -392,7 +385,8 @@ public class GridCacheMvccManager extends GridCacheSharedManagerAdapter {
 
         assert old == null : "Old future is not null [futVer=" + futVer + ", fut=" + fut + ", old=" + old + ']';
 
-        onFutureAdded(fut);
+        if (cctx.kernalContext().clientDisconnected())
+            ((GridFutureAdapter)fut).onDone(disconnectedError(null));
     }
 
     /**
@@ -513,23 +507,14 @@ public class GridCacheMvccManager extends GridCacheSharedManagerAdapter {
                 fut.onNodeLeft(n.id());
         }
 
-        onFutureAdded(fut);
+        if (cctx.kernalContext().clientDisconnected())
+            ((GridFutureAdapter)fut).onDone(disconnectedError(null));
 
         // Just in case if future was completed before it was added.
         if (fut.isDone())
             removeFuture(fut);
 
         return true;
-    }
-
-    /**
-     * @param fut Future.
-     */
-    private void onFutureAdded(IgniteInternalFuture<?> fut) {
-        if (cctx.kernalContext().isStopping())
-            ((GridFutureAdapter)fut).onDone(stopError());
-        else if (cctx.kernalContext().clientDisconnected())
-            ((GridFutureAdapter)fut).onDone(disconnectedError(null));
     }
 
     /**

@@ -1332,14 +1332,8 @@ public abstract class GridCacheAdapter<K, V> implements IgniteInternalCache<K, V
         });
     }
 
-    /**
-     * Gets value without waiting for toplogy changes.
-     *
-     * @param key Key.
-     * @return Value.
-     * @throws IgniteCheckedException If failed.
-     */
-    public V getTopologySafe(K key) throws IgniteCheckedException {
+    /** {@inheritDoc} */
+    @Override public V getTopologySafe(K key) throws IgniteCheckedException {
         String taskName = ctx.kernalContext().job().currentTaskName();
 
         return getAllAsync(
@@ -2453,16 +2447,8 @@ public abstract class GridCacheAdapter<K, V> implements IgniteInternalCache<K, V
         });
     }
 
-    /**
-     * Tries to put value in cache. Will fail with {@link GridCacheTryPutFailedException}
-     * if topology exchange is in progress.
-     *
-     * @param key Key.
-     * @param val value.
-     * @return Old value.
-     * @throws IgniteCheckedException In case of error.
-     */
-    @Nullable public V tryPutIfAbsent(K key, V val) throws IgniteCheckedException {
+    /** {@inheritDoc} */
+    @Override @Nullable public V tryPutIfAbsent(K key, V val) throws IgniteCheckedException {
         // Supported only in ATOMIC cache.
         throw new UnsupportedOperationException();
     }

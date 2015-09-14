@@ -20,8 +20,8 @@ package org.apache.ignite.internal;
 import org.apache.ignite.IgniteCheckedException;
 import org.apache.ignite.IgniteLogger;
 import org.apache.ignite.internal.processors.cache.CachePartialUpdateCheckedException;
-import org.apache.ignite.internal.processors.cache.GridCacheAdapter;
 import org.apache.ignite.internal.processors.cache.GridCacheTryPutFailedException;
+import org.apache.ignite.internal.processors.cache.IgniteInternalCache;
 import org.apache.ignite.internal.util.typedef.F;
 import org.apache.ignite.internal.util.typedef.internal.U;
 import org.apache.ignite.plugin.PluginProvider;
@@ -52,7 +52,7 @@ public class MarshallerContextImpl extends MarshallerContextAdapter {
     private IgniteLogger log;
 
     /** */
-    private volatile GridCacheAdapter<Integer, String> cache;
+    private volatile IgniteInternalCache<Integer, String> cache;
 
     /** Non-volatile on purpose. */
     private int failedCnt;
@@ -103,7 +103,7 @@ public class MarshallerContextImpl extends MarshallerContextAdapter {
 
     /** {@inheritDoc} */
     @Override protected boolean registerClassName(int id, String clsName) throws IgniteCheckedException {
-        GridCacheAdapter<Integer, String> cache0 = cache;
+        IgniteInternalCache<Integer, String> cache0 = cache;
 
         if (cache0 == null)
             return false;
@@ -137,7 +137,7 @@ public class MarshallerContextImpl extends MarshallerContextAdapter {
 
     /** {@inheritDoc} */
     @Override protected String className(int id) throws IgniteCheckedException {
-        GridCacheAdapter<Integer, String> cache0 = cache;
+        IgniteInternalCache<Integer, String> cache0 = cache;
 
         if (cache0 == null) {
             U.awaitQuiet(latch);
@@ -187,9 +187,9 @@ public class MarshallerContextImpl extends MarshallerContextAdapter {
         }
 
         /** {@inheritDoc} */
-        @Override public void onUpdated(Iterable<CacheEntryEvent<? extends Integer, ? extends String>> events)
+        @Override public void onUpdated(Iterable<CacheEntryEvent<? extends Integer, ? extends String>> evts)
             throws CacheEntryListenerException {
-            for (CacheEntryEvent<? extends Integer, ? extends String> evt : events) {
+            for (CacheEntryEvent<? extends Integer, ? extends String> evt : evts) {
                 assert evt.getOldValue() == null || F.eq(evt.getOldValue(), evt.getValue()):
                     "Received cache entry update for system marshaller cache: " + evt;
 
