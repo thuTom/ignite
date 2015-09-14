@@ -401,7 +401,7 @@ mixin form-row-custom(lblClasses, fieldClasses, dataSource)
                         tbody
                             tr(ng-repeat='group in #{fieldMdl}')
                                 td
-                                    div(ng-show='!tableEditing(field, $index)')
+                                    .col-sm-12(ng-show='!tableEditing(field, $index)')
                                         a.labelFormField(id='{{field.id + $index}}' ng-click='tableStartEdit(backupItem, field, $index)') {{$index + 1}}) {{group.name}}
                                         +btn-remove('tableRemove(backupItem, field, $index)', 'field.removeTip')
                                         +btn-add('tableGroupNewItem(field, $index)', 'field.addItemTip')

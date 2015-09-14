@@ -205,8 +205,6 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
             query: '',
             pageSize: $scope.pageSizes[0],
             result: 'none',
-            hideSystemColumns: true,
-            disabledSystemColumns: false,
             rate: {
                 value: 1,
                 unit: 60000,
@@ -282,11 +280,11 @@ controlCenterModule.controller('sqlController', ['$scope', '$window','$controlle
 
 
     var _columnFilter = function(paragraph) {
-        return !paragraph.disabledSystemColumns && paragraph.hideSystemColumns ? _hideColumn : _allColumn;
+        return !paragraph.disabledSystemColumns && paragraph.systemColumns ? _allColumn : _hideColumn;
     };
 
     $scope.toggleSystemColumns = function (paragraph) {
-        paragraph.hideSystemColumns = !paragraph.hideSystemColumns;
+        paragraph.systemColumns = !paragraph.systemColumns;
 
         paragraph.columnFilter = _columnFilter(paragraph);
     };
