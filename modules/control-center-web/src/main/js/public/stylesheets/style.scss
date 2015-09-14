@@ -529,8 +529,16 @@ h3 {
     .btn-group { margin-left: 10px; }
 
     .fa-undo {
-        margin-top: 5px;
         font-size: 16px;
+
+        padding: 5px 7px;
+    }
+
+    .fa-undo:hover {
+        padding: 4px 6px;
+
+        border-radius: 5px;
+        border: thin dotted $ignite-border-color;
     }
 }
 
@@ -813,12 +821,12 @@ h3 {
     padding: 0;
 
     border-radius: 5px;
-    border: thin dotted lightgrey;
+    border: thin dotted $ignite-border-color;
 }
 
 .table-details {
     border-radius: 5px;
-    border: thin dotted lightgrey;
+    border: thin dotted $ignite-border-color;
 
     margin-top: 10px;
 
@@ -832,7 +840,7 @@ h3 {
 
 .group {
     border-radius: 5px;
-    border: thin dotted lightgrey;
+    border: thin dotted $ignite-border-color;
 
     text-align: left;
 }
@@ -1360,7 +1368,7 @@ a {
     margin-left: 20px;
 
     border-radius: 5px;
-    border: thin dotted lightgrey;
+    border: thin dotted $ignite-border-color;
 
     padding: 0;
 }
