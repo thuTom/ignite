@@ -491,15 +491,21 @@ controlCenterModule.service('$common', [
             $timeout(function () {
                 var cont = newPopover.$options.container;
 
+                console.log('0: ' + cont);
+
                 if (cont === 'self') {
+                    console.log('1: ' + cont);
+
                     tipContainer = element;
                 } else if (angular.isElement(cont)) {
+                    console.log('2: ' + cont);
                     tipContainer = cont;
                 } else if (cont) {
+                    console.log('3: ' + cont);
                     tipContainer = findElement(cont);
                 }
                 else {
-                    console.log('AHTUNG: ' + cont);
+                    console.log('4: ' + cont);
                 }
 
                 if (isDefined(newPopover.$options.container)) {
