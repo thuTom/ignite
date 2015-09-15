@@ -32,28 +32,42 @@ router.get('/', function (req, res) {
     });
 });
 
-function updateUser(user, params) {
-    var updated = false;
-
-    if (params.userName) {
+function _updateUser(res, user, params) {
+    if (params.userName)
         user.username = params.userName;
 
-        updated = true;
-    }
-
-    if (params.email) {
+    if (params.email)
         user.email = params.email;
 
-        updated = true;
-    }
-
-    if (params.token) {
+    if (params.token)
         user.token = params.token;
 
-        updated = true;
-    }
 
-    return updated;
+    if (params.userName || params.email || params.token)
+        user.save(function (err) {
+            if (err)
+                // TODO IGNITE-843 Send error to admin.
+                return res.status(500).send('Failed to update profile!');
+
+            res.json(user);
+        });
+}
+
+function _checkUserEmailAndUpdate(res, user, params) {
+    if (params.email && user.email != params.email) {
+        db.Account.findOne({email: params.email}, function(err, userForEmail) {
+            // TODO send error to admin
+            if (err)
+                return res.status(500).send('Failed to check e-mail!');
+
+            if (userForEmail && userForEmail._id != user._id)
+                return res.status(500).send('User with this e-mail already registered!');
+
+            _updateUser(res, user, params);
+        });
+    }
+    else
+        _updateUser(res, user, params);
 }
 
 /**
@@ -62,41 +76,27 @@ function updateUser(user, params) {
 router.post('/save', function (req, res) {
     var params = req.body;
 
-    if (params.newPassword) {
-        var newPassword = params.newPassword;
+    db.Account.findById(params._id, function (err, user) {
+        if (err)
+        // TODO IGNITE-843 Send error to admin
+            return res.status(500).send('Failed to find user!');
 
-        if (!newPassword || newPassword.length == 0)
-            return res.status(500).send('Wrong value for new password');
+        if (params.newPassword) {
+            var newPassword = params.newPassword;
 
-        db.Account.findById(params._id, function (err, user) {
-            if (err)
-                return res.status(500).send(err);
+            if (!newPassword || newPassword.length == 0)
+                return res.status(500).send('Wrong value for new password!');
 
             user.setPassword(newPassword, function (err, user) {
                 if (err)
                     return res.status(500).send(err.message);
 
-                if (updateUser(user, params))
-                    user.save(function (err) {
-                        if (err)
-                            return res.status(500).send(err.message);
-
-                        res.json(user);
-                    });
+                _checkUserEmailAndUpdate(res, user, params);
             });
-        });
-    }
-    else {
-        var user = {};
-
-        if (updateUser(user, params))
-            db.Account.findByIdAndUpdate(params._id, user, {'new': true}, function (err, val) {
-                if (err)
-                    return res.status(500).send(err.message);
-
-                res.json(val);
-            })
-    }
+        }
+        else
+            _checkUserEmailAndUpdate(res, user, params);
+    });
 });
 
 module.exports = router;

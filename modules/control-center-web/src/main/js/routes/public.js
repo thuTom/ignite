@@ -133,13 +133,15 @@ router.post('/password/forgot', function(req, res) {
             return res.status(401).send('No account with that email address exists!');
 
         if (err)
-            return res.status(401).send(err);
+            // TODO IGNITE-843 Send email to admin
+            return res.status(401).send('Failed to reset password!');
 
         user.resetPasswordToken = token;
 
         user.save(function(err) {
             if (err)
-                return res.status(401).send(err);
+            // TODO IGNITE-843 Send email to admin
+            return res.status(401).send('Failed to reset password!');
 
             var mailer  = nodemailer.createTransport(transporter);
 
@@ -174,7 +176,8 @@ router.post('/password/reset', function(req, res) {
             return res.status(500).send('Invalid token for password reset!');
 
         if (err)
-            return res.status(500).send(err);
+            // TODO IGNITE-843 Send email to admin
+            return res.status(500).send('Failed to reset password!');
 
         user.setPassword(req.body.password, function (err, updatedUser) {
             if (err)
