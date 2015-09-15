@@ -36,6 +36,7 @@
           "type": "dropdown-multiple",
           "model": "clusters",
           "placeholder": "Choose clusters",
+          "placeholderEmpty": "No clusters installed",
           "items": "clusters",
           "tip": [
             "Select clusters to start in cluster or add a new cluster."
@@ -51,6 +52,7 @@
           "type": "dropdown-multiple",
           "model": "metadatas",
           "placeholder": "Choose metadata",
+          "placeholderEmpty": "No metadata installed",
           "items": "metadatas",
           "tip": [
             "Select cache type metadata to describe types in cache."

@@ -30,6 +30,7 @@
           "type": "dropdown-multiple",
           "model": "caches",
           "placeholder": "Choose caches",
+          "placeholderEmpty": "No caches installed",
           "items": "caches",
           "tip": [
             "Select caches to associate database with cache."

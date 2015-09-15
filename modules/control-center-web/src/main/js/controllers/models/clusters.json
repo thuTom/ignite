@@ -34,6 +34,7 @@
           "type": "dropdown-multiple",
           "model": "caches",
           "placeholder": "Choose caches",
+          "placeholderEmpty": "No caches installed",
           "items": "caches",
           "tip": [
             "Select caches to start in cluster or add a new cache."
