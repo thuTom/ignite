@@ -39,7 +39,7 @@ var AccountSchema = new Schema({
 });
 
 // Install passport plugin.
-AccountSchema.plugin(passportLocalMongoose, {usernameField: 'email', limitAttempts: false, lastLoginField: 'lastLogin',
+AccountSchema.plugin(passportLocalMongoose, {usernameField: 'email', limitAttempts: true, lastLoginField: 'lastLogin',
     usernameLowerCase: true});
 
 // Configure transformation to JSON.
