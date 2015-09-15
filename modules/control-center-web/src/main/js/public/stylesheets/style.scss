@@ -585,6 +585,13 @@ button.form-control {
 
     width: 100%;
 
+    label.placeholder {
+        font-size: 0.8em;
+        line-height: 0.8em;
+        color: $ignite-placeholder-color;
+        width: 100%;
+    }
+
     tbody {
         border-left: 10px solid transparent;
     }
@@ -597,13 +604,6 @@ button.form-control {
 
     tfoot > tr > td {
         padding: 0;
-
-        label.placeholder {
-            font-size: 0.8em;
-            line-height: 0.8em;
-            color: $ignite-placeholder-color;
-            width: 100%;
-        }
 
         .pagination {
             margin: 10px 0;

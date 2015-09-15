@@ -97,12 +97,11 @@ mixin table-pair(header, tblMdl, keyFld, valFld, keyPlaceholder, valPlaceholder,
             table.links-edit(id='{{::field.model}}' st-table=tblMdl)
                 tbody
                     tr(ng-repeat='item in #{tblMdl}')
-                        td
-                            div(ng-show='!tableEditing(field, $index)')
-                                a.labelFormField(ng-click='tableStartEdit(backupItem, field, $index)') {{compactJavaName(field.model, $index + 1, 55, [item.#{keyFld}, item.#{valFld}])}}
-                                +btn-remove('tableRemove(backupItem, field, $index)', 'field.removeTip')
-                            div(ng-if='tableEditing(field, $index)')
-                                +table-pair-edit('cur', keyPlaceholder, valPlaceholder, keyJavaBuildInTypes, valueJavaBuildInTypes, '{{::field.focusId}}', '$index')
+                        td.col-sm-12(ng-show='!tableEditing(field, $index)')
+                            a.labelFormField(ng-click='tableStartEdit(backupItem, field, $index)') {{compactJavaName(field.model, $index + 1, 55, [item.#{keyFld}, item.#{valFld}])}}
+                            +btn-remove('tableRemove(backupItem, field, $index)', 'field.removeTip')
+                        td.col-sm-12(ng-show='tableEditing(field, $index)')
+                            +table-pair-edit('cur', keyPlaceholder, valPlaceholder, keyJavaBuildInTypes, valueJavaBuildInTypes, '{{::field.focusId}}', '$index')
                 tfoot(ng-show='tableNewItemActive(field)')
                     tr
                         td.col-sm-12
