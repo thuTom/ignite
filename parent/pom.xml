@@ -145,7 +145,7 @@
         <dependency>
             <groupId>org.apache.ignite</groupId>
             <artifactId>ignite-apache-license-gen</artifactId>
-            <version>${project.version}</version>
+            <version>1.4.1-SNAPSHOT</version>
             <scope>test</scope><!-- hack to have ignite-apache-license-gen at first place at mvn reactor -->
         </dependency>
     </dependencies>
