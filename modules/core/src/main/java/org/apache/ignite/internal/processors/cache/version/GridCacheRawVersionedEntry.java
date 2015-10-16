@@ -379,9 +379,11 @@ public class GridCacheRawVersionedEntry<K, V> extends DataStreamerEntry implemen
 
     /** {@inheritDoc} */
     @Override public String toString() {
+    	Object p1 = keyBytes != null ? keyBytes.length : "n/a";
+    	Object p2 = valBytes != null ? valBytes.length : "n/a";
         return S.toString(GridCacheRawVersionedEntry.class, this,
-            "keyBytesLen", keyBytes != null ? keyBytes.length : "n/a",
-            "valBytesLen", valBytes != null ? valBytes.length : "n/a",
+            "keyBytesLen", p1,
+            "valBytesLen", p2,
             "super", super.toString());
     }
 }

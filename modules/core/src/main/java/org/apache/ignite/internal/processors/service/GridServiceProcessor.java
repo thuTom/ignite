@@ -634,7 +634,7 @@ public class GridServiceProcessor extends GridProcessorAdapter {
             }
         }
 
-        return new GridServiceProxy<>(prj, name, svcItf, sticky, ctx).proxy();
+        return (T) new GridServiceProxy<>(prj, name, svcItf, sticky, ctx).proxy();
     }
 
     /**

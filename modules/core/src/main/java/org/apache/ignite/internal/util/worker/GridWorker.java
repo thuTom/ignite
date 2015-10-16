@@ -258,10 +258,11 @@ public abstract class GridWorker implements Runnable {
     /** {@inheritDoc} */
     @Override public String toString() {
         Thread runner = this.runner;
-
+        Object p1 = (runner != null ? runner.isInterrupted() : "unknown");
+        Object p2 = (runner == null ? "null" : runner.getName());
         return S.toString(GridWorker.class, this,
             "hashCode", hashCode(),
-            "interrupted", (runner != null ? runner.isInterrupted() : "unknown"),
-            "runner", (runner == null ? "null" : runner.getName()));
+            "interrupted", p1,
+            "runner", p2);
     }
 }

@@ -1598,11 +1598,13 @@ public class GridDhtPartitionsExchangeFuture extends GridFutureAdapter<AffinityT
     /** {@inheritDoc} */
     @Override public String toString() {
         ClusterNode oldestNode = this.oldestNode.get();
-
+        Object p1 = oldestNode == null ? "null" : oldestNode.id();
+        Object p2 = oldestNode == null ? "null" : oldestNode.order();
+        Object p3 = evtLatch == null ? "null" : evtLatch.getCount();
         return S.toString(GridDhtPartitionsExchangeFuture.class, this,
-            "oldest", oldestNode == null ? "null" : oldestNode.id(),
-            "oldestOrder", oldestNode == null ? "null" : oldestNode.order(),
-            "evtLatch", evtLatch == null ? "null" : evtLatch.getCount(),
+            "oldest", p1,
+            "oldestOrder", p2,
+            "evtLatch", p3,
             "remaining", remaining(),
             "super", super.toString());
     }

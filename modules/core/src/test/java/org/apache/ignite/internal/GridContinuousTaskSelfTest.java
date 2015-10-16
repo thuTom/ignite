@@ -261,7 +261,7 @@ public class GridContinuousTaskSelfTest extends GridCommonAbstractTest {
                     }
                 }, 1000);
 
-                jobCtx.holdcc(holdccTimeout);
+                jobCtx.holdcc(holdccTimeout.longValue());
             }
 
             if (counter == 2)

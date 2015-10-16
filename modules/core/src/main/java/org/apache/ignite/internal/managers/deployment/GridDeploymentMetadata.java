@@ -287,6 +287,7 @@ class GridDeploymentMetadata {
 
     /** {@inheritDoc} */
     @Override public String toString() {
-        return S.toString(GridDeploymentMetadata.class, this, "seqNum", clsLdrId != null ? clsLdrId.localId() : "n/a");
+    	Object p1=clsLdrId != null ? clsLdrId.localId() : "n/a";
+        return S.toString(GridDeploymentMetadata.class, this, "seqNum", p1);
     }
 }
